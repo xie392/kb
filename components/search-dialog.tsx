@@ -2,13 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { articles } from "@/lib/mock-data";
+import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
-
-interface Hit {
-  article: (typeof articles)[0];
-  snippet: string;
-}
 
 function highlight(text: string, keyword: string) {
   if (!keyword) return text;
@@ -31,6 +26,12 @@ export default function SearchDialog() {
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const { data, isFetching } = api.search.search.useQuery(
+    { q: keyword },
+    { enabled: open && keyword.trim().length > 0 }
+  );
+  const hits = data?.items ?? [];
+
   // 打开时聚焦输入框
   useEffect(() => {
     if (open) {
@@ -40,7 +41,7 @@ export default function SearchDialog() {
     }
   }, [open]);
 
-  // Esc 关闭
+  // Esc 关闭 + Cmd+K 开合
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -64,27 +65,7 @@ export default function SearchDialog() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
-  // 搜索：标题/摘要/分类/标签
-  const kw = keyword.trim().toLowerCase();
-  const hits: Hit[] = kw
-    ? articles
-        .map((a) => {
-          const titleIdx = a.title.toLowerCase().indexOf(kw);
-          const sumIdx = a.summary.toLowerCase().indexOf(kw);
-          const catIdx = a.category.toLowerCase().indexOf(kw);
-          const tagIdx = a.tags.find((t) => t.toLowerCase().includes(kw));
-          const snippet = titleIdx !== -1 ? a.title : sumIdx !== -1 ? a.summary : a.summary;
-          return {
-            article: a,
-            snippet,
-            score: Math.max(titleIdx !== -1 ? 0 : 99, sumIdx !== -1 ? 1 : 99, catIdx !== -1 ? 1 : 99, tagIdx ? 1 : 99),
-          };
-        })
-        .filter((h) => h.score < 99)
-        .sort((a, b) => a.score - b.score)
-        .slice(0, 8)
-        .map((h) => ({ article: h.article, snippet: h.snippet }))
-    : [];
+  const kw = keyword.trim();
 
   return (
     <>
@@ -104,12 +85,9 @@ export default function SearchDialog() {
         </kbd>
       </button>
 
-      {/* 弹窗遮罩 */}
+      {/* 弹窗 */}
       {open && (
         <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
-          {/* 无遮罩：点击空白处关闭由 document 监听处理 */}
-
-          {/* 搜索面板 */}
           <div
             ref={panelRef}
             className="relative w-full max-w-[620px] bg-[#fbfaf6] sketch-border sketch-shadow fade-up overflow-hidden"
@@ -146,6 +124,12 @@ export default function SearchDialog() {
                     支持标题、正文摘要、分类、标签
                   </div>
                 </div>
+              ) : isFetching ? (
+                <div className="py-12 text-center">
+                  <div className="font-hand-display text-[20px] font-bold text-[#a39e98]">
+                    搜索中…
+                  </div>
+                </div>
               ) : hits.length === 0 ? (
                 <div className="py-12 text-center">
                   <div className="font-hand-display text-[24px] font-bold text-[#a39e98] rotate-[-1deg]">
@@ -157,35 +141,26 @@ export default function SearchDialog() {
                 </div>
               ) : (
                 <ul className="divide-y divide-dashed divide-[#e6e6e6]">
-                  {hits.map(({ article, snippet }) => (
-                    <li key={article.id}>
+                  {hits.map((a) => (
+                    <li key={a.id}>
                       <Link
-                        href={`/article/${article.id}`}
+                        href={`/article/${a.id}`}
                         onClick={() => setOpen(false)}
                         className="group flex items-start gap-3 px-5 py-4 hover:bg-white transition-colors"
                       >
-                        <span
-                          className="w-2 h-2 rounded-full rotate-12 mt-2 shrink-0"
-                          style={{ backgroundColor: article.categoryColor }}
-                        />
+                        <span className="w-2 h-2 rounded-full rotate-12 mt-2 shrink-0 bg-[#62aef0]" />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className="font-hand-body text-[13px]"
-                              style={{ color: article.categoryColor }}
-                            >
-                              【{article.category}】
-                            </span>
-                            <span className="font-hand-body text-[12px] text-[#a39e98]">
-                              {formatDate(article.updatedAt)}
-                            </span>
-                          </div>
+                          <span className="font-hand-body text-[12px] text-[#a39e98]">
+                            {formatDate(String(a.updatedAt))}
+                          </span>
                           <div className="mt-0.5 font-hand-display text-[19px] font-bold text-[#31302e] group-hover:text-[#0075de] transition-colors">
-                            {highlight(article.title, keyword)}
+                            {highlight(a.title, keyword)}
                           </div>
-                          <div className="mt-0.5 font-hand-body text-[14px] text-[#615d59] line-clamp-1">
-                            {highlight(snippet, keyword)}
-                          </div>
+                          {a.summary && (
+                            <div className="mt-0.5 font-hand-body text-[14px] text-[#615d59] line-clamp-1">
+                              {highlight(a.summary, keyword)}
+                            </div>
+                          )}
                         </div>
                         <span className="font-hand-display text-[16px] text-[#0075de] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1">
                           →

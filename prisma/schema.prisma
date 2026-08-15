@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  nickname     String?
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  sort      Int        @default(0)
+  createdAt DateTime   @default(now())
+  articles  Article[]
+}
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  createdAt DateTime     @default(now())
+  articles  ArticleTag[]
+}
+
+model Article {
+  id         String       @id @default(cuid())
+  title      String
+  content    String // 富文本 HTML
+  summary    String?
+  categoryId String?
+  category   Category?    @relation(fields: [categoryId], references: [id])
+  status     String       @default("normal") // normal | trash
+  visibility String       @default("private") // private | public
+  isPinned   Boolean      @default(false)
+  isFavorite Boolean      @default(false)
+  tags       ArticleTag[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}

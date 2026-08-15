@@ -1,87 +1,112 @@
 "use client";
 
 import { useState } from "react";
-import { categories } from "@/lib/mock-data";
+import { api } from "@/trpc/client";
 
 export default function AdminCategoriesPage() {
-  const [open, setOpen] = useState<Record<string, boolean>>({ work: true });
-  const toggle = (id: string) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
+  const utils = api.useUtils();
+  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [newName, setNewName] = useState("");
+  const [newParent, setNewParent] = useState<string>("");
+
+  const { data: cats } = api.category.tree.useQuery();
+  const invalidate = () => utils.category.tree.invalidate();
+
+  const create = api.category.create.useMutation({
+    onSuccess: () => { invalidate(); setNewName(""); show("已新增分类", "ok"); },
+    onError: (e) => show(e.message, "err"),
+  });
+  const remove = api.category.delete.useMutation({
+    onSuccess: () => { invalidate(); show("已删除分类", "ok"); },
+    onError: (e) => show(e.message, "err"),
+  });
+
+  const show = (text: string, type: "ok" | "err") => {
+    setMsg({ type, text });
+    setTimeout(() => setMsg(null), 2500);
+  };
 
   return (
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-[22px] font-bold tracking-[-0.25px] text-ink">分类管理</h2>
-          <p className="text-[13px] text-[#a39e98] mt-0.5">管理分类层级结构与排序</p>
+          <h2 className="font-hand-display text-[32px] font-bold text-[#213183]">分类管理</h2>
+          <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">管理分类层级结构与排序</p>
         </div>
-        <button className="flex items-center gap-1.5 h-9 px-4 rounded-full bg-primary text-white text-[13.5px] font-medium hover:bg-primary-active transition-colors">
-          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1z" />
-          </svg>
-          新增分类
-        </button>
+        <div className="flex items-center gap-2">
+          <select
+            value={newParent}
+            onChange={(e) => setNewParent(e.target.value)}
+            className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
+          >
+            <option value="">作为一级分类</option>
+            {cats?.map((c) => (
+              <option key={c.id} value={c.id}>作为 {c.name} 的子分类</option>
+            ))}
+          </select>
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="分类名称"
+            className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+          />
+          <button
+            onClick={() => {
+              if (!newName.trim()) return show("请输入分类名称", "err");
+              create.mutate({ name: newName.trim(), parentId: newParent || null });
+            }}
+            className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[16px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+          >
+            ＋ 新增
+          </button>
+        </div>
       </div>
+
+      {msg && (
+        <div className={`mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up`}>
+          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-[#2a9d99]" : "text-red-500"}`}>
+            {msg.type === "ok" ? "✓" : "✗"} {msg.text}
+          </span>
+        </div>
+      )}
 
       {/* 分类树 */}
-      <div className="card divide-y divide-hairline fade-up">
-        {categories.map((cat) => (
+      <div className="bg-white sketch-border sketch-shadow divide-y divide-dashed divide-[#e6e6e6] fade-up">
+        {cats?.map((cat) => (
           <div key={cat.id}>
-            <div className="flex items-center gap-3 px-5 py-4 hover:bg-[#f6f5f4]/50 transition-colors group">
+            <div className="flex items-center gap-3 px-5 py-4 hover:bg-[#f6f5f4]/60 transition-colors group">
+              <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de]">
+                {cat.name[0]}
+              </span>
+              <span className="font-hand-display text-[20px] font-bold text-[#31302e] flex-1">{cat.name}</span>
+              <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{cat.count} 篇</span>
               <button
-                onClick={() => toggle(cat.id)}
-                className="w-6 h-6 grid place-items-center text-[#a39e98] hover:text-ink transition-colors"
+                onClick={() => remove.mutate({ id: cat.id })}
+                className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <svg
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${open[cat.id] ? "rotate-90" : ""}`}
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M4.5 2.5L8 6l-3.5 3.5" strokeLinecap="round" />
-                </svg>
+                删除
               </button>
-              <span className="sticker-dot" style={{ backgroundColor: cat.color }} />
-              <span className="text-[14.5px] font-medium text-ink flex-1">{cat.name}</span>
-              <span className="text-[12px] text-[#a39e98] tabular-nums">{cat.count} 篇</span>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="px-2 py-1 rounded-[6px] text-[12px] text-[#615d59] hover:bg-[#f6f5f4] hover:text-ink transition-colors">添加子分类</button>
-                <button className="px-2 py-1 rounded-[6px] text-[12px] text-[#615d59] hover:bg-[#f6f5f4] hover:text-ink transition-colors">编辑</button>
-                <button className="px-2 py-1 rounded-[6px] text-[12px] text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors">删除</button>
-              </div>
             </div>
-            {open[cat.id] && (
-              <div className="pb-2">
-                {cat.children?.map((child) => (
-                  <div
-                    key={child.id}
-                    className="flex items-center gap-3 pl-[60px] pr-5 py-3 hover:bg-[#f6f5f4]/50 transition-colors group"
-                  >
-                    <span className="text-[#a39e98] text-[13px]">└</span>
-                    <span className="text-[13.5px] text-[#31302e] flex-1">{child.name}</span>
-                    <span className="text-[12px] text-[#a39e98] tabular-nums">{child.count} 篇</span>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="px-2 py-1 rounded-[6px] text-[12px] text-[#615d59] hover:bg-[#f6f5f4] hover:text-ink transition-colors">编辑</button>
-                      <button className="px-2 py-1 rounded-[6px] text-[12px] text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors">删除</button>
-                    </div>
-                  </div>
-                ))}
+            {cat.children?.map((child) => (
+              <div key={child.id} className="flex items-center gap-3 pl-[56px] pr-5 py-3 hover:bg-[#f6f5f4]/60 transition-colors group">
+                <span className="font-hand-body text-[14px] text-[#a39e98]">└</span>
+                <span className="font-hand-display text-[18px] font-bold text-[#615d59] flex-1">{child.name}</span>
+                <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{child.count} 篇</span>
+                <button
+                  onClick={() => remove.mutate({ id: child.id })}
+                  className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  删除
+                </button>
               </div>
-            )}
+            ))}
           </div>
         ))}
-      </div>
-
-      {/* 删除校验提示 */}
-      <div className="mt-6 card p-4 flex items-start gap-3 fade-up" style={{ animationDelay: "100ms" }}>
-        <svg className="w-4 h-4 text-sticker-orange shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M8 2L14 13.5H2L8 2z" strokeLinejoin="round" />
-          <path d="M8 6.5v3M8 11.5h.01" strokeLinecap="round" />
-        </svg>
-        <div className="text-[12.5px] text-[#615d59] leading-relaxed">
-          <span className="font-medium text-[#31302e]">删除保护</span>
-          ：分类下有子分类或笔记时不可直接删除，需先迁移或清空。该提示会出现在删除确认框中。
-        </div>
+        {!cats?.length && (
+          <div className="py-14 text-center font-hand-display text-[22px] font-bold text-[#a39e98]">
+            还没有分类，先新增一个吧
+          </div>
+        )}
       </div>
     </div>
   );

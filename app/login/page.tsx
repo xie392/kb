@@ -1,11 +1,43 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await signIn("credentials", {
+        username,
+        password,
+        redirect: false,
+      });
+      if (res?.error) {
+        setError("用户名或密码错误");
+      } else {
+        router.push("/kb-9f3x");
+        router.refresh();
+      }
+    } catch {
+      setError("登录失败，请重试");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="graph-paper min-h-screen grid lg:grid-cols-2 font-hand-body text-[#31302e]">
       {/* 左侧：手绘便签板 */}
       <section className="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden">
-        {/* 手绘大标题 */}
         <div className="relative">
           <div className="flex items-center gap-2">
             <span className="w-10 h-10 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[22px] font-bold text-[#213183] rotate-[-4deg]">
@@ -24,7 +56,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* 便签装饰 */}
         <div className="relative flex items-center gap-4">
           <div className="sticky-note sketch-border px-4 py-2 rotate-[-2deg]">
             <div className="font-hand-display text-[18px] font-bold text-[#523410]">个人专属</div>
@@ -41,7 +72,6 @@ export default function LoginPage() {
       {/* 右侧：手绘登录卡片 */}
       <section className="flex items-center justify-center p-6">
         <div className="w-full max-w-[400px] fade-up">
-          {/* 移动端 Logo */}
           <div className="flex items-center gap-2 mb-10 lg:hidden">
             <span className="w-10 h-10 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[22px] font-bold text-[#213183] rotate-[-4deg]">
               知
@@ -57,7 +87,7 @@ export default function LoginPage() {
               欢迎回来，继续你的知识积累。
             </p>
 
-            <form className="mt-7 space-y-5">
+            <form onSubmit={onSubmit} className="mt-7 space-y-5">
               <div>
                 <label htmlFor="username" className="block font-hand-display text-[17px] font-bold text-[#31302e] mb-1.5">
                   用户名
@@ -66,6 +96,8 @@ export default function LoginPage() {
                   id="username"
                   type="text"
                   autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="请输入用户名"
                   className="w-full h-11 px-4 bg-white sketch-border text-[15px] text-[#31302e] placeholder:text-[#a39e98] outline-none focus:border-[#0075de] transition-colors font-hand-body"
                 />
@@ -75,21 +107,29 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block font-hand-display text-[17px] font-bold text-[#31302e]">
                     密码
                   </label>
-                  <span className="font-hand-body text-[13px] text-[#a39e98]">单机部署 · 忘记密码需重置数据</span>
+                  <span className="font-hand-body text-[13px] text-[#a39e98]">初始账号 admin / admin123</span>
                 </div>
                 <input
                   id="password"
                   type="password"
                   autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入密码"
                   className="w-full h-11 px-4 bg-white sketch-border text-[15px] text-[#31302e] placeholder:text-[#a39e98] outline-none focus:border-[#0075de] transition-colors font-hand-body"
                 />
               </div>
+              {error && (
+                <div className="sticky-note sketch-border px-3 py-2 rotate-[-1deg]">
+                  <span className="font-hand-body text-[14px] text-red-500">✗ {error}</span>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full h-11 bg-[#0075de] text-white font-hand-display text-[20px] font-bold sketch-border sketch-shadow rotate-[-0.5deg] hover:rotate-0 transition-transform"
+                disabled={loading}
+                className="w-full h-11 bg-[#0075de] text-white font-hand-display text-[20px] font-bold sketch-border sketch-shadow rotate-[-0.5deg] hover:rotate-0 transition-transform disabled:opacity-50"
               >
-                登录
+                {loading ? "登录中…" : "登录"}
               </button>
             </form>
           </div>

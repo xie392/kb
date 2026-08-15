@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Caveat, Patrick_Hand } from "next/font/google";
 import { cn } from "@/lib/utils";
+import TRPCProvider from "@/trpc/react";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const caveat = Caveat({
@@ -30,7 +31,9 @@ export default function RootLayout({
       lang="zh-CN"
       className={cn("font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <TRPCProvider>{children}</TRPCProvider>
+      </body>
     </html>
   );
 }
