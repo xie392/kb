@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
 
@@ -70,6 +71,12 @@ export default function AdminArticlesPage() {
             共 {data?.total ?? 0} 篇{isFetching ? "（加载中…）" : ""}
           </p>
         </div>
+        <Link
+          href="/kb-9f3x/articles/new"
+          className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[17px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+        >
+          ＋ 新增文章
+        </Link>
       </div>
 
       {/* 状态筛选 */}
@@ -177,6 +184,9 @@ export default function AdminArticlesPage() {
                   <div className="flex items-center justify-end gap-2">
                     {filter === "normal" ? (
                       <>
+                        <Link href={`/kb-9f3x/articles/${a.id}/edit`} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
+                          编辑
+                        </Link>
                         <button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
                           {a.isPinned ? "取消置顶" : "置顶"}
                         </button>
