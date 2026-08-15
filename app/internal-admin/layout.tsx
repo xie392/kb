@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoutButton from "@/components/logout-button";
 
 const navItems = [
   { label: "数据看板", href: "/kb-9f3x", icon: "dashboard" },
@@ -112,15 +113,13 @@ export default function AdminLayout({
         <header className="sticky top-0 z-20 h-14 bg-[#fbfaf6]/90 backdrop-blur-sm border-b border-[#e6e6e6] flex items-center justify-between px-8">
           <div className="text-[14px] text-[#31302e]">数据看板</div>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-[12px] text-[#615d59]">
-              <span className="w-6 h-6 rounded-full bg-sticker-purple grid place-items-center text-[11px] font-semibold text-white">
-                我
+            <span className="inline-flex items-center gap-1.5 font-hand-body text-[14px] text-[#615d59]">
+              <span className="w-7 h-7 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[14px] font-bold text-[#213183] rotate-[-3deg]">
+                管
               </span>
               管理员
             </span>
-            <button className="text-[12px] text-[#a39e98] hover:text-[#31302e] transition-colors">
-              退出
-            </button>
+            <LogoutButton />
           </div>
         </header>
         {children}
