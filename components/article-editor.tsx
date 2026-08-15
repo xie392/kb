@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/client";
+import RichTextEditor from "@/components/rich-text-editor";
 
 interface Props {
   article?: {
@@ -13,60 +14,6 @@ interface Props {
     visibility: string;
     tagIds: string[];
   };
-}
-
-const toolbarGroups = [
-  [
-    { label: "H1", icon: "h1" },
-    { label: "H2", icon: "h2" },
-    { label: "H3", icon: "h3" },
-  ],
-  [
-    { label: "B", icon: "bold" },
-    { label: "I", icon: "italic" },
-    { label: "U", icon: "underline" },
-  ],
-  [
-    { label: "列表", icon: "list" },
-    { label: "引用", icon: "quote" },
-    { label: "代码", icon: "code" },
-  ],
-];
-
-function ToolbarButton({ label, icon }: { label: string; icon: string }) {
-  const render = () => {
-    switch (icon) {
-      case "bold": return <span className="font-bold">B</span>;
-      case "italic": return <span className="italic">I</span>;
-      case "underline": return <span className="underline underline-offset-2">U</span>;
-      case "h1": case "h2": case "h3": return <span className="text-[12px] font-bold">{label}</span>;
-      case "list": return (
-        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M3 4.5h10M3 8h10M3 11.5h10" strokeLinecap="round" />
-        </svg>
-      );
-      case "quote": return (
-        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M4 4c-1.7 1-2.5 2.8-2.5 5v3h4v-4H3.5c.2-1.3 1-2.3 2-2.9L4 4zm7 0c-1.7 1-2.5 2.8-2.5 5v3h4v-4h-2c.2-1.3 1-2.3 2-2.9L11 4z" />
-        </svg>
-      );
-      case "code": return (
-        <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M6 4L2.5 8 6 12M10 4l3.5 4L10 12" strokeLinecap="round" />
-        </svg>
-      );
-      default: return <span className="text-[12px] font-semibold">{label}</span>;
-    }
-  };
-  return (
-    <button
-      type="button"
-      title={label}
-      className="min-w-[30px] h-[30px] px-1.5 rounded-[6px] text-[13px] text-[#615d59] hover:bg-[#f6f5f4] hover:text-[#31302e] transition-colors grid place-items-center"
-    >
-      {render()}
-    </button>
-  );
 }
 
 export default function ArticleEditor({ article }: Props) {
@@ -231,27 +178,13 @@ export default function ArticleEditor({ article }: Props) {
           </div>
         </div>
 
-        {/* 编辑器 */}
+        {/* 编辑器（TipTap 富文本） */}
         <div className="mt-8">
-          <div className="flex items-center gap-1 bg-white sketch-border sketch-shadow px-2 py-1.5 w-fit mb-4">
-            {toolbarGroups.map((group, gi) => (
-              <div key={gi} className={`flex items-center gap-0.5 ${gi > 0 ? "pl-2 ml-1 border-l border-[#e6e6e6]" : ""}`}>
-                {group.map((btn) => (
-                  <ToolbarButton key={btn.label} {...btn} />
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <textarea
+          <RichTextEditor
             value={content}
-            onChange={(e) => { setContent(e.target.value); setSaved(false); }}
-            placeholder="开始写作… 支持 Markdown / HTML"
-            className="w-full min-h-[50vh] bg-white sketch-border sketch-shadow p-6 font-hand-body text-[16px] leading-relaxed text-[#31302e] placeholder:text-[#a39e98] outline-none resize-y"
+            onChange={(html) => { setContent(html); setSaved(false); }}
+            placeholder="开始写作… 支持标题 / 列表 / 引用 / 代码块 / 图片 / 链接"
           />
-          <div className="mt-2 font-hand-body text-[13px] text-[#a39e98]">
-            当前以纯文本编辑，保存为 HTML 内容；后续可接入富文本编辑器
-          </div>
         </div>
       </div>
     </div>
