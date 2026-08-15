@@ -41,7 +41,7 @@ export const categoryRouter = router({
     .input(
       z.object({
         name: z.string().min(1).max(50),
-        parentId: z.string().cuid().nullish(),
+        parentId: z.string().min(1).max(50).nullish(),
         sort: z.number().int().default(0),
       })
     )
@@ -64,7 +64,7 @@ export const categoryRouter = router({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string().cuid(),
+        id: z.string().min(1).max(50),
         name: z.string().min(1).max(50).optional(),
         sort: z.number().int().optional(),
       })
@@ -76,7 +76,7 @@ export const categoryRouter = router({
 
   /** 删除分类：有子分类或笔记时拒绝 */
   delete: protectedProcedure
-    .input(z.object({ id: z.string().cuid() }))
+    .input(z.object({ id: z.string().min(1).max(50) }))
     .mutation(async ({ ctx, input }) => {
       const [children, articles] = await Promise.all([
         ctx.db.category.count({ where: { parentId: input.id } }),

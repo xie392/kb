@@ -18,8 +18,8 @@ const articleSelect = {
 
 const listInput = z.object({
   status: z.enum(["normal", "trash"]).default("normal"),
-  categoryId: z.string().cuid().nullish(),
-  tagId: z.string().cuid().nullish(),
+  categoryId: z.string().min(1).max(50).nullish(),
+  tagId: z.string().min(1).max(50).nullish(),
   keyword: z.string().max(100).optional(),
   visibility: z.enum(["private", "public"]).optional(),
   page: z.number().int().min(1).default(1),
@@ -97,9 +97,9 @@ export const articleRouter = router({
         title: z.string().min(1).max(200),
         content: z.string(),
         summary: z.string().max(500).nullish(),
-        categoryId: z.string().cuid().nullish(),
+        categoryId: z.string().min(1).max(50).nullish(),
         visibility: z.enum(["private", "public"]).default("private"),
-        tagIds: z.array(z.string().cuid()).max(10).default([]),
+        tagIds: z.array(z.string().min(1).max(50)).max(10).default([]),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -123,15 +123,15 @@ export const articleRouter = router({
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string().cuid(),
+        id: z.string().min(1).max(50),
         title: z.string().min(1).max(200).optional(),
         content: z.string().optional(),
         summary: z.string().max(500).nullish(),
-        categoryId: z.string().cuid().nullish(),
+        categoryId: z.string().min(1).max(50).nullish(),
         visibility: z.enum(["private", "public"]).optional(),
         isPinned: z.boolean().optional(),
         isFavorite: z.boolean().optional(),
-        tagIds: z.array(z.string().cuid()).max(10).optional(),
+        tagIds: z.array(z.string().min(1).max(50)).max(10).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -146,7 +146,7 @@ export const articleRouter = router({
     }),
 
   softDelete: protectedProcedure
-    .input(z.object({ ids: z.array(z.string().cuid()).min(1) }))
+    .input(z.object({ ids: z.array(z.string().min(1).max(50)).min(1) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.article.updateMany({
         where: { id: { in: input.ids } },
@@ -156,7 +156,7 @@ export const articleRouter = router({
     }),
 
   restore: protectedProcedure
-    .input(z.object({ ids: z.array(z.string().cuid()).min(1) }))
+    .input(z.object({ ids: z.array(z.string().min(1).max(50)).min(1) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.article.updateMany({
         where: { id: { in: input.ids } },
@@ -166,7 +166,7 @@ export const articleRouter = router({
     }),
 
   hardDelete: protectedProcedure
-    .input(z.object({ ids: z.array(z.string().cuid()).min(1) }))
+    .input(z.object({ ids: z.array(z.string().min(1).max(50)).min(1) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.article.deleteMany({ where: { id: { in: input.ids } } });
       return { ok: true };
@@ -176,8 +176,8 @@ export const articleRouter = router({
   batch: protectedProcedure
     .input(
       z.object({
-        ids: z.array(z.string().cuid()).min(1),
-        categoryId: z.string().cuid().nullish(),
+        ids: z.array(z.string().min(1).max(50)).min(1),
+        categoryId: z.string().min(1).max(50).nullish(),
         visibility: z.enum(["private", "public"]).nullish(),
         isPinned: z.boolean().nullish(),
       })

@@ -20,7 +20,7 @@ export const tagRouter = router({
     }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.string().cuid() }))
+    .input(z.object({ id: z.string().min(1).max(50) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.tag.delete({ where: { id: input.id } });
       return { ok: true };
