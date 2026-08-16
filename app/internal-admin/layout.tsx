@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LogoutButton from "@/components/logout-button";
+import AdminHeader from "./admin-header";
 
 const navItems = [
   { label: "数据看板", href: "/kb-9f3x", icon: "dashboard" },
@@ -59,9 +60,9 @@ export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="graph-paper min-h-screen flex font-hand-body text-[#31302e]">
-      {/* 后台侧边导航 */}
-      <aside className="w-[220px] shrink-0 h-screen sticky top-0 flex flex-col bg-white border-r-2 border-dashed border-[#e6e6e6]">
+    <div className="graph-paper h-screen flex overflow-hidden font-hand-body text-[#31302e]">
+      {/* 后台侧边导航（固定不滚动） */}
+      <aside className="w-[220px] shrink-0 h-full flex flex-col bg-white border-r-2 border-dashed border-[#e6e6e6]">
         <div className="px-4 pt-4 pb-3 flex items-center justify-between">
           <Link href="/kb-9f3x" className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-lg bg-secondary grid place-items-center text-white text-[13px] font-bold">
@@ -107,22 +108,10 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* 内容区 */}
-      <div className="flex-1 min-w-0">
-        {/* 顶部栏 */}
-        <header className="sticky top-0 z-20 h-14 bg-[#fbfaf6]/90 backdrop-blur-sm border-b border-[#e6e6e6] flex items-center justify-between px-8">
-          <div className="text-[14px] text-[#31302e]">数据看板</div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 font-hand-body text-[14px] text-[#615d59]">
-              <span className="w-7 h-7 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[14px] font-bold text-[#213183] rotate-[-3deg]">
-                管
-              </span>
-              管理员
-            </span>
-            <LogoutButton />
-          </div>
-        </header>
-        {children}
+      {/* 内容区（锁定视口高度，超出部分在内部滚动） */}
+      <div className="flex-1 min-w-0 h-full overflow-hidden flex flex-col">
+        <AdminHeader />
+        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

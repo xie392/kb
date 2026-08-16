@@ -26,6 +26,47 @@ export default function AdminCategoriesPage() {
     setTimeout(() => setMsg(null), 2500);
   };
 
+  // 扁平化所有分类（含任意层级子分类），用于"作为 X 的子分类"下拉
+  const flatOptions: { id: string; label: string }[] = [];
+  const walk = (list: typeof cats, depth: number) => {
+    list?.forEach((c) => {
+      flatOptions.push({ id: c.id, label: `${"　".repeat(depth)}${c.name}` });
+      if (c.children) walk(c.children, depth + 1);
+    });
+  };
+  walk(cats, 0);
+
+  // 递归渲染分类树（任意层级）
+  const renderNode = (c: NonNullable<typeof cats>[number], depth: number): React.ReactNode => (
+    <div key={c.id}>
+      <div
+        className="flex items-center gap-3 hover:bg-[#f6f5f4]/60 transition-colors group"
+        style={{ paddingLeft: 20 + depth * 36, paddingTop: depth === 0 ? 16 : 12, paddingBottom: depth === 0 ? 16 : 12, paddingRight: 20 }}
+      >
+        {depth === 0 ? (
+          <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de]">
+            {c.name[0]}
+          </span>
+        ) : (
+          <span className="font-hand-body text-[14px] text-[#a39e98] w-5">└</span>
+        )}
+        <span
+          className={`font-hand-display font-bold flex-1 ${depth === 0 ? "text-[20px] text-[#31302e]" : "text-[17px] text-[#615d59]"}`}
+        >
+          {c.name}
+        </span>
+        <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{c.count} 篇</span>
+        <button
+          onClick={() => remove.mutate({ id: c.id })}
+          className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          删除
+        </button>
+      </div>
+      {c.children?.map((child) => renderNode(child, depth + 1))}
+    </div>
+  );
+
   return (
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
@@ -40,8 +81,8 @@ export default function AdminCategoriesPage() {
             className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
           >
             <option value="">作为一级分类</option>
-            {cats?.map((c) => (
-              <option key={c.id} value={c.id}>作为 {c.name} 的子分类</option>
+            {flatOptions.map((c) => (
+              <option key={c.id} value={c.id}>作为 {c.label} 的子分类</option>
             ))}
           </select>
           <input
@@ -72,36 +113,7 @@ export default function AdminCategoriesPage() {
 
       {/* 分类树 */}
       <div className="bg-white sketch-border sketch-shadow divide-y divide-dashed divide-[#e6e6e6] fade-up">
-        {cats?.map((cat) => (
-          <div key={cat.id}>
-            <div className="flex items-center gap-3 px-5 py-4 hover:bg-[#f6f5f4]/60 transition-colors group">
-              <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de]">
-                {cat.name[0]}
-              </span>
-              <span className="font-hand-display text-[20px] font-bold text-[#31302e] flex-1">{cat.name}</span>
-              <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{cat.count} 篇</span>
-              <button
-                onClick={() => remove.mutate({ id: cat.id })}
-                className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                删除
-              </button>
-            </div>
-            {cat.children?.map((child) => (
-              <div key={child.id} className="flex items-center gap-3 pl-[56px] pr-5 py-3 hover:bg-[#f6f5f4]/60 transition-colors group">
-                <span className="font-hand-body text-[14px] text-[#a39e98]">└</span>
-                <span className="font-hand-display text-[18px] font-bold text-[#615d59] flex-1">{child.name}</span>
-                <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{child.count} 篇</span>
-                <button
-                  onClick={() => remove.mutate({ id: child.id })}
-                  className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  删除
-                </button>
-              </div>
-            ))}
-          </div>
-        ))}
+        {cats?.map((cat) => renderNode(cat, 0))}
         {!cats?.length && (
           <div className="py-14 text-center font-hand-display text-[22px] font-bold text-[#a39e98]">
             还没有分类，先新增一个吧

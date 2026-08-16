@@ -3,38 +3,41 @@ import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
 export const categoryRouter = router({
-  /** 分类树（含子分类和笔记数） */
+  /** 分类树（任意层级嵌套，含子分类和笔记数） */
   tree: publicProcedure.query(async ({ ctx }) => {
     const categories = await ctx.db.category.findMany({
       include: { _count: { select: { articles: true } } },
       orderBy: { sort: "asc" },
     });
 
-    // 组装树
-    const childrenMap = new Map<string, typeof categories>();
-    const roots: (typeof categories)[number][] = [];
+    type CategoryTreeNode = {
+      id: string;
+      name: string;
+      sort: number;
+      count: number;
+      children: CategoryTreeNode[];
+    };
+
+    // 按 parentId 分组
+    const childrenMap = new Map<string | null, typeof categories>();
     for (const c of categories) {
-      if (c.parentId) {
-        const arr = childrenMap.get(c.parentId) ?? [];
-        arr.push(c);
-        childrenMap.set(c.parentId, arr);
-      } else {
-        roots.push(c);
-      }
+      const key = c.parentId;
+      const arr = childrenMap.get(key) ?? [];
+      arr.push(c);
+      childrenMap.set(key, arr);
     }
 
-    return roots.map((root) => ({
-      id: root.id,
-      name: root.name,
-      sort: root.sort,
-      count: root._count.articles,
-      children: (childrenMap.get(root.id) ?? []).map((child) => ({
-        id: child.id,
-        name: child.name,
-        sort: child.sort,
-        count: child._count.articles,
-      })),
-    }));
+    // 递归组装树
+    const build = (parentId: string | null): CategoryTreeNode[] =>
+      (childrenMap.get(parentId) ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        sort: c.sort,
+        count: c._count.articles,
+        children: build(c.id),
+      }));
+
+    return build(null);
   }),
 
   create: protectedProcedure
