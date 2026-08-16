@@ -19,6 +19,15 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import { Markdown } from "@tiptap/markdown";
 import { MarkdownPaste } from "@/components/markdown-paste";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /* ─── 工具栏按钮 ─── */
 
@@ -417,6 +426,7 @@ export function EditorToolbar({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
   const groups = useMemo(
     () =>
@@ -434,7 +444,7 @@ export function EditorToolbar({
     e.target.value = ""; // 允许重复选择同一文件
     if (!file || !onUploadImage || !editor) return;
     if (!file.type.startsWith("image/")) {
-      window.alert("请选择图片文件（JPG/PNG/GIF/WebP/SVG）");
+      setErrMsg("请选择图片文件（JPG/PNG/GIF/WebP/SVG）");
       return;
     }
     setUploading(true);
@@ -442,7 +452,7 @@ export function EditorToolbar({
       const url = await onUploadImage(file);
       if (url) editor.chain().focus().setImage({ src: url }).run();
     } catch (err) {
-      window.alert(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
+      setErrMsg(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
     } finally {
       setUploading(false);
     }
@@ -468,6 +478,31 @@ export function EditorToolbar({
           ))}
         </div>
       ))}
+
+      {/* 错误提示弹窗 */}
+      <AlertDialog
+        open={!!errMsg}
+        onOpenChange={(open) => {
+          if (!open) setErrMsg(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-xl border border-[#e6e6e6] bg-white shadow-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+              提示
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-[#615d59]">{errMsg}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              className="bg-[#0075de] text-white hover:bg-[#005bab]"
+              onClick={() => setErrMsg(null)}
+            >
+              知道了
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

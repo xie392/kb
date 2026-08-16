@@ -69,9 +69,11 @@ function HandPost({
 
 export default async function HomePage() {
   const caller = await createServerCaller();
-  const [list, cats] = await Promise.all([
+  const [list, cats, tags, trend] = await Promise.all([
     caller.article.list({ status: "normal", page: 1, pageSize: 50 }),
     caller.category.tree(),
+    caller.tag.list(),
+    caller.stats.trend(),
   ]);
 
   const articles = list.items;
@@ -80,9 +82,11 @@ export default async function HomePage() {
   const stats = [
     { v: String(articles.length), l: "笔记总数" },
     { v: String(cats.length), l: "分类" },
-    { v: "6", l: "标签" },
+    { v: String(tags.length), l: "标签" },
     { v: String(articles.filter((a) => a.isFavorite).length), l: "收藏" },
   ];
+  const trendTotal = trend.reduce((s, t) => s + t.count, 0);
+  const trendPeak = Math.max(...trend.map((t) => t.count), 0);
 
   return (
     <div className="graph-paper min-h-screen font-hand-body text-[#31302e]">
@@ -137,7 +141,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 便签注释 + 图表 */}
+      {/* 便签注释 + 增长图表 */}
       <div className="relative max-w-[1000px] mx-auto px-6">
         <div className="hidden lg:block sticky-note sketch-border-2 px-4 py-3 rotate-[3deg] absolute -left-16 top-8 w-[140px] fade-up">
           <div className="font-hand-display text-[16px] font-bold text-[#523410]">✏️ 提示</div>
@@ -151,11 +155,22 @@ export default async function HomePage() {
             <div className="font-hand-display text-[20px] font-bold text-[#31302e] marker-underline inline-block">
               近 30 天笔记增长
             </div>
-            <div className="mt-3"><HandChart /></div>
+            {trendTotal > 0 ? (
+              <>
+                <div className="mt-1 font-hand-body text-[13px] text-[#a39e98]">
+                  近 30 天共新增 {trendTotal} 篇 · 峰值 {trendPeak} 篇/天
+                </div>
+                <div className="mt-3"><HandChart data={trend} /></div>
+              </>
+            ) : (
+              <div className="mt-4 py-10 text-center font-hand-body text-[15px] text-[#a39e98]">
+                近 30 天还没有新笔记，去写第一篇吧 ✍️
+              </div>
+            )}
           </div>
           <div className="hidden sm:block sticky-note sketch-border px-3 py-2 rotate-[2deg] shrink-0">
-            <div className="font-hand-body text-[13px] text-[#523410]">手绘占位图表</div>
-            <div className="font-hand-body text-[12px] text-[#a39e98]">接入真实数据后替换</div>
+            <div className="font-hand-body text-[13px] text-[#523410]">真实数据</div>
+            <div className="font-hand-body text-[12px] text-[#a39e98]">每篇笔记都是记录</div>
           </div>
         </div>
       </div>

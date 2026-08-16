@@ -1,6 +1,27 @@
-import { router, protectedProcedure } from "@/server/api/trpc";
+import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import type { PrismaClient } from "@prisma/client";
+
+/** 近 N 天每日新增笔记数（status: normal） */
+async function getDailyTrend(db: PrismaClient, days = 30) {
+  const now = new Date();
+  const out: { date: string; count: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const next = new Date(d);
+    next.setDate(d.getDate() + 1);
+    const count = await db.article.count({
+      where: { status: "normal", createdAt: { gte: d, lt: next } },
+    });
+    out.push({ date: d.toISOString().slice(0, 10), count });
+  }
+  return out;
+}
 
 export const statsRouter = router({
+  /** 近 30 天每日新增（公开，供前台首页图表） */
+  trend: publicProcedure.query(async ({ ctx }) => getDailyTrend(ctx.db)),
+
   overview: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -37,17 +58,7 @@ export const statsRouter = router({
     ]);
 
     // 近 30 天每日新增
-    const days: { date: string; count: number }[] = [];
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const next = new Date(d);
-      next.setDate(d.getDate() + 1);
-      const count = await ctx.db.article.count({
-        where: { status: "normal", createdAt: { gte: d, lt: next } },
-      });
-      days.push({ date: d.toISOString().slice(0, 10), count });
-    }
+    const days = await getDailyTrend(ctx.db);
 
     return {
       total,

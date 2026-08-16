@@ -1,12 +1,5 @@
 import Link from "next/link";
-import SearchDialog from "@/components/search-dialog";
-
-const navLinks = [
-  { label: "首页", href: "/" },
-  { label: "分类", href: "/categories" },
-  { label: "标签", href: "/tags" },
-  { label: "收藏", href: "/favorites" },
-];
+import SiteNav from "@/components/site-nav";
 
 export default function HomeLayout({
   children,
@@ -25,22 +18,7 @@ export default function HomeLayout({
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1.5">
-            <SearchDialog />
-            {navLinks.map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`font-hand-display text-[17px] px-4 py-1.5 transition-colors ${
-                  link.href === "/"
-                    ? "bg-white sketch-border sketch-shadow text-[#0075de] font-bold"
-                    : `text-[#615d59] hover:text-[#0075de] ${i % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]"}`
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <SiteNav />
         </div>
       </header>
 

@@ -19,6 +19,15 @@ export const tagRouter = router({
       });
     }),
 
+  update: protectedProcedure
+    .input(z.object({ id: z.string().min(1).max(50), name: z.string().min(1).max(30) }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.tag.update({
+        where: { id: input.id },
+        data: { name: input.name },
+      });
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1).max(50) }))
     .mutation(async ({ ctx, input }) => {

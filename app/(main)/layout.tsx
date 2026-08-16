@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { categories } from "@/lib/mock-data";
-import SearchDialog from "@/components/search-dialog";
+import SiteNav from "@/components/site-nav";
+import { createServerCaller } from "@/trpc/server";
 
-const navLinks = [
-  { label: "首页", href: "/" },
-  { label: "分类", href: "/categories" },
-  { label: "标签", href: "/tags" },
-  { label: "收藏", href: "/favorites" },
-];
+const FOOTER_COLORS = ["#0075de", "#ff64c8", "#62aef0", "#2a9d99", "#dd5b00"];
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // 页脚展示真实顶级分类（取前 3 个）
+  let topCats: { id: string; name: string }[] = [];
+  try {
+    const caller = await createServerCaller();
+    const cats = await caller.category.tree();
+    topCats = cats.slice(0, 3);
+  } catch {
+    // 数据库异常时页脚不展示分类，不影响页面
+  }
+
   return (
     <div className="graph-paper min-h-screen font-hand-body text-[#31302e]">
       {/* 手绘顶部导航 */}
@@ -26,22 +31,7 @@ export default function MainLayout({
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1.5">
-            <SearchDialog />
-            {navLinks.map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`font-hand-display text-[17px] px-4 py-1.5 transition-colors ${
-                  link.href === "/"
-                    ? "bg-white sketch-border sketch-shadow text-[#0075de] font-bold"
-                    : `text-[#615d59] hover:text-[#0075de] ${i % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]"}`
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <SiteNav />
         </div>
       </header>
 
@@ -51,14 +41,19 @@ export default function MainLayout({
       <footer className="border-t-2 border-dashed border-[#e6e6e6] py-8">
         <div className="max-w-[1000px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 font-hand-body text-[15px] text-[#a39e98]">
           <span>我的知识库 · 私有部署 · 数据自持</span>
-          <div className="flex items-center gap-3">
-            {categories.slice(0, 3).map((c) => (
-              <span key={c.id} className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full rotate-12" style={{ backgroundColor: c.color }} />
-                {c.name}
-              </span>
-            ))}
-          </div>
+          {topCats.length > 0 && (
+            <div className="flex items-center gap-3">
+              {topCats.map((c, i) => (
+                <span key={c.id} className="flex items-center gap-1.5">
+                  <span
+                    className="w-2 h-2 rounded-full rotate-12"
+                    style={{ backgroundColor: FOOTER_COLORS[i % FOOTER_COLORS.length] }}
+                  />
+                  {c.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </footer>
     </div>

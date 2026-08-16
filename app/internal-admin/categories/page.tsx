@@ -2,18 +2,35 @@
 
 import { useState } from "react";
 import { api } from "@/trpc/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminCategoriesPage() {
   const utils = api.useUtils();
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [newName, setNewName] = useState("");
   const [newParent, setNewParent] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<NonNullable<typeof cats>[number] | null>(null);
 
   const { data: cats } = api.category.tree.useQuery();
   const invalidate = () => utils.category.tree.invalidate();
 
   const create = api.category.create.useMutation({
     onSuccess: () => { invalidate(); setNewName(""); show("已新增分类", "ok"); },
+    onError: (e) => show(e.message, "err"),
+  });
+  const update = api.category.update.useMutation({
+    onSuccess: () => { invalidate(); setEditingId(null); show("已保存分类名称", "ok"); },
     onError: (e) => show(e.message, "err"),
   });
   const remove = api.category.delete.useMutation({
@@ -25,6 +42,20 @@ export default function AdminCategoriesPage() {
     setMsg({ type, text });
     setTimeout(() => setMsg(null), 2500);
   };
+
+  const startEdit = (c: NonNullable<typeof cats>[number]) => {
+    setEditingId(c.id);
+    setEditName(c.name);
+  };
+
+  const saveEdit = () => {
+    if (!editingId) return;
+    const name = editName.trim();
+    if (!name) return show("请输入分类名称", "err");
+    update.mutate({ id: editingId, name });
+  };
+
+  const confirmDelete = (c: NonNullable<typeof cats>[number]) => setDeleteTarget(c);
 
   // 扁平化所有分类（含任意层级子分类），用于"作为 X 的子分类"下拉
   const flatOptions: { id: string; label: string }[] = [];
@@ -44,24 +75,59 @@ export default function AdminCategoriesPage() {
         style={{ paddingLeft: 20 + depth * 36, paddingTop: depth === 0 ? 16 : 12, paddingBottom: depth === 0 ? 16 : 12, paddingRight: 20 }}
       >
         {depth === 0 ? (
-          <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de]">
+          <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de] shrink-0">
             {c.name[0]}
           </span>
         ) : (
-          <span className="font-hand-body text-[14px] text-[#a39e98] w-5">└</span>
+          <span className="font-hand-body text-[14px] text-[#a39e98] w-5 shrink-0">└</span>
         )}
-        <span
-          className={`font-hand-display font-bold flex-1 ${depth === 0 ? "text-[20px] text-[#31302e]" : "text-[17px] text-[#615d59]"}`}
-        >
-          {c.name}
-        </span>
-        <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums">{c.count} 篇</span>
-        <button
-          onClick={() => remove.mutate({ id: c.id })}
-          className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          删除
-        </button>
+        {editingId === c.id ? (
+          <>
+            <input
+              autoFocus
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit();
+                if (e.key === "Escape") setEditingId(null);
+              }}
+              className="flex-1 h-9 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
+            />
+            <button
+              onClick={saveEdit}
+              className="font-hand-body text-[14px] text-[#0075de] hover:text-[#005bab] transition-colors"
+            >
+              保存
+            </button>
+            <button
+              onClick={() => setEditingId(null)}
+              className="font-hand-body text-[14px] text-[#a39e98] hover:text-[#615d59] transition-colors"
+            >
+              取消
+            </button>
+          </>
+        ) : (
+          <>
+            <span
+              className={`font-hand-display font-bold flex-1 truncate ${depth === 0 ? "text-[20px] text-[#31302e]" : "text-[17px] text-[#615d59]"}`}
+            >
+              {c.name}
+            </span>
+            <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums shrink-0">{c.count} 篇</span>
+            <button
+              onClick={() => startEdit(c)}
+              className="font-hand-body text-[14px] text-[#a39e98] hover:text-[#0075de] opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              编辑
+            </button>
+            <button
+              onClick={() => confirmDelete(c)}
+              className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              删除
+            </button>
+          </>
+        )}
       </div>
       {c.children?.map((child) => renderNode(child, depth + 1))}
     </div>
@@ -120,6 +186,55 @@ export default function AdminCategoriesPage() {
           </div>
         )}
       </div>
+
+      {/* 删除确认弹窗 */}
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-xl border border-[#e6e6e6] bg-white shadow-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+              删除分类
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+              {deleteTarget &&
+                (deleteTarget.count > 0 ? (
+                  <>
+                    分类「<span className="font-semibold text-[#31302e]">{deleteTarget.name}</span>」
+                    下有{" "}
+                    <span className="font-semibold text-red-500">{deleteTarget.count}</span>{" "}
+                    篇文章，请先删除该分类下的文章后再删除该分类。
+                  </>
+                ) : (
+                  <>
+                    确定删除分类「
+                    <span className="font-semibold text-[#31302e]">{deleteTarget.name}</span>
+                    」吗？该分类下没有文章，删除后不可恢复。
+                  </>
+                ))}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white text-[#615d59] border border-[#e6e6e6] hover:bg-[#f6f5f4]">
+              取消
+            </AlertDialogCancel>
+            {deleteTarget && deleteTarget.count === 0 && (
+              <AlertDialogAction
+                className="bg-red-500 text-white hover:bg-red-600"
+                onClick={() => {
+                  remove.mutate({ id: deleteTarget.id });
+                  setDeleteTarget(null);
+                }}
+              >
+                删除
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

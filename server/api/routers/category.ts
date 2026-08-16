@@ -93,7 +93,7 @@ export const categoryRouter = router({
       if (articles > 0)
         throw new TRPCError({
           code: "CONFLICT",
-          message: "该分类下有笔记，请先迁移或移入回收站",
+          message: `该分类下有 ${articles} 篇文章，请先删除该分类下的文章后再删除该分类`,
         });
       await ctx.db.category.delete({ where: { id: input.id } });
       return { ok: true };
