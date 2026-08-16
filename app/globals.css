@@ -368,15 +368,93 @@
   text-underline-offset: 2px;
 }
 .prose-kb img {
+  display: block;
+  margin: 1.2em auto; /* 默认居中；对齐/宽度由节点内联样式覆盖 */
   border-radius: 12px;
   max-width: 100%;
   height: auto;
-  margin: 1.2em 0;
 }
 .prose-kb hr {
   border: none;
   border-top: 1px solid var(--color-hairline);
   margin: 2em 0;
+}
+
+/* 高亮标记（马克笔） */
+.prose-kb mark {
+  background-color: #ffe483;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* 任务列表 */
+.prose-kb ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.prose-kb ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0.4em 0;
+}
+.prose-kb ul[data-type="taskList"] li > label {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.prose-kb ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+.prose-kb ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+.prose-kb ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* 表格 */
+.prose-kb table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.2em 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.prose-kb th,
+.prose-kb td {
+  border: 1px solid var(--color-hairline);
+  padding: 6px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-kb th {
+  background-color: var(--color-canvas-soft);
+  font-weight: 600;
+}
+.prose-kb .selectedCell::after {
+  background: rgba(0, 117, 222, 0.08);
+  z-index: 2;
+  position: relative;
+}
+.prose-kb .column-resize-handle {
+  background-color: var(--color-primary);
+  width: 2px;
+}
+
+/* 代码块与任务列表在编辑时的选中态 */
+.prose-kb .ProseMirror-selectednode {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @theme inline {

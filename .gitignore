@@ -47,3 +47,6 @@ yarn-error.log*
 .omc
 .nextdb.sqlite
 dev.db
+
+# 本地上传的图片
+public/uploads/

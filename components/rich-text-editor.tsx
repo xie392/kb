@@ -1,11 +1,24 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEditor, useEditorState, EditorContent, type Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { NodeSelection, type EditorState } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import Underline from "@tiptap/extension-underline";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import { Table } from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import { Markdown } from "@tiptap/markdown";
+import { MarkdownPaste } from "@/components/markdown-paste";
 
 /* ─── 工具栏按钮 ─── */
 
@@ -173,6 +186,143 @@ function IconLink() {
   );
 }
 
+function IconHighlight() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="8.5" width="12" height="4.5" rx="1.2" fill="currentColor" opacity="0.35" />
+      <path d="M4 4.5h8M6 7h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCodeBlock() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+      <path d="m6 6-2 2 2 2M10 6l2 2-2 2" />
+    </svg>
+  );
+}
+
+function IconTaskList() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2.8" width="3.4" height="3.4" rx="0.9" />
+      <path d="M3.2 4.5l.9.9 1.4-1.6" />
+      <rect x="7.5" y="3.2" width="6.5" height="1.7" rx="0.8" />
+      <rect x="2" y="9.8" width="3.4" height="3.4" rx="0.9" />
+      <rect x="7.5" y="10.4" width="6.5" height="1.7" rx="0.8" />
+    </svg>
+  );
+}
+
+function IconAlignLeft() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <path d="M2 3.5h12M2 7h8M2 10.5h11M2 14h5" />
+    </svg>
+  );
+}
+
+function IconAlignCenter() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <path d="M2 3.5h12M4 7h8M3 10.5h10M5 14h6" />
+    </svg>
+  );
+}
+
+function IconAlignRight() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <path d="M2 3.5h12M6 7h8M3 10.5h11M9 14h5" />
+    </svg>
+  );
+}
+
+function IconClearFormat() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6.5 3h5M8 3v7.5M5.5 12h5.5" />
+      <path d="M2.5 14l10.5-11" />
+    </svg>
+  );
+}
+
+function IconTable() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.2" />
+      <path d="M2.5 6.5h11M6 3.5v9" />
+    </svg>
+  );
+}
+
+function IconTableDelete() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.2" />
+      <path d="M2.5 6.5h11M6 3.5v9" />
+      <path d="M4.5 13l7-9" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconSpinner() {
+  return (
+    <svg className="animate-spin" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2 8a6 6 0 1 1 11 3.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconDelete() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9M6.5 7.5v4M9.5 7.5v4" />
+    </svg>
+  );
+}
+
+/* ─── 图片节点（支持对齐 + 宽度属性） ─── */
+
+function buildImageStyle(align: string | null, width: number | null) {
+  const parts: string[] = [];
+  if (align === "left") parts.push("display:block", "float:left", "margin:8px 16px 8px 0");
+  else if (align === "right") parts.push("display:block", "float:right", "margin:8px 0 8px 16px");
+  else parts.push("display:block", "margin:8px auto");
+  if (typeof width === "number") parts.push(`width:${width}%`);
+  return parts.join(";");
+}
+
+const CustomImage = Image.configure({ allowBase64: true }).extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      align: {
+        default: "center",
+        parseHTML: (el) => {
+          const s = el.getAttribute("style") ?? "";
+          return s.includes("float:left") ? "left" : s.includes("float:right") ? "right" : "center";
+        },
+        renderHTML: () => ({}),
+      },
+      width: {
+        default: null,
+        parseHTML: (el) => {
+          const m = (el.getAttribute("style") ?? "").match(/width:(\d+)%/);
+          return m ? Number(m[1]) : null;
+        },
+        renderHTML: () => ({}),
+      },
+    };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { align, width, ...rest } = HTMLAttributes;
+    return ["img", { ...rest, style: buildImageStyle(align, width) }];
+  },
+});
+
 /* ─── 工具栏分组数据（供外部使用） ─── */
 
 export interface ToolbarAction {
@@ -182,7 +332,14 @@ export interface ToolbarAction {
   icon: React.ReactNode;
 }
 
-export function buildToolbarGroups(editor: Editor): ToolbarAction[][] {
+interface ToolbarImageOpts {
+  /** 有值时图片按钮改为触发本地文件选择（上传后返回图片 URL） */
+  openImagePicker?: () => void;
+  /** 上传中状态 */
+  uploading?: boolean;
+}
+
+export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): ToolbarAction[][] {
   return [
     [
       { title: "撤销", onClick: () => editor.chain().focus().undo().run(), icon: <IconUndo /> },
@@ -199,19 +356,32 @@ export function buildToolbarGroups(editor: Editor): ToolbarAction[][] {
       { title: "斜体", active: editor.isActive("italic"), onClick: () => editor.chain().focus().toggleItalic().run(), icon: <IconItalic /> },
       { title: "下划线", active: editor.isActive("underline"), onClick: () => editor.chain().focus().toggleUnderline().run(), icon: <IconUnderline /> },
       { title: "删除线", active: editor.isActive("strike"), onClick: () => editor.chain().focus().toggleStrike().run(), icon: <IconStrike /> },
+      { title: "高亮", active: editor.isActive("highlight"), onClick: () => editor.chain().focus().toggleHighlight().run(), icon: <IconHighlight /> },
       { title: "行内代码", active: editor.isActive("code"), onClick: () => editor.chain().focus().toggleCode().run(), icon: <IconCode /> },
+      { title: "清除格式", onClick: () => editor.chain().focus().clearNodes().unsetAllMarks().run(), icon: <IconClearFormat /> },
     ],
     [
       { title: "无序列表", active: editor.isActive("bulletList"), onClick: () => editor.chain().focus().toggleBulletList().run(), icon: <IconUl /> },
       { title: "有序列表", active: editor.isActive("orderedList"), onClick: () => editor.chain().focus().toggleOrderedList().run(), icon: <IconOl /> },
+      { title: "任务列表", active: editor.isActive("taskList"), onClick: () => editor.chain().focus().toggleTaskList().run(), icon: <IconTaskList /> },
       { title: "引用", active: editor.isActive("blockquote"), onClick: () => editor.chain().focus().toggleBlockquote().run(), icon: <IconQuote /> },
+      { title: "代码块", active: editor.isActive("codeBlock"), onClick: () => editor.chain().focus().toggleCodeBlock().run(), icon: <IconCodeBlock /> },
+    ],
+    [
+      { title: "左对齐", active: editor.isActive({ textAlign: "left" }), onClick: () => editor.chain().focus().setTextAlign("left").run(), icon: <IconAlignLeft /> },
+      { title: "居中", active: editor.isActive({ textAlign: "center" }), onClick: () => editor.chain().focus().setTextAlign("center").run(), icon: <IconAlignCenter /> },
+      { title: "右对齐", active: editor.isActive({ textAlign: "right" }), onClick: () => editor.chain().focus().setTextAlign("right").run(), icon: <IconAlignRight /> },
     ],
     [
       { title: "分割线", onClick: () => editor.chain().focus().setHorizontalRule().run(), icon: <IconHr /> },
-      { title: "图片", onClick: () => {
+      { title: opts?.uploading ? "上传中…" : "图片", onClick: () => {
+        if (opts?.openImagePicker) {
+          opts.openImagePicker();
+          return;
+        }
         const url = window.prompt("图片 URL（或 base64 数据）");
-        if (url) editor.chain().focus().setImage({ src: url }).run();
-      }, icon: <IconImage /> },
+        if (url) editor.chain().focus().setImage({ src: url, width: 100 }).run();
+      }, icon: opts?.uploading ? <IconSpinner /> : <IconImage /> },
       { title: "链接", onClick: () => {
         const prev = editor.getAttributes("link").href as string | undefined;
         const url = window.prompt("链接 URL", prev ?? "https://");
@@ -219,19 +389,70 @@ export function buildToolbarGroups(editor: Editor): ToolbarAction[][] {
         if (url === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
         editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
       }, active: editor.isActive("link"), icon: <IconLink /> },
+      { title: "表格", onClick: () => {
+        const input = window.prompt("表格尺寸（列数×行数），如 3×3", "3×3");
+        if (!input) return;
+        const m = input.trim().match(/^(\d+)\s*[x×]\s*(\d+)$/);
+        if (!m) return;
+        const cols = Math.min(Math.max(parseInt(m[1]), 1), 8);
+        const rows = Math.min(Math.max(parseInt(m[2]), 1), 20);
+        editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+      }, icon: <IconTable /> },
+      { title: "删除表格", active: editor.isActive("table"), onClick: () => {
+        if (editor.isActive("table")) editor.chain().focus().deleteTable().run();
+      }, icon: <IconTableDelete /> },
     ],
   ];
 }
 
 /* ─── 独立工具栏组件（可放在任意位置） ─── */
 
-export function EditorToolbar({ editor }: { editor: Editor | null }) {
-  const groups = useMemo(() => editor ? buildToolbarGroups(editor) : [], [editor]);
+export function EditorToolbar({
+  editor,
+  onUploadImage,
+}: {
+  editor: Editor | null;
+  /** 传入后图片按钮变为"本地上传"，返回图片 URL */
+  onUploadImage?: (file: File) => Promise<string>;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const groups = useMemo(
+    () =>
+      editor
+        ? buildToolbarGroups(editor, {
+            openImagePicker: onUploadImage ? () => fileRef.current?.click() : undefined,
+            uploading,
+          })
+        : [],
+    [editor, onUploadImage, uploading]
+  );
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 允许重复选择同一文件
+    if (!file || !onUploadImage || !editor) return;
+    if (!file.type.startsWith("image/")) {
+      window.alert("请选择图片文件（JPG/PNG/GIF/WebP/SVG）");
+      return;
+    }
+    setUploading(true);
+    try {
+      const url = await onUploadImage(file);
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      window.alert(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (!editor) return null;
 
   return (
     <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-[#e6e6e6] bg-white flex-wrap">
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       {groups.map((group, gi) => (
         <div key={gi} className="flex items-center gap-0.5">
           {gi > 0 && <ToolbarDivider />}
@@ -264,9 +485,20 @@ export function useArticleEditor(options: {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-      Image.configure({ allowBase64: true }),
+      Underline,
+      Highlight.configure({ multicolor: false }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      CustomImage,
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: placeholder ?? "开始写作…" }),
+      Markdown,
+      MarkdownPaste,
     ],
     content: value || "",
     editorProps: {
@@ -311,6 +543,124 @@ export function useArticleEditor(options: {
   return editor;
 }
 
+/* ─── 块级浮动工具条（选中图片/表格等节点时显示） ─── */
+
+function MenuBtn({
+  active,
+  title,
+  onClick,
+  children,
+}: {
+  active?: boolean;
+  title: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      className={`w-7 h-7 grid place-items-center rounded-md text-[12px] transition-colors ${
+        active
+          ? "bg-[#0075de]/10 text-[#0075de]"
+          : "text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e]"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function BlockMenu({ editor }: { editor: Editor }) {
+  const [scrollTarget, setScrollTarget] = useState<HTMLElement | Window>(window);
+
+  useEffect(() => {
+    // 找到编辑器的滚动容器（滚动时浮动菜单跟随）
+    let el: HTMLElement | null = editor.view.dom.parentElement;
+    while (el && el.scrollHeight <= el.clientHeight) el = el.parentElement;
+    setScrollTarget(el ?? window);
+  }, [editor]);
+
+  // 直接从编辑器状态派生选中节点的类型/属性，避免在 effect 中 setState 造成死循环
+  const { nodeType, imgAttrs } = useEditorState({
+    editor,
+    selector: ({ editor }) => {
+      const sel = editor.state.selection;
+      if (!(sel instanceof NodeSelection)) {
+        return { nodeType: null, imgAttrs: null };
+      }
+      const node = sel.node;
+      return {
+        nodeType: node.type.name,
+        imgAttrs:
+          node.type.name === "image"
+            ? {
+                align: (node.attrs.align as string) ?? "center",
+                width: (node.attrs.width as number | null) ?? null,
+              }
+            : null,
+      };
+    },
+  });
+
+  const bubbleOptions = useMemo(
+    () => ({ placement: "top" as const, offset: 8, scrollTarget }),
+    [scrollTarget]
+  );
+
+  const shouldShow = useCallback(
+    ({ state }: { state: EditorState }) => state.selection instanceof NodeSelection,
+    []
+  );
+
+  const setImageAttr = (patch: { align?: string; width?: number | null }) =>
+    editor.chain().focus().updateAttributes("image", patch).run();
+
+  return (
+    <BubbleMenu
+      editor={editor}
+      shouldShow={shouldShow}
+      options={bubbleOptions}
+    >
+      <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
+        {nodeType === "image" && (
+          <>
+            <MenuBtn title="左对齐" active={imgAttrs?.align === "left"} onClick={() => setImageAttr({ align: "left" })}>
+              <IconAlignLeft />
+            </MenuBtn>
+            <MenuBtn title="居中" active={imgAttrs?.align === "center"} onClick={() => setImageAttr({ align: "center" })}>
+              <IconAlignCenter />
+            </MenuBtn>
+            <MenuBtn title="右对齐" active={imgAttrs?.align === "right"} onClick={() => setImageAttr({ align: "right" })}>
+              <IconAlignRight />
+            </MenuBtn>
+            <ToolbarDivider />
+            {[25, 50, 75, 100].map((w) => (
+              <MenuBtn key={w} title={`宽度 ${w}%`} active={imgAttrs?.width === w} onClick={() => setImageAttr({ width: w })}>
+                <span className="text-[10px] font-semibold">{w}%</span>
+              </MenuBtn>
+            ))}
+            <ToolbarDivider />
+          </>
+        )}
+        {nodeType === "table" && (
+          <>
+            <MenuBtn title="删除表格" onClick={() => editor.chain().focus().deleteTable().run()}>
+              <IconDelete />
+            </MenuBtn>
+            <ToolbarDivider />
+          </>
+        )}
+        <MenuBtn title="删除" onClick={() => editor.chain().focus().deleteSelection().run()}>
+          <IconDelete />
+        </MenuBtn>
+      </div>
+    </BubbleMenu>
+  );
+}
+
 /* ─── 纯编辑区组件（不含工具栏） ─── */
 
 export function EditorArea({ editor }: { editor: Editor | null }) {
@@ -327,6 +677,7 @@ export function EditorArea({ editor }: { editor: Editor | null }) {
   return (
     <div className="px-6 py-4">
       <EditorContent editor={editor} />
+      <BlockMenu editor={editor} />
     </div>
   );
 }

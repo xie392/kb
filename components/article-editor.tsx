@@ -69,6 +69,18 @@ export default function ArticleEditor({ article }: Props) {
   const createCategory = api.category.create.useMutation({
     onError: (e) => show(`创建分类失败：${e.message}`, "err"),
   });
+  const uploadImage = api.upload.image.useMutation();
+
+  const handleUploadImage = async (file: File): Promise<string> => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("读取文件失败"));
+      reader.readAsDataURL(file);
+    });
+    const res = await uploadImage.mutateAsync({ data: dataUrl });
+    return res.url;
+  };
 
   const show = (text: string, type: "ok" | "err") => {
     setMsg({ type, text });
@@ -172,61 +184,64 @@ export default function ArticleEditor({ article }: Props) {
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
       <div className="shrink-0 bg-white border-b border-[#e6e6e6]">
-        <EditorToolbar editor={editor} />
+        <EditorToolbar editor={editor} onUploadImage={handleUploadImage} />
       </div>
 
       {/* ═══ 主体内容（剩余空间内部滚动，编辑器不会撑高页面） ═══ */}
       <div className="flex-1 min-h-0 overflow-y-auto pb-12">
-        {/* 标题输入 */}
-        <div className="px-6 pt-3 pb-1">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="无标题"
-            className="w-full text-[28px] sm:text-[32px] font-bold leading-tight text-[#31302e] placeholder:text-[#c5c0b9] bg-transparent border-none outline-none focus:ring-0 font-sans"
-          />
-        </div>
+        {/* 标题、标签、正文收窄居中，其余（工具栏/顶栏/大纲/状态栏）保持全宽 */}
+        <div className="max-w-3xl mx-auto">
+          {/* 标题输入 */}
+          <div className="px-6 pt-3 pb-1">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="无标题"
+              className="w-full text-[28px] sm:text-[32px] font-bold leading-tight text-[#31302e] placeholder:text-[#c5c0b9] bg-transparent border-none outline-none focus:ring-0 font-sans"
+            />
+          </div>
 
-        {/* 元信息栏（分类 + 标签） */}
-        <div className="px-6 pb-2 flex items-center gap-3 flex-wrap">
-          <CategorySelect
-            options={cats ?? []}
-            value={categoryId}
-            onChange={setCategoryId}
-            onCreate={async (name, parentId) => {
-              try {
-                const data = await createCategory.mutateAsync({ name, parentId });
-                utils.category.tree.invalidate();
-                return data.id;
-              } catch {
-                return null;
-              }
-            }}
-          />
+          {/* 元信息栏（分类 + 标签） */}
+          <div className="px-6 pb-2 flex items-center gap-3 flex-wrap">
+            <CategorySelect
+              options={cats ?? []}
+              value={categoryId}
+              onChange={setCategoryId}
+              onCreate={async (name, parentId) => {
+                try {
+                  const data = await createCategory.mutateAsync({ name, parentId });
+                  utils.category.tree.invalidate();
+                  return data.id;
+                } catch {
+                  return null;
+                }
+              }}
+            />
 
-          <TagSelect
-            options={tags ?? []}
-            value={tagIds}
-            onChange={setTagIds}
-            onCreate={async (name) => {
-              try {
-                const data = await createTag.mutateAsync({ name });
-                utils.tag.list.invalidate();
-                return data.id;
-              } catch {
-                return null;
-              }
-            }}
-          />
-        </div>
+            <TagSelect
+              options={tags ?? []}
+              value={tagIds}
+              onChange={setTagIds}
+              onCreate={async (name) => {
+                try {
+                  const data = await createTag.mutateAsync({ name });
+                  utils.tag.list.invalidate();
+                  return data.id;
+                } catch {
+                  return null;
+                }
+              }}
+            />
+          </div>
 
-        {/* 分隔线 */}
-        <div className="h-px bg-[#e6e6e6]" />
+          {/* 分隔线 */}
+          <div className="h-px bg-[#e6e6e6]" />
 
-        {/* 富文本编辑区（100% 宽度） */}
-        <div>
-          <EditorArea editor={editor} />
+          {/* 富文本编辑区 */}
+          <div>
+            <EditorArea editor={editor} />
+          </div>
         </div>
       </div>
 
