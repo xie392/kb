@@ -7,7 +7,7 @@ import {
   useArticleEditor,
   EditorToolbar,
   EditorArea,
-} from "@/components/rich-text-editor";
+} from "@/components/rich-text";
 import TagSelect from "@/components/tag-select";
 import CategorySelect from "@/components/category-select";
 import { ADMIN_HOME } from "@/lib/config";

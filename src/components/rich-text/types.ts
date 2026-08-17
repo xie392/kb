@@ -1,0 +1,34 @@
+import type { ReactNode } from "react";
+
+/** 图片对齐方式 */
+export type ImageAlign = "left" | "center" | "right";
+
+/** 图片视觉样式（none=无 / border=描边 / shadow=阴影） */
+export type ImageStyle = "none" | "border" | "shadow";
+
+/** 图片节点属性 */
+export interface ImageAttrs {
+  src?: string;
+  alt?: string;
+  title?: string;
+  width?: number | null;
+  height?: number | null;
+  align?: ImageAlign;
+  rotation?: number;
+  imgStyle?: ImageStyle;
+}
+
+/** 标题大纲项（供外部渲染目录） */
+export interface OutlineItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+/** 工具栏按钮定义（buildToolbarGroups 产出的统一结构） */
+export interface ToolbarAction {
+  title: string;
+  active?: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+}
