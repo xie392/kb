@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { createServerCaller } from "@/trpc/server";
 import { extractToc } from "@/lib/toc";
+import { highlightCodeBlocks } from "@/lib/code-highlight";
 import ArticleToc from "@/components/article-toc";
+import ArticleCodeCopy from "@/components/article-code-copy";
 
 export default async function ArticlePage({
   params,
@@ -26,7 +28,9 @@ export default async function ArticlePage({
     pageSize: 100,
   });
 
-  const { items: tocItems, html: contentWithIds } = extractToc(article.content);
+  const { items: tocItems, html: contentWithIds } = extractToc(
+    highlightCodeBlocks(article.content),
+  );
 
   const index = list.items.findIndex((a) => a.id === id);
   const prev = index > 0 ? list.items[index - 1] : null;
@@ -93,6 +97,7 @@ export default async function ArticlePage({
                 className="prose-kb"
                 dangerouslySetInnerHTML={{ __html: contentWithIds }}
               />
+              <ArticleCodeCopy />
             </div>
 
             <div className="mt-10 pt-6 border-t-2 border-dashed border-[#e6e6e6] flex items-center gap-3 font-hand-display">

@@ -190,7 +190,7 @@ export default function ArticleEditor({ article }: Props) {
       </div>
 
       {/* ═══ 主体内容（剩余空间内部滚动，编辑器不会撑高页面） ═══ */}
-      <div className="flex-1 min-h-0 overflow-y-auto pb-12">
+      <div className="relative flex-1 min-h-0 overflow-y-auto pb-12">
         {/* 标题、标签、正文收窄居中，其余（工具栏/顶栏/大纲/状态栏）保持全宽 */}
         <div className="max-w-3xl mx-auto">
           {/* 标题输入 */}

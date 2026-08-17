@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useEditor, useEditorState, EditorContent, type Editor } from "@tiptap/react";
+import { useEditor, useEditorState, EditorContent, ReactNodeViewRenderer, NodeViewWrapper, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { NodeSelection, type EditorState } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
@@ -19,6 +19,7 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import { Markdown } from "@tiptap/markdown";
 import { MarkdownPaste } from "@/components/markdown-paste";
+import { CustomCodeBlock } from "@/components/code-block-node";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -293,44 +294,276 @@ function IconDelete() {
   );
 }
 
-/* ─── 图片节点（支持对齐 + 宽度属性） ─── */
+function IconRotate() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" />
+      <path d="M13.5 2v3h-3" />
+    </svg>
+  );
+}
 
-function buildImageStyle(align: string | null, width: number | null) {
-  const parts: string[] = [];
-  if (align === "left") parts.push("display:block", "float:left", "margin:8px 16px 8px 0");
-  else if (align === "right") parts.push("display:block", "float:right", "margin:8px 0 8px 16px");
-  else parts.push("display:block", "margin:8px auto");
-  if (typeof width === "number") parts.push(`width:${width}%`);
-  return parts.join(";");
+function IconImageStyle() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2.5" y="3.5" width="9" height="9" rx="1.5" />
+      <circle cx="5.2" cy="6.2" r="0.9" />
+      <path d="M2.5 10l2.5-2.2 2 1.6L10 6.5l1.5 1.5" />
+    </svg>
+  );
+}
+
+function IconReset() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.5 4v3.5H7" />
+      <path d="M3.9 10.5a5 5 0 1 0 .9-4.1L3.5 7.5" />
+    </svg>
+  );
+}
+
+/* ─── 图片节点（支持对齐、旋转、描边、阴影） ───
+ * 属性通过 data-* 输出到 DOM，视觉由 CSS 按属性选择器控制。
+ * 这样 updateAttributes 后 ProseMirror 能把变更同步到 DOM（节点级
+ * renderHTML 仅在首次插入时执行，属性级 renderHTML 返回 {} 会导致更新不落 DOM）。
+ */
+
+type ImageAlign = "left" | "center" | "right";
+type ImageStyle = "none" | "border" | "shadow";
+
+function parseLegacyStyle(el: HTMLElement) {
+  const s = el.getAttribute("style") ?? "";
+  const align: ImageAlign = s.includes("float:left")
+    ? "left"
+    : s.includes("float:right")
+      ? "right"
+      : "center";
+  const rotMatch = s.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/);
+  const rotation = rotMatch ? Number(rotMatch[1]) : 0;
+  const imgStyle: ImageStyle = s.includes("box-shadow:")
+    ? "shadow"
+    : s.includes("border:")
+      ? "border"
+      : "none";
+  return { align, rotation, imgStyle };
+}
+
+function numAttr(el: HTMLElement, name: string): number | null {
+  const v = el.getAttribute(name);
+  if (v === null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function readImageEl(el: HTMLElement): HTMLImageElement | null {
+  if (el.tagName === "IMG") return el as HTMLImageElement;
+  const img = el.querySelector("img");
+  return img as HTMLImageElement | null;
 }
 
 const CustomImage = Image.configure({ allowBase64: true }).extend({
+  parseHTML() {
+    return [{ tag: "span.kb-img-wrap" }, { tag: "img[src]" }];
+  },
   addAttributes() {
     return {
       ...this.parent?.(),
-      align: {
-        default: "center",
-        parseHTML: (el) => {
-          const s = el.getAttribute("style") ?? "";
-          return s.includes("float:left") ? "left" : s.includes("float:right") ? "right" : "center";
-        },
-        renderHTML: () => ({}),
+      src: {
+        default: null,
+        parseHTML: (el) => readImageEl(el as HTMLElement)?.getAttribute("src") ?? null,
+      },
+      alt: {
+        default: null,
+        parseHTML: (el) => readImageEl(el as HTMLElement)?.getAttribute("alt") ?? null,
+      },
+      title: {
+        default: null,
+        parseHTML: (el) => readImageEl(el as HTMLElement)?.getAttribute("title") ?? null,
       },
       width: {
         default: null,
         parseHTML: (el) => {
-          const m = (el.getAttribute("style") ?? "").match(/width:(\d+)%/);
-          return m ? Number(m[1]) : null;
+          const img = readImageEl(el as HTMLElement);
+          return img ? numAttr(img, "width") : null;
         },
-        renderHTML: () => ({}),
+        renderHTML: (a) => (a.width ? { width: a.width } : {}),
+      },
+      height: {
+        default: null,
+        parseHTML: (el) => {
+          const img = readImageEl(el as HTMLElement);
+          return img ? numAttr(img, "height") : null;
+        },
+        renderHTML: (a) => (a.height ? { height: a.height } : {}),
+      },
+      align: {
+        default: "center",
+        parseHTML: (el) => {
+          const root = el as HTMLElement;
+          const img = readImageEl(root);
+          return (
+            root.getAttribute("data-align") ??
+            img?.getAttribute("data-align") ??
+            parseLegacyStyle(img ?? root).align
+          ) as ImageAlign;
+        },
+        renderHTML: (a) => ({ "data-align": a.align }),
+      },
+      rotation: {
+        default: 0,
+        parseHTML: (el) => {
+          const img = readImageEl(el as HTMLElement);
+          if (!img) return 0;
+          const d = img.getAttribute("data-rotation");
+          if (d !== null) return Number(d) || 0;
+          return parseLegacyStyle(img).rotation;
+        },
+        renderHTML: (a) =>
+          a.rotation ? { "data-rotation": String(a.rotation) } : {},
+      },
+      imgStyle: {
+        default: "none",
+        parseHTML: (el) => {
+          const img = readImageEl(el as HTMLElement);
+          if (!img) return "none";
+          return (
+            (img.getAttribute("data-style") as ImageStyle | null) ??
+            parseLegacyStyle(img).imgStyle
+          );
+        },
+        renderHTML: (a) =>
+          a.imgStyle && a.imgStyle !== "none"
+            ? { "data-style": a.imgStyle }
+            : {},
       },
     };
   },
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageView);
+  },
   renderHTML({ HTMLAttributes }) {
-    const { align, width, ...rest } = HTMLAttributes;
-    return ["img", { ...rest, style: buildImageStyle(align, width) }];
+    const attrs = HTMLAttributes as Record<string, unknown>;
+    const align = (attrs["data-align"] as ImageAlign) ?? "center";
+    const rot = Number(attrs["data-rotation"]) || 0;
+    const w = Number(attrs.width) || 0;
+    const h = Number(attrs.height) || 0;
+    const rad = (rot * Math.PI) / 180;
+    const sin = Math.abs(Math.sin(rad));
+    const cos = Math.abs(Math.cos(rad));
+    const boxW = Math.round(w * cos + h * sin);
+    const boxH = Math.round(w * sin + h * cos);
+    const textAlign =
+      align === "left" ? "left" : align === "right" ? "right" : "center";
+    let wrapStyle = `text-align:${textAlign};`;
+    let imgStyle: string | undefined;
+    if (w && h && boxW && boxH) {
+      wrapStyle += `width:${boxW}px;max-width:100%;aspect-ratio:${boxW} / ${boxH};`;
+      imgStyle = [
+        `width:${((w / boxW) * 100).toFixed(4)}%`,
+        "height:auto",
+        "position:absolute",
+        "top:50%",
+        "left:50%",
+        "max-width:none",
+        "margin:0",
+        `transform:translate(-50%,-50%) rotate(${rot}deg)`,
+      ].join(";");
+    }
+    return [
+      "div",
+      { class: "kb-img-wrap", "data-align": align, style: wrapStyle },
+      ["img", { ...attrs, style: imgStyle }],
+    ];
   },
 });
+
+/* 图片 NodeView：wrapper 内的定位容器按旋转后的包围盒预留布局空间，
+ * 图片绝对居中并旋转，避免 transform 悬浮覆盖相邻内容。 */
+function ImageView(props: {
+  node: { attrs: Record<string, unknown> };
+  updateAttributes: (patch: Record<string, unknown>) => void;
+  selected?: boolean;
+}) {
+  const { node, selected, updateAttributes } = props;
+  const attrs = node.attrs as {
+    src?: string;
+    alt?: string;
+    title?: string;
+    width?: number | null;
+    height?: number | null;
+    align?: ImageAlign;
+    rotation?: number;
+    imgStyle?: ImageStyle;
+  };
+  const align = attrs.align ?? "center";
+  const rotation = ((attrs.rotation ?? 0) % 360 + 360) % 360;
+  const imgStyle = attrs.imgStyle ?? "none";
+  const storedW = Number(attrs.width) || 0;
+  const storedH = Number(attrs.height) || 0;
+
+  const [size, setSize] = useState<{ w: number; h: number } | null>(
+    storedW && storedH ? { w: storedW, h: storedH } : null,
+  );
+
+  const rad = (rotation * Math.PI) / 180;
+  const sin = Math.abs(Math.sin(rad));
+  const cos = Math.abs(Math.cos(rad));
+  const boxW = size ? size.w * cos + size.h * sin : 0;
+  const boxH = size ? size.w * sin + size.h * cos : 0;
+  const textAlign =
+    align === "left" ? "left" : align === "right" ? "right" : "center";
+
+  const wrapStyle: React.CSSProperties = {
+    textAlign,
+    width: boxW ? `${Math.round(boxW)}px` : undefined,
+    maxWidth: "100%",
+    aspectRatio: boxW && boxH ? `${boxW} / ${boxH}` : undefined,
+  };
+  const imgCss: React.CSSProperties = size
+    ? {
+        width: `${((size.w / boxW) * 100).toFixed(4)}%`,
+        height: "auto",
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        maxWidth: "none",
+        margin: 0,
+        transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+      }
+    : { maxWidth: "100%", height: "auto" };
+
+  return (
+    <NodeViewWrapper
+      as="div"
+      className="kb-img-wrap"
+      style={wrapStyle}
+      data-align={align}
+      data-selected={selected ? "true" : undefined}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={attrs.src ?? undefined}
+        alt={attrs.alt ?? undefined}
+        title={attrs.title ?? undefined}
+        data-align={align}
+        data-rotation={String(rotation)}
+        data-style={imgStyle}
+        style={imgCss}
+        onLoad={(e) => {
+          const el = e.currentTarget;
+          const nw = el.naturalWidth || el.width;
+          const nh = el.naturalHeight || el.height;
+          if (nw && nh) {
+            setSize({ w: nw, h: nh });
+            if (!storedW || !storedH) {
+              updateAttributes({ width: Math.round(nw), height: Math.round(nh) });
+            }
+          }
+        }}
+      />
+    </NodeViewWrapper>
+  );
+}
 
 /* ─── 工具栏分组数据（供外部使用） ─── */
 
@@ -389,7 +622,7 @@ export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): Too
           return;
         }
         const url = window.prompt("图片 URL（或 base64 数据）");
-        if (url) editor.chain().focus().setImage({ src: url, width: 100 }).run();
+        if (url) editor.chain().focus().setImage({ src: url }).run();
       }, icon: opts?.uploading ? <IconSpinner /> : <IconImage /> },
       { title: "链接", onClick: () => {
         const prev = editor.getAttributes("link").href as string | undefined;
@@ -519,7 +752,8 @@ export function useArticleEditor(options: {
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] }, codeBlock: false }),
+      CustomCodeBlock,
       Underline,
       Highlight.configure({ multicolor: false }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -582,11 +816,13 @@ export function useArticleEditor(options: {
 
 function MenuBtn({
   active,
+  disabled,
   title,
   onClick,
   children,
 }: {
   active?: boolean;
+  disabled?: boolean;
   title: string;
   onClick: () => void;
   children: React.ReactNode;
@@ -595,13 +831,14 @@ function MenuBtn({
     <button
       type="button"
       title={title}
+      disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={`w-7 h-7 grid place-items-center rounded-md text-[12px] transition-colors ${
         active
           ? "bg-[#0075de]/10 text-[#0075de]"
           : "text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e]"
-      }`}
+      } ${disabled ? "opacity-30 cursor-not-allowed pointer-events-none" : ""}`}
     >
       {children}
     </button>
@@ -610,13 +847,32 @@ function MenuBtn({
 
 function BlockMenu({ editor }: { editor: Editor }) {
   const [scrollTarget, setScrollTarget] = useState<HTMLElement | Window>(window);
+  const [styleOpen, setStyleOpen] = useState(false);
+  const styleWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 找到编辑器的滚动容器（滚动时浮动菜单跟随）
     let el: HTMLElement | null = editor.view.dom.parentElement;
-    while (el && el.scrollHeight <= el.clientHeight) el = el.parentElement;
-    setScrollTarget(el ?? window);
+    while (el) {
+      const oy = getComputedStyle(el).overflowY;
+      if (oy === "auto" || oy === "scroll") {
+        setScrollTarget(el);
+        return;
+      }
+      el = el.parentElement;
+    }
+    setScrollTarget(window);
   }, [editor]);
+
+  useEffect(() => {
+    if (!styleOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (styleWrapRef.current && !styleWrapRef.current.contains(e.target as Node)) {
+        setStyleOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [styleOpen]);
 
   // 直接从编辑器状态派生选中节点的类型/属性，避免在 effect 中 setState 造成死循环
   const { nodeType, imgAttrs } = useEditorState({
@@ -632,8 +888,9 @@ function BlockMenu({ editor }: { editor: Editor }) {
         imgAttrs:
           node.type.name === "image"
             ? {
-                align: (node.attrs.align as string) ?? "center",
-                width: (node.attrs.width as number | null) ?? null,
+                align: (node.attrs.align as ImageAlign) ?? "center",
+                rotation: (node.attrs.rotation as number) ?? 0,
+                imgStyle: (node.attrs.imgStyle as ImageStyle) ?? "none",
               }
             : null,
       };
@@ -650,8 +907,13 @@ function BlockMenu({ editor }: { editor: Editor }) {
     []
   );
 
-  const setImageAttr = (patch: { align?: string; width?: number | null }) =>
+  const setImageAttr = (patch: Partial<{ align: ImageAlign; rotation: number; imgStyle: ImageStyle }>) =>
     editor.chain().focus().updateAttributes("image", patch).run();
+
+  const isDefault =
+    imgAttrs?.align === "center" && imgAttrs?.rotation === 0 && imgAttrs?.imgStyle === "none";
+
+  const styleLabels: Record<ImageStyle, string> = { none: "无样式", border: "描边", shadow: "阴影" };
 
   return (
     <BubbleMenu
@@ -660,23 +922,57 @@ function BlockMenu({ editor }: { editor: Editor }) {
       options={bubbleOptions}
     >
       <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
-        {nodeType === "image" && (
+        {nodeType === "image" && imgAttrs && (
           <>
-            <MenuBtn title="左对齐" active={imgAttrs?.align === "left"} onClick={() => setImageAttr({ align: "left" })}>
+            <MenuBtn title="向左旋转 90°" onClick={() => setImageAttr({ rotation: (imgAttrs.rotation - 90) % 360 })}>
+              <IconRotate />
+            </MenuBtn>
+            <ToolbarDivider />
+            <MenuBtn title="左对齐" active={imgAttrs.align === "left"} onClick={() => setImageAttr({ align: "left" })}>
               <IconAlignLeft />
             </MenuBtn>
-            <MenuBtn title="居中" active={imgAttrs?.align === "center"} onClick={() => setImageAttr({ align: "center" })}>
+            <MenuBtn title="居中" active={imgAttrs.align === "center"} onClick={() => setImageAttr({ align: "center" })}>
               <IconAlignCenter />
             </MenuBtn>
-            <MenuBtn title="右对齐" active={imgAttrs?.align === "right"} onClick={() => setImageAttr({ align: "right" })}>
+            <MenuBtn title="右对齐" active={imgAttrs.align === "right"} onClick={() => setImageAttr({ align: "right" })}>
               <IconAlignRight />
             </MenuBtn>
             <ToolbarDivider />
-            {[25, 50, 75, 100].map((w) => (
-              <MenuBtn key={w} title={`宽度 ${w}%`} active={imgAttrs?.width === w} onClick={() => setImageAttr({ width: w })}>
-                <span className="text-[10px] font-semibold">{w}%</span>
+            <div ref={styleWrapRef} className="relative">
+              <MenuBtn
+                title="样式"
+                active={imgAttrs.imgStyle !== "none"}
+                onClick={() => setStyleOpen((v) => !v)}
+              >
+                <IconImageStyle />
               </MenuBtn>
-            ))}
+              {styleOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 min-w-[110px] bg-white rounded-lg border border-[#e6e6e6] shadow-lg py-1 z-50">
+                  {(["none", "border", "shadow"] as ImageStyle[]).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => { setImageAttr({ imgStyle: s }); setStyleOpen(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-[13px] transition-colors ${
+                        imgAttrs.imgStyle === s
+                          ? "text-[#0075de] bg-[#0075de]/5 font-medium"
+                          : "text-[#615d59] hover:bg-[#f6f5f4]"
+                      }`}
+                    >
+                      {styleLabels[s]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <MenuBtn
+              title="复原"
+              disabled={isDefault}
+              onClick={() => setImageAttr({ align: "center", rotation: 0, imgStyle: "none" })}
+            >
+              <IconReset />
+            </MenuBtn>
             <ToolbarDivider />
           </>
         )}
