@@ -4,7 +4,13 @@ import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 export const tagRouter = router({
   list: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.tag.findMany({
-      include: { _count: { select: { articles: true } } },
+      include: {
+        _count: {
+          select: {
+            articles: ctx.user ? true : { where: { article: { visibility: "public" } } },
+          },
+        },
+      },
       orderBy: { name: "asc" },
     });
   }),

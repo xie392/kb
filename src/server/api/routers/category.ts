@@ -5,8 +5,15 @@ import { TRPCError } from "@trpc/server";
 export const categoryRouter = router({
   /** 分类树（任意层级嵌套，含子分类和笔记数） */
   tree: publicProcedure.query(async ({ ctx }) => {
+    // 未登录时每个分类的笔记数只统计公开文章
     const categories = await ctx.db.category.findMany({
-      include: { _count: { select: { articles: true } } },
+      include: {
+        _count: {
+          select: {
+            articles: ctx.user ? true : { where: { visibility: "public" } },
+          },
+        },
+      },
       orderBy: { sort: "asc" },
     });
 

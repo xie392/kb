@@ -9,24 +9,27 @@ export const searchRouter = router({
       const kw = input.q.trim();
       if (!kw) return { items: [] };
 
+      // 未登录只能搜到公开文章
+      const pubFilter = ctx.user ? {} : { visibility: "public" };
+
       const [byTitle, bySummary, byCategory, byTag] = await Promise.all([
         ctx.db.article.findMany({
-          where: { status: "normal", title: { contains: kw } },
+          where: { status: "normal", ...pubFilter, title: { contains: kw } },
           select: { id: true, title: true, summary: true, updatedAt: true },
           take: 10,
         }),
         ctx.db.article.findMany({
-          where: { status: "normal", summary: { contains: kw } },
+          where: { status: "normal", ...pubFilter, summary: { contains: kw } },
           select: { id: true, title: true, summary: true, updatedAt: true },
           take: 10,
         }),
         ctx.db.article.findMany({
-          where: { status: "normal", category: { name: { contains: kw } } },
+          where: { status: "normal", ...pubFilter, category: { name: { contains: kw } } },
           select: { id: true, title: true, summary: true, updatedAt: true },
           take: 10,
         }),
         ctx.db.article.findMany({
-          where: { status: "normal", tags: { some: { tag: { name: { contains: kw } } } } },
+          where: { status: "normal", ...pubFilter, tags: { some: { tag: { name: { contains: kw } } } } },
           select: { id: true, title: true, summary: true, updatedAt: true },
           take: 10,
         }),

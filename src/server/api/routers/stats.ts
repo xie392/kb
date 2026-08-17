@@ -1,8 +1,8 @@
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import type { PrismaClient } from "@prisma/client";
 
-/** 近 N 天每日新增笔记数（status: normal） */
-async function getDailyTrend(db: PrismaClient, days = 30) {
+/** 近 N 天每日新增笔记数（status: normal；未登录只统计公开文章） */
+async function getDailyTrend(db: PrismaClient, includePrivate: boolean, days = 30) {
   const now = new Date();
   const out: { date: string; count: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
@@ -11,7 +11,11 @@ async function getDailyTrend(db: PrismaClient, days = 30) {
     const next = new Date(d);
     next.setDate(d.getDate() + 1);
     const count = await db.article.count({
-      where: { status: "normal", createdAt: { gte: d, lt: next } },
+      where: {
+        status: "normal",
+        ...(includePrivate ? {} : { visibility: "public" }),
+        createdAt: { gte: d, lt: next },
+      },
     });
     out.push({ date: d.toISOString().slice(0, 10), count });
   }
@@ -20,7 +24,9 @@ async function getDailyTrend(db: PrismaClient, days = 30) {
 
 export const statsRouter = router({
   /** 近 30 天每日新增（公开，供前台首页图表） */
-  trend: publicProcedure.query(async ({ ctx }) => getDailyTrend(ctx.db)),
+  trend: publicProcedure.query(async ({ ctx }) =>
+    getDailyTrend(ctx.db, !!ctx.user)
+  ),
 
   overview: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
@@ -57,8 +63,8 @@ export const statsRouter = router({
       }),
     ]);
 
-    // 近 30 天每日新增
-    const days = await getDailyTrend(ctx.db);
+    // 近 30 天每日新增（后台已登录，统计全部）
+    const days = await getDailyTrend(ctx.db, true);
 
     return {
       total,

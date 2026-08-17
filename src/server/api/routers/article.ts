@@ -30,7 +30,12 @@ export const articleRouter = router({
   list: publicProcedure.input(listInput).query(async ({ ctx, input }) => {
     const where: Record<string, unknown> = { status: input.status };
     if (input.categoryId) where.categoryId = input.categoryId;
-    if (input.visibility) where.visibility = input.visibility;
+    // 未登录只能看到公开文章
+    if (!ctx.user) {
+      where.visibility = "public";
+    } else if (input.visibility) {
+      where.visibility = input.visibility;
+    }
     if (input.keyword) {
       where.OR = [
         { title: { contains: input.keyword } },
