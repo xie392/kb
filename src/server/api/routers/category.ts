@@ -34,15 +34,19 @@ export const categoryRouter = router({
       childrenMap.set(key, arr);
     }
 
-    // 递归组装树
+    // 递归组装树，count 为该分类自身 + 所有子分类文章数之和
     const build = (parentId: string | null): CategoryTreeNode[] =>
-      (childrenMap.get(parentId) ?? []).map((c) => ({
-        id: c.id,
-        name: c.name,
-        sort: c.sort,
-        count: c._count.articles,
-        children: build(c.id),
-      }));
+      (childrenMap.get(parentId) ?? []).map((c) => {
+        const children = build(c.id);
+        const childCount = children.reduce((sum, ch) => sum + ch.count, 0);
+        return {
+          id: c.id,
+          name: c.name,
+          sort: c.sort,
+          count: c._count.articles + childCount,
+          children,
+        };
+      });
 
     return build(null);
   }),
