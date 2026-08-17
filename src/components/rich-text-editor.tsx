@@ -444,7 +444,7 @@ export function EditorToolbar({
     e.target.value = ""; // 允许重复选择同一文件
     if (!file || !onUploadImage || !editor) return;
     if (!file.type.startsWith("image/")) {
-      setErrMsg("请选择图片文件（JPG/PNG/GIF/WebP/SVG）");
+      setErrMsg("请选择图片文件（JPG/PNG/GIF/WebP）");
       return;
     }
     setUploading(true);

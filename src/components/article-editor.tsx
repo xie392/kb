@@ -70,7 +70,8 @@ export default function ArticleEditor({ article }: Props) {
   const createCategory = api.category.create.useMutation({
     onError: (e) => show(`创建分类失败：${e.message}`, "err"),
   });
-  const uploadImage = api.upload.image.useMutation();
+  // 图片上传统一走附件管理（会写入 Attachment 记录，可在附件管理中查看/管理）
+  const uploadImage = api.attachment.create.useMutation();
 
   const handleUploadImage = async (file: File): Promise<string> => {
     const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -79,7 +80,7 @@ export default function ArticleEditor({ article }: Props) {
       reader.onerror = () => reject(new Error("读取文件失败"));
       reader.readAsDataURL(file);
     });
-    const res = await uploadImage.mutateAsync({ data: dataUrl });
+    const res = await uploadImage.mutateAsync({ name: file.name, data: dataUrl });
     return res.url;
   };
 

@@ -6,7 +6,7 @@ import { tagRouter } from "@/server/api/routers/tag";
 import { searchRouter } from "@/server/api/routers/search";
 import { statsRouter } from "@/server/api/routers/stats";
 import { settingsRouter } from "@/server/api/routers/settings";
-import { uploadRouter } from "@/server/api/routers/upload";
+import { attachmentRouter } from "@/server/api/routers/attachment";
 
 export const appRouter = router({
   auth: authRouter,
@@ -16,7 +16,7 @@ export const appRouter = router({
   search: searchRouter,
   stats: statsRouter,
   settings: settingsRouter,
-  upload: uploadRouter,
+  attachment: attachmentRouter,
 });
 
 export type AppRouter = typeof appRouter;

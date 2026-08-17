@@ -57,3 +57,16 @@ model ArticleTag {
 
   @@id([articleId, tagId])
 }
+
+model Attachment {
+  id        String   @id @default(cuid())
+  name      String // 原始文件名（显示用）
+  url       String // 存储相对路径，如 /uploads/attachments/xxx.jpg
+  mimeType  String
+  size      Int // 字节
+  kind      String // image | file
+  createdAt DateTime @default(now())
+
+  @@index([kind])
+  @@index([name])
+}
