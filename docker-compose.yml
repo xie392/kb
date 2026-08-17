@@ -1,7 +1,7 @@
 # 服务器部署编排：放在服务器 /opt/kb 目录，与 .env 同级
 services:
   kb:
-    image: ghcr.io/xie392/kb:latest
+    image: kb:latest # 本地镜像名，由 CI 直传 docker load 导入，不从远程拉取
     container_name: kb
     restart: unless-stopped
     ports:
