@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 
 const ADMIN_BASE_PATH = process.env.ADMIN_BASE_PATH ?? "kb-9f3x";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isAdmin = pathname.startsWith(`/${ADMIN_BASE_PATH}`);
 
