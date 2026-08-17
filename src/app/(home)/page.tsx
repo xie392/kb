@@ -91,8 +91,8 @@ export default async function HomePage() {
   return (
     <div className="graph-paper min-h-screen font-hand-body text-[#31302e]">
       {/* ─── 手绘 Hero ─── */}
-      <section className="max-w-[1000px] mx-auto px-6 pt-14 pb-10 text-center">
-        <h1 className="font-hand-display text-[64px] sm:text-[80px] font-bold leading-none text-[#213183] rotate-[-2deg] inline-block">
+      <section className="max-w-[1000px] mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 text-center">
+        <h1 className="font-hand-display text-[44px] sm:text-[64px] md:text-[80px] font-bold leading-none text-[#213183] rotate-[-2deg] inline-block">
           我的知识库
           <span
             className="block w-full h-[6px] mt-2 rotate-[-1deg]"
@@ -116,7 +116,7 @@ export default async function HomePage() {
               className="sticky-note sketch-border px-5 py-3 fade-up"
               style={{ transform: `rotate(${[-2, 1, -1, 2][i]}deg)`, animationDelay: `${i * 100}ms` }}
             >
-              <div className="font-hand-display text-[34px] font-bold text-[#523410] leading-none">
+              <div className="font-hand-display text-[28px] sm:text-[34px] font-bold text-[#523410] leading-none">
                 {s.v}
               </div>
               <div className="mt-1 font-hand-body text-[14px] text-[#793400]">{s.l}</div>
@@ -130,7 +130,7 @@ export default async function HomePage() {
             <Link
               key={c.id}
               href={`/categories#${c.id}`}
-              className={`font-hand-display text-[18px] px-4 py-1.5 bg-white sketch-border sketch-shadow hover:-translate-y-0.5 transition-transform ${
+              className={`font-hand-display text-[16px] sm:text-[18px] px-4 py-1.5 bg-white sketch-border sketch-shadow hover:-translate-y-0.5 transition-transform ${
                 i % 2 ? "rotate-[1deg]" : "rotate-[-1deg]"
               }`}
             >
@@ -142,7 +142,7 @@ export default async function HomePage() {
       </section>
 
       {/* 便签注释 + 增长图表 */}
-      <div className="relative max-w-[1000px] mx-auto px-6">
+      <div className="relative max-w-[1000px] mx-auto px-4 sm:px-6">
         <div className="hidden lg:block sticky-note sketch-border-2 px-4 py-3 rotate-[3deg] absolute -left-16 top-8 w-[140px] fade-up">
           <div className="font-hand-display text-[16px] font-bold text-[#523410]">✏️ 提示</div>
           <div className="mt-1 font-hand-body text-[13px] text-[#793400] leading-snug">
@@ -176,7 +176,7 @@ export default async function HomePage() {
       </div>
 
       {/* 精选 */}
-      <section className="max-w-[1000px] mx-auto px-6 pb-14">
+      <section className="max-w-[1000px] mx-auto px-4 sm:px-6 pb-14">
         <div className="flex items-center gap-3 mb-4">
           <span className="font-hand-display text-[24px] font-bold text-[#213183] marker-underline inline-block">
             精选笔记
@@ -224,7 +224,7 @@ export default async function HomePage() {
       </section>
 
       {/* 全部文章 */}
-      <section className="max-w-[1000px] mx-auto px-6 pb-16">
+      <section className="max-w-[1000px] mx-auto px-4 sm:px-6 pb-16">
         <div className="flex items-center gap-3 mb-4">
           <span className="font-hand-display text-[24px] font-bold text-[#213183] marker-underline inline-block">
             全部文章

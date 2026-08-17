@@ -41,13 +41,13 @@ export default function TrashList({ initial }: { initial: { id: string; title: s
           items.map((article, i) => (
             <div
               key={article.id}
-              className="flex items-center gap-4 py-4 px-5 fade-up opacity-70"
+              className="flex items-center gap-3 sm:gap-4 py-4 px-4 sm:px-5 fade-up opacity-70"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <svg className="w-4 h-4 text-[#a39e98] shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M3.5 4.5h9M6.5 4.5V3.5A1 1 0 0 1 7.5 2.5h1a1 1 0 0 1 1 1v1m-5 0l.5 9a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1l.5-9" />
               </svg>
-              <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums w-20 shrink-0">
+              <span className="hidden sm:inline font-hand-body text-[14px] text-[#a39e98] tabular-nums w-20 shrink-0">
                 {formatDate(article.updatedAt)}
               </span>
               <span className="font-hand-body text-[16px] text-[#615d59] line-through truncate flex-1">

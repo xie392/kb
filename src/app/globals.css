@@ -347,6 +347,8 @@
   border: 1px solid var(--color-hairline);
   border-radius: 4px;
   padding: 0.1em 0.35em;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 .prose-kb pre {
   background-color: var(--color-ink);
@@ -361,6 +363,9 @@
   border: none;
   padding: 0;
   color: inherit;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 .prose-kb a {
   color: var(--color-primary);

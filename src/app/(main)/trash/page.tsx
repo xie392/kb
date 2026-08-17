@@ -11,7 +11,7 @@ export default async function TrashPage() {
   }));
 
   return (
-    <div className="max-w-[1000px] mx-auto px-6 py-10">
+    <div className="max-w-[1000px] mx-auto px-4 sm:px-6 py-10">
       <header className="mb-8 text-center pt-4 fade-up">
         <h1 className="font-hand-display text-[40px] font-bold text-[#213183] rotate-[-1deg]">回收站</h1>
         <p className="mt-2 font-hand-body text-[16px] text-[#615d59]">

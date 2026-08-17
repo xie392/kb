@@ -48,7 +48,7 @@ export default async function ArticlePage({
             </span>
           </nav>
 
-          <article className="bg-white sketch-border sketch-shadow p-8 sm:p-12 fade-up">
+          <article className="bg-white sketch-border sketch-shadow p-5 sm:p-8 lg:p-12 fade-up">
             <header className="mb-10">
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <span className="font-hand-body text-[15px] px-1.5 text-[#ff64c8]">
@@ -66,11 +66,11 @@ export default async function ArticlePage({
                 )}
               </div>
 
-              <h1 className="font-hand-display text-[40px] sm:text-[46px] font-bold leading-[1.15] text-[#213183] marker-underline inline-block">
+              <h1 className="font-hand-display text-[30px] sm:text-[40px] lg:text-[46px] font-bold leading-[1.15] text-[#213183] marker-underline inline-block">
                 {article.title}
               </h1>
 
-              <div className="mt-5 flex items-center gap-4 font-hand-body text-[15px] text-[#a39e98]">
+              <div className="mt-5 flex items-center gap-x-4 gap-y-1 flex-wrap font-hand-body text-[15px] text-[#a39e98]">
                 <span>✎ 更新于 {formatDate(article.updatedAt.toISOString())}</span>
                 <span>·</span>
                 <span>创建于 {formatDate(article.createdAt.toISOString())}</span>

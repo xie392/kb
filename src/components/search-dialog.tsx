@@ -87,7 +87,7 @@ export default function SearchDialog() {
 
       {/* 弹窗 */}
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[8vh] sm:pt-[15vh] px-4">
           <div
             ref={panelRef}
             className="relative w-full max-w-[620px] bg-[#fbfaf6] sketch-border sketch-shadow fade-up overflow-hidden"

@@ -25,7 +25,7 @@ export default async function ArticleLayout({
   }));
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 py-8 flex gap-6 items-start">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex gap-6 items-start">
       <CategorySidebar tree={pruneTree(tree)} articles={articles} />
       {children}
     </div>
