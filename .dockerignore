@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env*.local
+*.db
+*.db-journal
+dev.db
+public/uploads
+.DS_Store
+**/.DS_Store
+tsconfig.tsbuildinfo
+.omc
+.claude
+.agents

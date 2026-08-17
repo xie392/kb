@@ -1,0 +1,11 @@
+# 服务器部署编排：放在服务器 /opt/kb 目录，与 .env 同级
+services:
+  kb:
+    image: ghcr.io/xie392/kb:latest
+    container_name: kb
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # 如需换端口，同步修改 nginx 反代
+    env_file: .env # 服务器 .env：DATABASE_URL 指向 /data 下的数据库
+    volumes:
+      - ./data:/data # 持久化 SQLite 数据库与附件，升级不丢数据

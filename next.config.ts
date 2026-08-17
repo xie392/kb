@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
 const nextConfig: NextConfig = {
+  // 附件目录由运行时环境变量配置，路径动态；忽略 Turbopack 的整树追踪警告
+  // （本项目 Docker 全量部署，不依赖 standalone 产物）
+  turbopack: {
+    ignoreIssue: [{ path: "**/src/server/storage.ts", title: /Dynamic filesystem access/ }],
+  },
   async rewrites() {
     return {
       // 物理路径直接访问 → 404（beforeFiles 优先于 filesystem）
