@@ -645,6 +645,11 @@
   margin: 1.2em 0;
   font-size: 14px;
   line-height: 1.5;
+  word-break: break-word;
+}
+/* 编辑器内启用固定布局，配合列宽拖拽的 colgroup */
+.ProseMirror.prose-kb table {
+  table-layout: fixed;
 }
 .prose-kb th,
 .prose-kb td {
@@ -652,19 +657,105 @@
   padding: 6px 12px;
   text-align: left;
   vertical-align: top;
+  position: relative;
+  min-width: 48px;
 }
 .prose-kb th {
   background-color: var(--color-canvas-soft);
   font-weight: 600;
 }
+/* 多选单元格高亮（prosemirror-tables 注入 .selectedCell 装饰） */
 .prose-kb .selectedCell::after {
-  background: rgba(0, 117, 222, 0.08);
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 117, 222, 0.1);
   z-index: 2;
-  position: relative;
+  pointer-events: none;
 }
+/* 列宽拖拽手柄 */
 .prose-kb .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
   background-color: var(--color-primary);
-  width: 2px;
+  pointer-events: none;
+  z-index: 3;
+}
+.prose-kb .resize-cursor,
+.prose-kb .resize-cursor * {
+  cursor: col-resize;
+}
+
+/* 表格外包裹（tiptap TableView 生成），允许横向溢出以容纳左上角全选手柄 */
+.ProseMirror.prose-kb .tableWrapper {
+  position: relative;
+  margin: 1.2em 0;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+.ProseMirror.prose-kb .tableWrapper table {
+  margin: 0;
+}
+
+/* 左上角全选手柄（九宫格图标） */
+.kb-table-grip {
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #b6b2ad;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.kb-table-grip:hover {
+  color: var(--color-primary);
+  background: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+/* 右键单元格菜单 */
+.kb-context-menu {
+  min-width: 148px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-family: inherit;
+}
+.kb-context-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  font-size: 13px;
+  color: #31302e;
+  cursor: pointer;
+  font-family: inherit;
+}
+.kb-context-item:hover {
+  background: #f4f2ef;
+}
+.kb-context-item.is-danger {
+  color: #cf222e;
+}
+.kb-context-item.is-danger:hover {
+  background: #fdecec;
+}
+.kb-context-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: #eceae6;
 }
 
 /* 代码块与任务列表在编辑时的选中态；图片节点用内边框，去掉 tiptap 外层 node-image 的外框 */

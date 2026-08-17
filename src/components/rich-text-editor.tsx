@@ -20,6 +20,7 @@ import TableHeader from "@tiptap/extension-table-header";
 import { Markdown } from "@tiptap/markdown";
 import { MarkdownPaste } from "@/components/markdown-paste";
 import { CustomCodeBlock } from "@/components/code-block-node";
+import { TablePicker, TableGlobalToolbar, TableCellToolbar, TableGrip, TableContextMenu, tableShouldShow } from "@/components/table-controls";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -255,25 +256,6 @@ function IconClearFormat() {
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6.5 3h5M8 3v7.5M5.5 12h5.5" />
       <path d="M2.5 14l10.5-11" />
-    </svg>
-  );
-}
-
-function IconTable() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-      <rect x="2.5" y="3.5" width="11" height="9" rx="1.2" />
-      <path d="M2.5 6.5h11M6 3.5v9" />
-    </svg>
-  );
-}
-
-function IconTableDelete() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
-      <rect x="2.5" y="3.5" width="11" height="9" rx="1.2" />
-      <path d="M2.5 6.5h11M6 3.5v9" />
-      <path d="M4.5 13l7-9" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -631,18 +613,6 @@ export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): Too
         if (url === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
         editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
       }, active: editor.isActive("link"), icon: <IconLink /> },
-      { title: "表格", onClick: () => {
-        const input = window.prompt("表格尺寸（列数×行数），如 3×3", "3×3");
-        if (!input) return;
-        const m = input.trim().match(/^(\d+)\s*[x×]\s*(\d+)$/);
-        if (!m) return;
-        const cols = Math.min(Math.max(parseInt(m[1]), 1), 8);
-        const rows = Math.min(Math.max(parseInt(m[2]), 1), 20);
-        editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
-      }, icon: <IconTable /> },
-      { title: "删除表格", active: editor.isActive("table"), onClick: () => {
-        if (editor.isActive("table")) editor.chain().focus().deleteTable().run();
-      }, icon: <IconTableDelete /> },
     ],
   ];
 }
@@ -711,6 +681,8 @@ export function EditorToolbar({
           ))}
         </div>
       ))}
+      <ToolbarDivider />
+      <TablePicker editor={editor} />
 
       {/* 错误提示弹窗 */}
       <AlertDialog
@@ -759,7 +731,7 @@ export function useArticleEditor(options: {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
-      Table.configure({ resizable: false }),
+      Table.configure({ resizable: true, lastColumnResizable: false }),
       TableRow,
       TableHeader,
       TableCell,
@@ -903,7 +875,9 @@ function BlockMenu({ editor }: { editor: Editor }) {
   );
 
   const shouldShow = useCallback(
-    ({ state }: { state: EditorState }) => state.selection instanceof NodeSelection,
+    ({ state }: { state: EditorState }) =>
+      state.selection instanceof NodeSelection &&
+      state.selection.node.type.name !== "table",
     []
   );
 
@@ -916,11 +890,28 @@ function BlockMenu({ editor }: { editor: Editor }) {
   const styleLabels: Record<ImageStyle, string> = { none: "无样式", border: "描边", shadow: "阴影" };
 
   return (
-    <BubbleMenu
-      editor={editor}
-      shouldShow={shouldShow}
-      options={bubbleOptions}
-    >
+    <>
+      <BubbleMenu
+        editor={editor}
+        shouldShow={tableShouldShow.global}
+        options={bubbleOptions}
+      >
+        <TableGlobalToolbar editor={editor} />
+      </BubbleMenu>
+      <BubbleMenu
+        editor={editor}
+        shouldShow={tableShouldShow.cell}
+        options={bubbleOptions}
+      >
+        <TableCellToolbar editor={editor} />
+      </BubbleMenu>
+      <TableGrip editor={editor} />
+      <TableContextMenu editor={editor} />
+      <BubbleMenu
+        editor={editor}
+        shouldShow={shouldShow}
+        options={bubbleOptions}
+      >
       <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
         {nodeType === "image" && imgAttrs && (
           <>
@@ -966,8 +957,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
                 </div>
               )}
             </div>
-            <MenuBtn
-              title="复原"
+            <MenuBtn title="复原"
               disabled={isDefault}
               onClick={() => setImageAttr({ align: "center", rotation: 0, imgStyle: "none" })}
             >
@@ -976,19 +966,12 @@ function BlockMenu({ editor }: { editor: Editor }) {
             <ToolbarDivider />
           </>
         )}
-        {nodeType === "table" && (
-          <>
-            <MenuBtn title="删除表格" onClick={() => editor.chain().focus().deleteTable().run()}>
-              <IconDelete />
-            </MenuBtn>
-            <ToolbarDivider />
-          </>
-        )}
         <MenuBtn title="删除" onClick={() => editor.chain().focus().deleteSelection().run()}>
           <IconDelete />
         </MenuBtn>
       </div>
-    </BubbleMenu>
+      </BubbleMenu>
+    </>
   );
 }
 
