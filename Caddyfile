@@ -1,0 +1,5 @@
+# Caddy 反向代理配置（放服务器 /opt/kb 目录，与 docker-compose.yml 同级）
+# 首次访问自动申请 Let's Encrypt 证书，之后自动续期；无需手动配置 HTTPS
+xie392.cn, www.xie392.cn {
+	reverse_proxy kb:3000
+}

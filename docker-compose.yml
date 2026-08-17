@@ -5,7 +5,33 @@ services:
     container_name: kb
     restart: unless-stopped
     ports:
-      - "3000:3000" # 如需换端口，同步修改 nginx 反代
+      - "3000:3000" # 调试口（IP:3000 直连验证用）；正式流量走 caddy 反代
     env_file: .env # 服务器 .env：DATABASE_URL 指向 /data 下的数据库
     volumes:
       - ./data:/data # 持久化 SQLite 数据库与附件，升级不丢数据
+    networks:
+      - kb-net
+
+  # Caddy 反向代理：自动申请/续期 Let's Encrypt 证书，域名 HTTPS 入口
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data # 证书持久化，续期不丢
+      - caddy_config:/config
+    depends_on:
+      - kb
+    networks:
+      - kb-net
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  kb-net:
