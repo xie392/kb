@@ -25,6 +25,7 @@ const statusTabs: { id: StatusFilter; label: string }[] = [
 export default function AdminArticlesPage() {
   const [filter, setFilter] = useState<StatusFilter>("normal");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [visibilityUpdatingId, setVisibilityUpdatingId] = useState<string | null>(null);
 
   const { data, isFetching } = api.article.list.useQuery({
     status: filter,
@@ -48,6 +49,11 @@ export default function AdminArticlesPage() {
   const restore = api.article.restore.useMutation({ onSuccess: () => { setSelected(new Set()); invalidate(); } });
   const hardDelete = api.article.hardDelete.useMutation({ onSuccess: () => { setSelected(new Set()); invalidate(); } });
   const batch = api.article.batch.useMutation({ onSuccess: () => { setSelected(new Set()); invalidate(); } });
+  const updateVisibility = api.article.batch.useMutation({
+    onMutate: ({ ids }) => setVisibilityUpdatingId(ids[0] ?? null),
+    onSuccess: invalidate,
+    onSettled: () => setVisibilityUpdatingId(null),
+  });
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -174,9 +180,24 @@ export default function AdminArticlesPage() {
                   </div>
                 </td>
                 <td className="px-3 py-3.5">
-                  <span className={`font-hand-body text-[13px] ${a.visibility === "public" ? "text-[#0075de]" : "text-[#a39e98]"}`}>
-                    {a.visibility === "public" ? "公开" : "私有"}
-                  </span>
+                  <select
+                    value={a.visibility}
+                    disabled={visibilityUpdatingId === a.id}
+                    onChange={(e) =>
+                      updateVisibility.mutate({
+                        ids: [a.id],
+                        visibility: e.target.value as "private" | "public",
+                      })
+                    }
+                    className={`font-hand-body text-[13px] bg-transparent border border-dashed rounded px-1.5 py-0.5 cursor-pointer outline-none transition-colors ${
+                      a.visibility === "public"
+                        ? "text-[#0075de] border-[#0075de]/40 hover:border-[#0075de]"
+                        : "text-[#a39e98] border-[#e6e6e6] hover:border-[#a39e98]"
+                    } disabled:opacity-50 disabled:cursor-wait`}
+                  >
+                    <option value="private">私有</option>
+                    <option value="public">公开</option>
+                  </select>
                 </td>
                 <td className="px-3 py-3.5 font-hand-body text-[13px] text-[#a39e98] whitespace-nowrap">
                   {formatDate(a.updatedAt)}
