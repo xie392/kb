@@ -1,23 +1,29 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-
-const ADMIN_BASE_PATH = process.env.ADMIN_BASE_PATH ?? "kb-9f3x";
+import { ADMIN_BASE_PATH, ADMIN_HOME, ADMIN_LOGIN } from "@/lib/config";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const isAdmin = pathname.startsWith(`/${ADMIN_BASE_PATH}`);
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
-  if (isAdmin) {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  // 隐藏登录页：未登录放行渲染，已登录直接进后台
+  if (pathname === ADMIN_LOGIN) {
+    if (token) {
+      return NextResponse.redirect(new URL(ADMIN_HOME, req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 其它后台路径：未登录跳转到隐藏登录页
+  if (pathname.startsWith(`/${ADMIN_BASE_PATH}/`) || pathname === ADMIN_HOME) {
     if (!token) {
-      const url = new URL("/login", req.url);
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(new URL(ADMIN_LOGIN, req.url));
     }
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login|p/).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|p/).*)"],
 };

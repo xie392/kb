@@ -10,6 +10,7 @@ import {
 } from "@/components/rich-text-editor";
 import TagSelect from "@/components/tag-select";
 import CategorySelect from "@/components/category-select";
+import { ADMIN_HOME } from "@/lib/config";
 
 interface Props {
   article?: {
@@ -56,11 +57,11 @@ export default function ArticleEditor({ article }: Props) {
   });
 
   const create = api.article.create.useMutation({
-    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push("/kb-9f3x/articles"); },
+    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
     onError: (e) => show(`保存失败：${e.message}`, "err"),
   });
   const update = api.article.update.useMutation({
-    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push("/kb-9f3x/articles"); },
+    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
     onError: (e) => show(`保存失败：${e.message}`, "err"),
   });
   const createTag = api.tag.create.useMutation({

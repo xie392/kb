@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
+import { ADMIN_HOME } from "@/lib/config";
 
 type StatusFilter = "normal" | "trash";
 type Row = {
@@ -72,7 +73,7 @@ export default function AdminArticlesPage() {
           </p>
         </div>
         <Link
-          href="/kb-9f3x/articles/new"
+          href={`${ADMIN_HOME}/articles/new`}
           className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[17px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
         >
           ＋ 新增文章
@@ -184,7 +185,7 @@ export default function AdminArticlesPage() {
                   <div className="flex items-center justify-end gap-2">
                     {filter === "normal" ? (
                       <>
-                        <Link href={`/kb-9f3x/articles/${a.id}/edit`} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
+                        <Link href={`${ADMIN_HOME}/articles/${a.id}/edit`} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
                           编辑
                         </Link>
                         <button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">

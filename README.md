@@ -57,7 +57,7 @@ cp .env.example .env
 | `DATABASE_URL` | SQLite 数据库文件路径（默认 `file:./dev.db`） |
 | `AUTH_SECRET` | Auth.js 会话密钥，生成方式：`openssl rand -base64 32` |
 | `AUTH_TRUST_HOST` | 生产环境设为 `true`，允许信任反向代理转发 |
-| `ADMIN_BASE_PATH` | 后台入口路径，建议改成不易猜测的值（默认 `kb-9f3x`） |
+| `NEXT_PUBLIC_ADMIN_BASE_PATH` | 后台入口路径（登录页同前缀），建议改成不易猜测的值（默认 `kb-9f3x`）；构建期注入，服务端与客户端统一读取 |
 
 > 注意：`.env` 已被 gitignore 忽略，不会提交到仓库。
 
@@ -101,10 +101,12 @@ npm run dev
 
 ### 后台入口
 
-后台路径由 `ADMIN_BASE_PATH` 环境变量控制（默认 `kb-9f3x`），并通过 Next.js rewrites 映射到物理路径 `internal-admin`（物理路径直接访问会 404）。
+后台与登录页共用随机前缀，由 `NEXT_PUBLIC_ADMIN_BASE_PATH` 环境变量控制（默认 `kb-9f3x`），通过 Next.js rewrites 映射到物理路径 `internal-admin`（`/internal-admin`、固定 `/login` 直接访问均 404）。
 
-- 登录后默认跳转到后台：`http://localhost:3000/kb-9f3x`
-- 若修改了 `ADMIN_BASE_PATH`，请同步修改登录页 `app/login/page.tsx` 中的跳转地址
+- 隐藏登录页：`http://localhost:3000/kb-9f3x/login`
+- 后台首页：`http://localhost:3000/kb-9f3x`
+- 已登录访问隐藏登录页会自动跳转到后台首页
+- 修改前缀时只需改 `NEXT_PUBLIC_ADMIN_BASE_PATH` 并重新构建（登录跳转、后台导航等均已统一读取）
 
 ## 常用脚本
 

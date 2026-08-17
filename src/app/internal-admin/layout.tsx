@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AdminHeader from "./admin-header";
 import AdminNav from "@/components/admin-nav";
+import { ADMIN_HOME } from "@/lib/config";
 
 export default function AdminLayout({
   children,
@@ -10,7 +11,7 @@ export default function AdminLayout({
       {/* 后台侧边导航（固定不滚动） */}
       <aside className="w-[220px] shrink-0 h-full flex flex-col bg-white border-r-2 border-dashed border-[#e6e6e6]">
         <div className="px-4 pt-4 pb-3 flex items-center justify-between">
-          <Link href="/kb-9f3x" className="flex items-center gap-2">
+          <Link href={ADMIN_HOME} className="flex items-center gap-2">
             <span className="w-7 h-7 rounded-lg bg-secondary grid place-items-center text-white text-[13px] font-bold">
               管
             </span>

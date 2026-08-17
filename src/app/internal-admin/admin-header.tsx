@@ -2,13 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import LogoutButton from "@/components/logout-button";
+import { ADMIN_HOME } from "@/lib/config";
 
 export default function AdminHeader() {
   const pathname = usePathname();
   // 编辑器页面隐藏 admin header，让编辑器自己控制顶部区域
   const isEditorPage =
-    pathname === "/kb-9f3x/articles/new" ||
-    /^\/kb-9f3x\/articles\/[^/]+\/edit$/.test(pathname);
+    pathname === `${ADMIN_HOME}/articles/new` ||
+    new RegExp(`^${ADMIN_HOME}/articles/[^/]+/edit$`).test(pathname);
 
   if (isEditorPage) return null;
 

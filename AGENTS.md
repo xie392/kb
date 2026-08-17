@@ -21,7 +21,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 技术栈：Next.js 16 (App Router) + TypeScript + Tailwind v4 + shadcn/ui + GSAP。
 - 前端统一采用**手绘线框图风格**（方格纸 `graph-paper`、手写字体 `font-hand-display/body`、`sketch-border/shadow`、马克笔、便签）。新页面必须沿用该设计语言，不要引入新的视觉体系。
 - 颜色一律使用设计系统变量/常量（docs/DESIGN.md），禁止硬编码随机色值。
-- 后台路径由 `ADMIN_BASE_PATH` 环境变量控制（rewrites 映射到 `internal-admin`），**禁止在前端导航渲染后台入口**，不要直接硬编码 `/admin`。
+- 后台与登录页共用随机前缀，由 `NEXT_PUBLIC_ADMIN_BASE_PATH` 环境变量控制（rewrites 映射到 `internal-admin`；`/internal-admin`、固定 `/login` 直接访问 404），**禁止在前端导航渲染后台入口**，不要直接硬编码 `/admin`。
 - 写作/编辑入口仅存在于后台，前端页面不提供"写笔记/编辑"入口。
 - 页面路由采用 route group：`(home)` 首页、`(main)` 前台内容页、`internal-admin` 后台。
 - 组件优先 Server Component；需要交互的组件标 `"use client"`，GSAP 一律用 `useGSAP()` hook（`@gsap/react`）并在 cleanup 中取消 rAF/监听。

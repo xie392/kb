@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "@/server/db";
 import { z } from "zod";
+import { ADMIN_LOGIN } from "@/lib/config";
 
 const credentialsSchema = z.object({
   username: z.string().min(1).max(50),
@@ -32,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 天
-  pages: { signIn: "/login" },
+  pages: { signIn: ADMIN_LOGIN },
   callbacks: {
     jwt({ token, user }) {
       if (user) token.id = user.id;

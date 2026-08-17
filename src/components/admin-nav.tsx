@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ADMIN_HOME } from "@/lib/config";
 
 const navItems = [
-  { label: "数据看板", href: "/kb-9f3x", icon: "dashboard" },
-  { label: "文章管理", href: "/kb-9f3x/articles", icon: "articles" },
-  { label: "分类管理", href: "/kb-9f3x/categories", icon: "categories" },
-  { label: "标签管理", href: "/kb-9f3x/tags", icon: "tags" },
-  { label: "系统设置", href: "/kb-9f3x/settings", icon: "settings" },
+  { label: "数据看板", href: ADMIN_HOME, icon: "dashboard" },
+  { label: "文章管理", href: `${ADMIN_HOME}/articles`, icon: "articles" },
+  { label: "分类管理", href: `${ADMIN_HOME}/categories`, icon: "categories" },
+  { label: "标签管理", href: `${ADMIN_HOME}/tags`, icon: "tags" },
+  { label: "系统设置", href: `${ADMIN_HOME}/settings`, icon: "settings" },
 ];
 
 function NavIcon({ name }: { name: string }) {
@@ -59,10 +60,10 @@ function NavIcon({ name }: { name: string }) {
 
 export default function AdminNav() {
   const pathname = usePathname();
-  // 数据看板是其他菜单的公共前缀（/kb-9f3x/articles 等），仅精确匹配；
-  // 其余菜单精确匹配或子路径匹配（如 /kb-9f3x/articles/xxx/edit → 文章管理高亮）
+  // 数据看板是其他菜单的公共前缀（{ADMIN_HOME}/articles 等），仅精确匹配；
+  // 其余菜单精确匹配或子路径匹配（如 {ADMIN_HOME}/articles/xxx/edit → 文章管理高亮）
   const isActive = (href: string) =>
-    href === "/kb-9f3x"
+    href === ADMIN_HOME
       ? pathname === href
       : pathname === href || pathname.startsWith(href + "/");
 
