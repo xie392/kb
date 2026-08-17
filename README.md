@@ -40,6 +40,8 @@
 npm install
 ```
 
+> 若使用 pnpm（v10+ 默认拦截依赖的构建脚本），请确保根目录存在 `pnpm-workspace.yaml` 并包含 `allowBuilds` 白名单（`better-sqlite3`、`esbuild`、`@prisma/engines`、`prisma`）。否则原生依赖（如 better-sqlite3）不会下载/编译二进制，运行时会报 `Could not locate the bindings file`。首次安装后可用 `pnpm rebuild` 重新执行被拦截的构建脚本。
+
 ### 2. 配置环境变量
 
 复制示例文件并填写密钥：
@@ -65,7 +67,10 @@ cp .env.example .env
 
 ```bash
 npx prisma migrate deploy
+npx prisma generate
 ```
+
+> 注意：`prisma migrate deploy` 只执行迁移，**不会**自动生成 Prisma Client，必须手动执行 `npx prisma generate`。重装依赖（清空 `node_modules`）后也需要重新执行 generate。
 
 ### 4. 初始化种子数据（可选）
 

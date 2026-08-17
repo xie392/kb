@@ -1,0 +1,10 @@
+# pnpm 配置（pnpm v11 起，构建脚本执行白名单）
+# 这些包需要执行 install/postinstall 脚本下载或编译原生二进制，否则运行时报错
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  "@prisma/engines": true
+  prisma: true
+
+# 关闭新包 24h 发布冷却期（供应链检查），避免刚发布的依赖导致安装失败
+minimumReleaseAge: 0
