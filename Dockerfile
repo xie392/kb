@@ -1,8 +1,12 @@
-# ---- 基础镜像 ----
-# better-sqlite3 是原生模块，使用 Debian 系 node:22-slim（glibc），不要换成 alpine
+# ---- 构建基础镜像 ----
+# better-sqlite3 是原生模块，预编译二进制不可用时需本地编译（node-gyp），
+# 依赖 python3/make/g++，故使用 Debian 系 node:22-slim（glibc），不要换成 alpine
 FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH"
-RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 make g++ \
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack enable && corepack prepare pnpm@10.32.1 --activate
 
 # ---- 构建阶段 ----
 FROM base AS build
@@ -25,9 +29,10 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN pnpm exec prisma migrate deploy
 RUN pnpm build
 
-# ---- 运行阶段 ----
-FROM base AS runner
-ENV NODE_ENV=production PORT=3000
+# ---- 运行阶段（无编译工具链，镜像更小） ----
+FROM node:22-slim AS runner
+ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH" NODE_ENV=production PORT=3000
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 WORKDIR /app
 COPY --from=build /app ./
 
