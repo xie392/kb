@@ -10,6 +10,7 @@ const navItems = [
   { label: "分类管理", href: `${ADMIN_HOME}/categories`, icon: "categories" },
   { label: "标签管理", href: `${ADMIN_HOME}/tags`, icon: "tags" },
   { label: "附件管理", href: `${ADMIN_HOME}/attachments`, icon: "attachments" },
+  { label: "备份管理", href: `${ADMIN_HOME}/backups`, icon: "backup" },
   { label: "系统设置", href: `${ADMIN_HOME}/settings`, icon: "settings" },
 ];
 
@@ -60,6 +61,14 @@ function NavIcon({ name }: { name: string }) {
       return (
         <svg className={cls} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M6.5 4.5v10.5a3 3 0 0 0 6 0V5a1.8 1.8 0 0 0-3.6 0v9.5a.7.7 0 0 0 1.4 0V6" strokeLinecap="round" />
+        </svg>
+      );
+    case "backup":
+      return (
+        <svg className={cls} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <rect x="3" y="5" width="14" height="11" rx="1.5" />
+          <path d="M7.5 8.5h5" strokeLinecap="round" />
+          <path d="M7 11.5l3 2.5 3-2.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
   }

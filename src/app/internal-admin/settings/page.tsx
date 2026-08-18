@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { api } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ADMIN_HOME } from "@/lib/config";
 
 export default function AdminSettingsPage() {
   const utils = api.useUtils();
@@ -153,11 +155,14 @@ export default function AdminSettingsPage() {
               <span className="font-hand-display text-[17px] font-bold text-ink-secondary">一键导出备份</span>
               <span className="font-hand-body text-[13px] text-ink-faint">全量 JSON 下载</span>
             </button>
-            <div className="flex flex-col items-center gap-2 px-4 py-5 sketch-dashed opacity-50">
+            <Link
+              href={`${ADMIN_HOME}/backups`}
+              className="flex flex-col items-center gap-2 px-4 py-5 sketch-dashed hover:bg-canvas-soft transition-colors"
+            >
               <span className="font-hand-display text-[20px] font-bold text-sticker-teal">⏱</span>
               <span className="font-hand-display text-[17px] font-bold text-ink-secondary">定期自动备份</span>
-              <span className="font-hand-body text-[13px] text-ink-faint">规划中</span>
-            </div>
+              <span className="font-hand-body text-[13px] text-ink-faint">前往备份管理</span>
+            </Link>
           </div>
         </section>
       </div>

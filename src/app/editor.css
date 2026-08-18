@@ -1,7 +1,7 @@
 /* Editor + Reader styles (TipTap / prose-kb) — only loaded on article and editor pages */
 
 /* 富文本阅读样式 */
-@utility prose-kb {
+.prose-kb {
   font-size: 16px;
   line-height: 1.75;
   color: var(--color-ink-secondary);

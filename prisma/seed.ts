@@ -9,13 +9,20 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  // 初始账号（密码: admin123）
-  const hash = await bcrypt.hash("admin123", 10);
-  await prisma.user.upsert({
-    where: { username: "admin" },
-    update: {},
-    create: { username: "admin", passwordHash: hash, nickname: "知识库管理员" },
-  });
+  // 仅在 users 表为空时创建初始账号，避免后续重启/迁移时因环境变量变化创建多余账号
+  const userCount = await prisma.user.count();
+  if (userCount === 0) {
+    const initUsername = process.env.INIT_USERNAME?.trim() || "admin";
+    const initPassword = process.env.INIT_PASSWORD?.trim() || "admin123";
+    const initNickname = process.env.INIT_NICKNAME?.trim() || "知识库管理员";
+    const hash = await bcrypt.hash(initPassword, 10);
+    await prisma.user.create({
+      data: { username: initUsername, passwordHash: hash, nickname: initNickname },
+    });
+    console.log(`👤 初始账号已创建：${initUsername}`);
+  } else {
+    console.log(`👤 已存在 ${userCount} 个用户，跳过初始账号创建`);
+  }
 
   // 分类树
   const work = await prisma.category.upsert({
@@ -171,7 +178,7 @@ async function main() {
     });
   }
 
-  console.log("✅ Seed 完成：1 用户 / 11 分类 / 6 标签 / 6 文章");
+  console.log(`✅ Seed 完成：1 用户 / 11 分类 / 6 标签 / 6 文章`);
 }
 
 main()

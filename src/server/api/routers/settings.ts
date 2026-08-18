@@ -2,6 +2,7 @@ import { z } from "zod";
 import { router, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
+import { buildBackupPayload } from "@/server/backup";
 
 export const settingsRouter = router({
   /** 修改密码：验证原密码 */
@@ -40,24 +41,6 @@ export const settingsRouter = router({
     return { username: ctx.user.username, nickname: ctx.user.nickname };
   }),
 
-  /** 全量备份：JSON 导出 */
-  backup: protectedProcedure.query(async ({ ctx }) => {
-    const [articles, categories, tags] = await Promise.all([
-      ctx.db.article.findMany({
-        include: { tags: { select: { tag: { select: { name: true } } } } },
-      }),
-      ctx.db.category.findMany(),
-      ctx.db.tag.findMany(),
-    ]);
-    return {
-      exportedAt: new Date().toISOString(),
-      articles: articles.map((a) => ({
-        ...a,
-        tagNames: a.tags.map((t) => t.tag.name),
-        tags: undefined,
-      })),
-      categories,
-      tags,
-    };
-  }),
+  /** 全量备份：JSON 导出（与备份管理共用同一份全量数据） */
+  backup: protectedProcedure.query(async ({ ctx }) => buildBackupPayload(ctx.db)),
 });
