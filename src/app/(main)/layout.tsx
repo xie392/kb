@@ -35,7 +35,7 @@ export default async function MainLayout({
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main id="main" className="flex-1">{children}</main>
 
       {/* 手绘页脚 */}
       <footer className="border-t-2 border-dashed border-[#e6e6e6] py-8">

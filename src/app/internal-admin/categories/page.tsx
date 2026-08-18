@@ -12,6 +12,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AdminCategoriesPage() {
   const utils = api.useUtils();
@@ -83,7 +92,7 @@ export default function AdminCategoriesPage() {
         )}
         {editingId === c.id ? (
           <>
-            <input
+            <Input
               autoFocus
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
@@ -91,20 +100,22 @@ export default function AdminCategoriesPage() {
                 if (e.key === "Enter") saveEdit();
                 if (e.key === "Escape") setEditingId(null);
               }}
-              className="flex-1 h-9 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
+              className="flex-1 h-9"
             />
-            <button
+            <Button
               onClick={saveEdit}
-              className="font-hand-body text-[14px] text-[#0075de] hover:text-[#005bab] transition-colors"
+              variant="ghost"
+              className="px-1.5 h-auto text-[14px] text-[#0075de]"
             >
               保存
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setEditingId(null)}
-              className="font-hand-body text-[14px] text-[#a39e98] hover:text-[#615d59] transition-colors"
+              variant="ghost"
+              className="px-1.5 h-auto text-[14px] text-[#a39e98]"
             >
               取消
-            </button>
+            </Button>
           </>
         ) : (
           <>
@@ -114,18 +125,20 @@ export default function AdminCategoriesPage() {
               {c.name}
             </span>
             <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums shrink-0">{c.count} 篇</span>
-            <button
+            <Button
               onClick={() => startEdit(c)}
-              className="font-hand-body text-[14px] text-[#a39e98] hover:text-[#0075de] opacity-0 group-hover:opacity-100 transition-opacity"
+              variant="ghost"
+              className="px-1.5 h-auto text-[14px] text-[#a39e98] opacity-0 group-hover:opacity-100"
             >
               编辑
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => confirmDelete(c)}
-              className="font-hand-body text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              variant="ghost"
+              className="px-1.5 h-auto text-[14px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
             >
               删除
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -141,31 +154,35 @@ export default function AdminCategoriesPage() {
           <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">管理分类层级结构与排序</p>
         </div>
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={newParent}
-            onChange={(e) => setNewParent(e.target.value)}
-            className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
+            onValueChange={(v) => setNewParent(v ?? "")}
           >
-            <option value="">作为一级分类</option>
-            {flatOptions.map((c) => (
-              <option key={c.id} value={c.id}>作为 {c.label} 的子分类</option>
-            ))}
-          </select>
-          <input
+            <SelectTrigger className="data-[size=default]:h-10 px-3 text-[14px] text-[#31302e]">
+              <SelectValue placeholder="作为一级分类" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">作为一级分类</SelectItem>
+              {flatOptions.map((c) => (
+                <SelectItem key={c.id} value={c.id}>作为 {c.label} 的子分类</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="分类名称"
-            className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+            className="h-10 w-36"
           />
-          <button
+          <Button
             onClick={() => {
               if (!newName.trim()) return show("请输入分类名称", "err");
               create.mutate({ name: newName.trim(), parentId: newParent || null });
             }}
-            className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[16px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+            className="h-10 px-4 text-[16px] font-bold rotate-[-1deg]"
           >
             ＋ 新增
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -194,7 +211,7 @@ export default function AdminCategoriesPage() {
           if (!open) setDeleteTarget(null);
         }}
       >
-        <AlertDialogContent className="rounded-xl border border-[#e6e6e6] bg-white shadow-lg">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
               删除分类
@@ -218,12 +235,12 @@ export default function AdminCategoriesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white text-[#615d59] border border-[#e6e6e6] hover:bg-[#f6f5f4]">
+            <AlertDialogCancel variant="outline" className="text-[#615d59]">
               取消
             </AlertDialogCancel>
             {deleteTarget && deleteTarget.count === 0 && (
               <AlertDialogAction
-                className="bg-red-500 text-white hover:bg-red-600"
+                variant="destructive"
                 onClick={() => {
                   remove.mutate({ id: deleteTarget.id });
                   setDeleteTarget(null);

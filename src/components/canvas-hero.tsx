@@ -23,6 +23,7 @@ export default function CanvasHero() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let particles: Particle[] = [];
     const mouse = { x: -9999, y: -9999 };
@@ -108,7 +109,7 @@ export default function CanvasHero() {
       }
       ctx.shadowBlur = 0;
 
-      raf = requestAnimationFrame(draw);
+      if (!reduceMotion) raf = requestAnimationFrame(draw);
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -123,6 +124,7 @@ export default function CanvasHero() {
 
     resize();
     draw();
+    if (reduceMotion) return;
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseout", onMouseLeave);

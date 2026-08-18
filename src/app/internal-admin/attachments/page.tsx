@@ -21,6 +21,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Row = {
   id: string;
@@ -166,12 +175,12 @@ export default function AdminAttachmentsPage() {
             共 {data?.total ?? 0} 个附件 · 图片 ≤ {ATTACH_LIMITS.image.label}，其他文件 ≤ {ATTACH_LIMITS.file.label} · 禁止可执行/脚本文件
           </p>
         </div>
-        <button
+        <Button
           onClick={() => setUploadOpen(true)}
-          className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[17px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+          className="h-10 px-4 text-[17px] font-bold rotate-[-1deg]"
         >
           ＋ 上传附件
-        </button>
+        </Button>
       </div>
 
       {msg && (
@@ -185,7 +194,7 @@ export default function AdminAttachmentsPage() {
       {/* 搜索栏 */}
       <div className="flex items-center gap-3 mb-4 bg-white sketch-border sketch-shadow px-4 py-3 fade-up">
         <span className="font-hand-display text-[15px] font-bold text-[#615d59] shrink-0">搜索</span>
-        <input
+        <Input
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={(e) => {
@@ -195,40 +204,47 @@ export default function AdminAttachmentsPage() {
             }
           }}
           placeholder="按文件名搜索"
-          className="h-9 flex-1 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+          className="flex-1 h-9"
         />
-        <select
+        <Select
           value={kind}
-          onChange={(e) => {
-            setKind(e.target.value as KindFilter);
-            setPage(1);
+          onValueChange={(v) => {
+            if (v) {
+              setKind(v as KindFilter);
+              setPage(1);
+            }
           }}
-          className="h-9 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
         >
-          <option value="all">全部类型</option>
-          <option value="image">仅图片</option>
-          <option value="file">仅文件</option>
-        </select>
-        <button
+          <SelectTrigger className="data-[size=default]:h-9 px-3 text-[14px] text-[#31302e]">
+            <SelectValue placeholder="全部类型" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全部类型</SelectItem>
+            <SelectItem value="image">仅图片</SelectItem>
+            <SelectItem value="file">仅文件</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
           onClick={() => {
             setSearchKeyword(keyword.trim());
             setPage(1);
           }}
-          className="h-9 px-4 bg-[#0075de] text-white font-hand-display text-[15px] font-bold sketch-border sketch-shadow rotate-[0.5deg] hover:rotate-0 transition-transform"
+          className="h-9 px-4 text-[15px] font-bold rotate-[0.5deg]"
         >
           搜索
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => {
             setKeyword("");
             setSearchKeyword("");
             setKind("all");
             setPage(1);
           }}
-          className="h-9 px-4 bg-white sketch-border font-hand-display text-[15px] font-bold text-[#615d59] hover:text-[#0075de] rotate-[-0.5deg] hover:rotate-0 transition-transform"
+          variant="outline"
+          className="h-9 px-4 text-[15px] font-bold text-[#615d59] rotate-[-0.5deg]"
         >
           重置
-        </button>
+        </Button>
       </div>
 
       {/* 附件表格 */}
@@ -266,7 +282,7 @@ export default function AdminAttachmentsPage() {
                 <td className="px-3 py-3 min-w-0">
                   {renamingId === a.id ? (
                     <div className="flex items-center gap-2">
-                      <input
+                      <Input
                         autoFocus
                         value={renameValue}
                         onChange={(e) => setRenameValue(e.target.value)}
@@ -274,14 +290,10 @@ export default function AdminAttachmentsPage() {
                           if (e.key === "Enter") saveRename();
                           if (e.key === "Escape") setRenamingId(null);
                         }}
-                        className="h-9 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none w-[240px]"
+                        className="h-9 w-[240px]"
                       />
-                      <button onClick={saveRename} className="font-hand-body text-[13px] text-[#0075de] hover:text-[#005bab]">
-                        保存
-                      </button>
-                      <button onClick={() => setRenamingId(null)} className="font-hand-body text-[13px] text-[#a39e98] hover:text-[#615d59]">
-                        取消
-                      </button>
+                      <Button onClick={saveRename} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#0075de]">保存</Button>
+                      <Button onClick={() => setRenamingId(null)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#a39e98]">取消</Button>
                     </div>
                   ) : (
                     <span className="font-hand-display text-[16px] font-bold text-[#31302e] truncate max-w-[260px] block" title={a.name}>
@@ -306,18 +318,10 @@ export default function AdminAttachmentsPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2.5">
-                    <button onClick={() => setPreview(a)} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
-                      预览
-                    </button>
-                    <button onClick={() => copyLink(a)} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
-                      复制链接
-                    </button>
-                    <button onClick={() => startRename(a)} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
-                      重命名
-                    </button>
-                    <button onClick={() => setDeleteTarget(a)} className="font-hand-body text-[13px] text-red-400 hover:text-red-500">
-                      删除
-                    </button>
+                    <Button onClick={() => setPreview(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">预览</Button>
+                    <Button onClick={() => copyLink(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">复制链接</Button>
+                    <Button onClick={() => startRename(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">重命名</Button>
+                    <Button onClick={() => setDeleteTarget(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">删除</Button>
                   </div>
                 </td>
               </tr>
@@ -342,20 +346,12 @@ export default function AdminAttachmentsPage() {
             第 {page} / {totalPages} 页 · 共 {data?.total ?? 0} 个
           </span>
           <div className="flex items-center gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="h-9 px-4 bg-white sketch-border font-hand-display text-[14px] font-bold text-[#615d59] hover:text-[#0075de] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
+            <Button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40">
               上一页
-            </button>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="h-9 px-4 bg-white sketch-border font-hand-display text-[14px] font-bold text-[#615d59] hover:text-[#0075de] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
+            </Button>
+            <Button disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40">
               下一页
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -404,9 +400,9 @@ export default function AdminAttachmentsPage() {
                   {formatBytes(picked.size)} · {picked.type || "未知类型"}
                 </div>
               </div>
-              <button onClick={() => { setPicked(null); setUploadErr(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} className="font-hand-body text-[13px] text-[#a39e98] hover:text-red-500">
+              <Button onClick={() => { setPicked(null); setUploadErr(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#a39e98] hover:text-red-500">
                 更换
-              </button>
+              </Button>
             </div>
           )}
 
@@ -415,20 +411,21 @@ export default function AdminAttachmentsPage() {
           )}
 
           <div className="flex justify-end gap-2 mt-1">
-            <button
+            <Button
               onClick={() => setUploadOpen(false)}
               disabled={uploading}
-              className="h-9 px-4 bg-white sketch-border font-hand-display text-[14px] font-bold text-[#615d59] hover:text-[#31302e] disabled:opacity-40"
+              variant="outline"
+              className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40"
             >
               取消
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={startUpload}
               disabled={!picked || uploading}
-              className="h-9 px-4 bg-[#0075de] text-white font-hand-display text-[14px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-9 px-4 text-[14px] font-bold rotate-[-1deg] disabled:opacity-40"
             >
               {uploading ? "上传中…" : "开始上传"}
-            </button>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -455,20 +452,19 @@ export default function AdminAttachmentsPage() {
             </div>
           )}
           <div className="flex justify-end gap-2">
-            <a
-              href={preview?.url}
-              download={preview?.name}
-              className="h-9 px-4 bg-[#0075de] text-white font-hand-display text-[14px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform inline-flex items-center"
+            <Button
+              render={<a href={preview?.url} download={preview?.name} />}
+              className="h-9 px-4 text-[14px] font-bold rotate-[-1deg]"
             >
               下载
-            </a>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* 删除确认 */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
-        <AlertDialogContent className="rounded-xl border border-[#e6e6e6] bg-white shadow-lg">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
               删除附件
@@ -480,11 +476,11 @@ export default function AdminAttachmentsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white text-[#615d59] border border-[#e6e6e6] hover:bg-[#f6f5f4]">
+            <AlertDialogCancel variant="outline" className="text-[#615d59]">
               取消
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 text-white hover:bg-red-600"
+              variant="destructive"
               onClick={() => deleteTarget && remove.mutate({ id: deleteTarget.id })}
             >
               删除

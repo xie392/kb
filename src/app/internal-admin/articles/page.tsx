@@ -5,6 +5,25 @@ import Link from "next/link";
 import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
 import { ADMIN_HOME } from "@/lib/config";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type StatusFilter = "normal" | "trash";
 type Row = {
@@ -26,6 +45,7 @@ export default function AdminArticlesPage() {
   const [filter, setFilter] = useState<StatusFilter>("normal");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [visibilityUpdatingId, setVisibilityUpdatingId] = useState<string | null>(null);
+  const [pendingHardDelete, setPendingHardDelete] = useState<string[] | null>(null);
 
   const { data, isFetching } = api.article.list.useQuery({
     status: filter,
@@ -78,28 +98,29 @@ export default function AdminArticlesPage() {
             共 {data?.total ?? 0} 篇{isFetching ? "（加载中…）" : ""}
           </p>
         </div>
-        <Link
-          href={`${ADMIN_HOME}/articles/new`}
-          className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[17px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+        <Button
+          render={<Link href={`${ADMIN_HOME}/articles/new`} />}
+          className="h-10 px-4 text-[17px] font-bold rotate-[-1deg]"
         >
           ＋ 新增文章
-        </Link>
+        </Button>
       </div>
 
       {/* 状态筛选 */}
       <div className="flex items-center gap-1 mb-4">
         {statusTabs.map((tab) => (
-          <button
+          <Button
             key={tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`font-hand-display text-[17px] px-4 py-1.5 transition-colors ${
+            variant={filter === tab.id ? "outline" : "ghost"}
+            className={`px-4 text-[17px] font-hand-display ${
               filter === tab.id
-                ? "bg-white sketch-border sketch-shadow text-[#0075de] font-bold"
+                ? "text-[#0075de] font-bold"
                 : "text-[#615d59] hover:text-[#0075de]"
             }`}
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -112,27 +133,27 @@ export default function AdminArticlesPage() {
           <span className="w-px h-5 bg-[#e6e6e6]" />
           {filter === "normal" ? (
             <>
-              <button onClick={() => batch.mutate({ ids: selectedIds, isPinned: true })} className="font-hand-body text-[14px] text-[#615d59] hover:text-[#0075de]">
+              <Button onClick={() => batch.mutate({ ids: selectedIds, isPinned: true })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
                 批量置顶
-              </button>
-              <button onClick={() => batch.mutate({ ids: selectedIds, visibility: "public" })} className="font-hand-body text-[14px] text-[#615d59] hover:text-[#0075de]">
+              </Button>
+              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "public" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
                 批量公开
-              </button>
-              <button onClick={() => batch.mutate({ ids: selectedIds, visibility: "private" })} className="font-hand-body text-[14px] text-[#615d59] hover:text-[#0075de]">
+              </Button>
+              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "private" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
                 批量私有
-              </button>
-              <button onClick={() => softDelete.mutate({ ids: selectedIds })} className="font-hand-body text-[14px] text-red-400 hover:text-red-500">
+              </Button>
+              <Button onClick={() => softDelete.mutate({ ids: selectedIds })} variant="ghost" className="px-1.5 h-auto text-[14px] text-red-400 hover:text-red-500">
                 移入回收站
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <button onClick={() => restore.mutate({ ids: selectedIds })} className="font-hand-body text-[14px] text-[#2a9d99] hover:underline">
+              <Button onClick={() => restore.mutate({ ids: selectedIds })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#2a9d99] hover:underline">
                 批量恢复
-              </button>
-              <button onClick={() => hardDelete.mutate({ ids: selectedIds })} className="font-hand-body text-[14px] text-red-400 hover:text-red-500">
+              </Button>
+              <Button onClick={() => setPendingHardDelete(selectedIds)} variant="ghost" className="px-1.5 h-auto text-[14px] text-red-400 hover:text-red-500">
                 永久删除
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -144,7 +165,12 @@ export default function AdminArticlesPage() {
           <thead>
             <tr className="bg-[#f6f5f4] border-b-2 border-dashed border-[#e6e6e6]">
               <th className="w-10 px-4 py-3">
-                <input type="checkbox" checked={selected.size === rows.length && rows.length > 0} onChange={toggleAll} className="w-4 h-4 accent-[#0075de] cursor-pointer" />
+                <Checkbox
+                  checked={selected.size === rows.length && rows.length > 0}
+                  onCheckedChange={toggleAll}
+                  className="cursor-pointer"
+                  aria-label="全选"
+                />
               </th>
               <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">标题</th>
               <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">分类</th>
@@ -158,7 +184,12 @@ export default function AdminArticlesPage() {
             {rows.map((a) => (
               <tr key={a.id} className="border-b border-dashed border-[#e6e6e6] last:border-0 hover:bg-[#f6f5f4]/60 transition-colors">
                 <td className="px-4 py-3.5">
-                  <input type="checkbox" checked={selected.has(a.id)} onChange={() => toggleSelect(a.id)} className="w-4 h-4 accent-[#0075de] cursor-pointer" />
+                  <Checkbox
+                    checked={selected.has(a.id)}
+                    onCheckedChange={() => toggleSelect(a.id)}
+                    className="cursor-pointer"
+                    aria-label={`选择 ${a.title}`}
+                  />
                 </td>
                 <td className="px-3 py-3.5">
                   <div className="flex items-center gap-2">
@@ -180,24 +211,28 @@ export default function AdminArticlesPage() {
                   </div>
                 </td>
                 <td className="px-3 py-3.5">
-                  <select
+                  <Select
                     value={a.visibility}
                     disabled={visibilityUpdatingId === a.id}
-                    onChange={(e) =>
-                      updateVisibility.mutate({
-                        ids: [a.id],
-                        visibility: e.target.value as "private" | "public",
-                      })
-                    }
-                    className={`font-hand-body text-[13px] bg-transparent border border-dashed rounded px-1.5 py-0.5 cursor-pointer outline-none transition-colors ${
-                      a.visibility === "public"
-                        ? "text-[#0075de] border-[#0075de]/40 hover:border-[#0075de]"
-                        : "text-[#a39e98] border-[#e6e6e6] hover:border-[#a39e98]"
-                    } disabled:opacity-50 disabled:cursor-wait`}
+                    onValueChange={(v) => {
+                      if (v) updateVisibility.mutate({ ids: [a.id], visibility: v as "private" | "public" });
+                    }}
                   >
-                    <option value="private">私有</option>
-                    <option value="public">公开</option>
-                  </select>
+                    <SelectTrigger
+                      size="sm"
+                      className={`px-1.5 text-[13px] ${
+                        a.visibility === "public"
+                          ? "text-[#0075de]"
+                          : "text-[#a39e98]"
+                      } disabled:opacity-50 disabled:cursor-wait`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">私有</SelectItem>
+                      <SelectItem value="public">公开</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </td>
                 <td className="px-3 py-3.5 font-hand-body text-[13px] text-[#a39e98] whitespace-nowrap">
                   {formatDate(a.updatedAt)}
@@ -206,24 +241,28 @@ export default function AdminArticlesPage() {
                   <div className="flex items-center justify-end gap-2">
                     {filter === "normal" ? (
                       <>
-                        <Link href={`${ADMIN_HOME}/articles/${a.id}/edit`} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
+                        <Button
+                          render={<Link href={`${ADMIN_HOME}/articles/${a.id}/edit`} />}
+                          variant="ghost"
+                          className="px-1.5 h-auto text-[13px] text-[#615d59]"
+                        >
                           编辑
-                        </Link>
-                        <button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} className="font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de]">
+                        </Button>
+                        <Button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">
                           {a.isPinned ? "取消置顶" : "置顶"}
-                        </button>
-                        <button onClick={() => softDelete.mutate({ ids: [a.id] })} className="font-hand-body text-[13px] text-red-400 hover:text-red-500">
+                        </Button>
+                        <Button onClick={() => softDelete.mutate({ ids: [a.id] })} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">
                           删除
-                        </button>
+                        </Button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => restore.mutate({ ids: [a.id] })} className="font-hand-body text-[13px] text-[#2a9d99] hover:underline">
+                        <Button onClick={() => restore.mutate({ ids: [a.id] })} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#2a9d99] hover:underline">
                           恢复
-                        </button>
-                        <button onClick={() => hardDelete.mutate({ ids: [a.id] })} className="font-hand-body text-[13px] text-red-400 hover:text-red-500">
+                        </Button>
+                        <Button onClick={() => setPendingHardDelete([a.id])} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">
                           永久删除
-                        </button>
+                        </Button>
                       </>
                     )}
                   </div>
@@ -242,6 +281,41 @@ export default function AdminArticlesPage() {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog
+        open={pendingHardDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingHardDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+              确认永久删除？
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+              {pendingHardDelete && pendingHardDelete.length > 1
+                ? `将永久删除 ${pendingHardDelete.length} 篇文章，删除后不可恢复。`
+                : "删除后不可恢复，确定要永久删除这篇文章吗？"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="ghost" className="text-[14px] text-[#615d59] hover:text-[#31302e]">
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className="text-[14px] font-bold"
+              onClick={() => {
+                if (pendingHardDelete) hardDelete.mutate({ ids: pendingHardDelete });
+                setPendingHardDelete(null);
+              }}
+            >
+              永久删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

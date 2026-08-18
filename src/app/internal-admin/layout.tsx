@@ -40,7 +40,7 @@ export default function AdminLayout({
       {/* 内容区（锁定视口高度，超出部分在内部滚动） */}
       <div className="flex-1 min-w-0 h-full overflow-hidden flex flex-col">
         <AdminHeader />
-        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
+        <main id="main" className="flex-1 min-h-0 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

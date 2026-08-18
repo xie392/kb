@@ -25,7 +25,7 @@ export default async function FavoritesPage() {
               className="group flex items-center gap-4 py-4 px-4 sm:px-5 fade-up"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <svg className="w-4 h-4 text-[#ff64c8] shrink-0 rotate-[-6deg]" viewBox="0 0 20 20" fill="currentColor">
+              <svg aria-hidden="true" className="w-4 h-4 text-[#ff64c8] shrink-0 rotate-[-6deg]" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 2.5l2.2 4.6 5 .7-3.6 3.6.9 5-4.5-2.4-4.5 2.4.9-5L2.8 7.8l5-.7L10 2.5z" />
               </svg>
               <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums w-20 shrink-0">

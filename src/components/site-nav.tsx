@@ -2,8 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import SearchDialog from "@/components/search-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "首页", href: "/" },
@@ -15,7 +23,6 @@ const navLinks = [
 export default function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   // 首页仅精确匹配；其余支持子路径（如 /article/xxx 不误伤）
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
@@ -24,18 +31,6 @@ export default function SiteNav() {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
-
-  // 点击外部关闭移动菜单
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [open]);
 
   return (
     <nav className="flex items-center gap-1.5">
@@ -63,40 +58,43 @@ export default function SiteNav() {
         })}
       </div>
 
-      {/* 移动端汉堡菜单 */}
-      <div ref={menuRef} className="relative md:hidden">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "关闭菜单" : "打开菜单"}
-          aria-expanded={open}
-          className="w-10 h-10 grid place-items-center bg-white sketch-border sketch-shadow font-hand-display text-[18px] text-[#31302e] hover:text-[#0075de] transition-colors"
-        >
-          {open ? "✕" : "☰"}
-        </button>
-
-        {open && (
-          <div className="absolute right-0 top-[52px] w-40 bg-[#fbfaf6] sketch-border sketch-shadow p-1.5 fade-up z-50">
+      {/* 移动端汉堡菜单（Base UI DropdownMenu，内置 click-outside 关闭） */}
+      <div className="md:hidden">
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-10 text-[18px]"
+                aria-label={open ? "关闭菜单" : "打开菜单"}
+              />
+            }
+          >
+            {open ? "✕" : "☰"}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
             {navLinks.map((link, i) => {
               const active = isActive(link.href);
               return (
-                <Link
+                <DropdownMenuItem
                   key={link.href}
-                  href={link.href}
-                  className={`block px-3 py-2 font-hand-display text-[17px] transition-colors ${
+                  render={<Link href={link.href} />}
+                  className={cn(
+                    "font-hand-display text-[17px] transition-colors",
                     active
                       ? "text-[#0075de] font-bold"
                       : `text-[#615d59] hover:text-[#0075de] ${
                           i % 2 ? "rotate-[0.3deg]" : "rotate-[-0.3deg]"
                         }`
-                  }`}
+                  )}
                 >
                   {link.label}
-                </Link>
+                </DropdownMenuItem>
               );
             })}
-          </div>
-        )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

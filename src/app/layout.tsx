@@ -3,6 +3,7 @@ import "./globals.css";
 import { Geist, Caveat, Patrick_Hand } from "next/font/google";
 import { cn } from "@/lib/utils";
 import TRPCProvider from "@/trpc/react";
+import { Toaster } from "@/components/ui/sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const caveat = Caveat({
@@ -32,7 +33,16 @@ export default function RootLayout({
       className={cn("font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
       <body className="min-h-screen antialiased">
-        <TRPCProvider>{children}</TRPCProvider>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[999] focus:bg-[#0075de] focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-hand-body focus:text-[15px]"
+        >
+          跳到主要内容
+        </a>
+        <TRPCProvider>
+          {children}
+          <Toaster position="top-center" richColors />
+        </TRPCProvider>
       </body>
     </html>
   );

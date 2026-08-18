@@ -22,7 +22,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="p-8 w-full">
       {isFetching && (
-        <div className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit">
+        <div aria-live="polite" className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit">
           <span className="font-hand-display text-[16px] font-bold text-[#a39e98]">加载中…</span>
         </div>
       )}

@@ -33,7 +33,7 @@ export default async function TagsPage() {
             <Link
               key={tag.id}
               href={`/tags#${tag.id}`}
-              className={`px-4 py-2 rounded-full bg-white sketch-border text-[#31302e] hover:text-[#0075de] hover:-translate-y-0.5 transition-all ${sizes[i % sizes.length]}`}
+              className={`px-4 py-2 rounded-full bg-white sketch-border text-[#31302e] hover:text-[#0075de] hover:-translate-y-0.5 transition-[color,transform] ${sizes[i % sizes.length]}`}
             >
               #{tag.name}
               <span className="ml-1.5 text-[12px] text-[#a39e98] tabular-nums">{tag._count.articles}</span>
@@ -48,7 +48,7 @@ export default async function TagsPage() {
           const tagArticles = all.filter((a) => a.tagNames.includes(tag.name));
           if (tagArticles.length === 0) return null;
           return (
-            <section key={tag.id} id={tag.id} className="fade-up" style={{ animationDelay: `${ti * 70}ms` }}>
+            <section key={tag.id} id={tag.id} className="fade-up scroll-mt-24" style={{ animationDelay: `${ti * 70}ms` }}>
               <div className="flex items-center gap-3 mb-4">
                 <h2 className="font-hand-display text-[22px] font-bold text-[#31302e]">#{tag.name}</h2>
                 <span className="font-hand-body text-[13px] text-[#a39e98] tabular-nums">{tagArticles.length} 篇</span>

@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,20 +58,21 @@ export function ToolbarBtn({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       title={title}
+      aria-label={title}
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`w-8 h-8 rounded-[6px] grid place-items-center transition-all duration-150 ${
-        active
-          ? "bg-[#0075de]/10 text-[#0075de]"
-          : "text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e]"
+      className={`rounded-[6px] transition-colors duration-150 ${
+        active ? "bg-[#0075de]/10 text-[#0075de]" : ""
       } ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

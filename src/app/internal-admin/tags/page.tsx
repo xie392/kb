@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { api } from "@/trpc/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const TAG_COLORS = ["#0075de", "#ff64c8", "#62aef0", "#2a9d99", "#dd5b00", "#d6b6f6"];
 
@@ -61,28 +63,29 @@ export default function AdminTagsPage() {
         </div>
         <div className="flex items-center gap-2">
           {emptyCount > 0 && (
-            <button
+            <Button
               onClick={() => cleanEmpty.mutate()}
-              className="h-10 px-4 bg-white sketch-border font-hand-display text-[15px] font-bold text-[#615d59] hover:text-[#0075de] rotate-[0.5deg] hover:rotate-0 transition-transform"
+              variant="outline"
+              className="h-10 px-4 text-[15px] font-bold text-[#615d59] rotate-[0.5deg]"
             >
               清理 {emptyCount} 个空标签
-            </button>
+            </Button>
           )}
-          <input
+          <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="标签名称"
-            className="h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+            className="h-10 w-36"
           />
-          <button
+          <Button
             onClick={() => {
               if (!newName.trim()) return;
               create.mutate({ name: newName.trim() });
             }}
-            className="h-10 px-4 bg-[#0075de] text-white font-hand-display text-[16px] font-bold sketch-border sketch-shadow rotate-[-1deg] hover:rotate-0 transition-transform"
+            className="h-10 px-4 text-[16px] font-bold rotate-[-1deg]"
           >
             ＋ 新增
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -109,7 +112,7 @@ export default function AdminTagsPage() {
                 </span>
                 {editingId === tag.id ? (
                   <>
-                    <input
+                    <Input
                       autoFocus
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -117,20 +120,22 @@ export default function AdminTagsPage() {
                         if (e.key === "Enter") saveEdit();
                         if (e.key === "Escape") setEditingId(null);
                       }}
-                      className="flex-1 h-9 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] outline-none"
+                      className="flex-1 h-9"
                     />
-                    <button
+                    <Button
                       onClick={saveEdit}
-                      className="font-hand-body text-[13px] text-[#0075de] hover:text-[#005bab] transition-colors"
+                      variant="ghost"
+                      className="px-1.5 h-auto text-[13px] text-[#0075de]"
                     >
                       保存
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setEditingId(null)}
-                      className="font-hand-body text-[13px] text-[#a39e98] hover:text-[#615d59] transition-colors"
+                      variant="ghost"
+                      className="px-1.5 h-auto text-[13px] text-[#a39e98]"
                     >
                       取消
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <>
@@ -140,18 +145,20 @@ export default function AdminTagsPage() {
                         {tag._count.articles} 篇笔记
                       </div>
                     </div>
-                    <button
+                    <Button
                       onClick={() => startEdit(tag.id, tag.name)}
-                      className="font-hand-body text-[13px] text-[#a39e98] hover:text-[#0075de] opacity-0 group-hover:opacity-100 transition-opacity"
+                      variant="ghost"
+                      className="px-1.5 h-auto text-[13px] text-[#a39e98] opacity-0 group-hover:opacity-100"
                     >
                       编辑
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => remove.mutate({ id: tag.id })}
-                      className="font-hand-body text-[13px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      variant="ghost"
+                      className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
                     >
                       删除
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>

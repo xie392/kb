@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { api } from "@/trpc/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function AdminSettingsPage() {
   const utils = api.useUtils();
@@ -71,10 +73,10 @@ export default function AdminSettingsPage() {
               <label className="block font-hand-display text-[16px] font-bold text-[#31302e] mb-1.5">
                 用户名
               </label>
-              <input
-                defaultValue={profile?.username ?? "…"}
+              <Input
+                value={profile?.username ?? "…"}
                 disabled
-                className="w-full max-w-[360px] h-10 px-3 bg-[#f6f5f4] sketch-border font-hand-body text-[14px] text-[#a39e98] outline-none cursor-not-allowed"
+                className="w-full max-w-[360px] h-10 bg-[#f6f5f4] text-[#a39e98]"
               />
               <p className="mt-1 font-hand-body text-[12px] text-[#a39e98]">用户名不可修改</p>
             </div>
@@ -83,21 +85,22 @@ export default function AdminSettingsPage() {
                 昵称
               </label>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder={profile?.nickname ?? "设置昵称"}
-                  className="w-full max-w-[360px] h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+                  className="w-full max-w-[360px] h-10"
                 />
-                <button
+                <Button
                   onClick={() => {
                     if (!nickname.trim()) return show("请输入昵称", "err");
                     updateProfile.mutate({ nickname: nickname.trim() });
                   }}
-                  className="h-10 px-4 bg-white sketch-border font-hand-display text-[15px] font-bold text-[#31302e] hover:text-[#0075de] rotate-[0.5deg] hover:rotate-0 transition-transform"
+                  variant="outline"
+                  className="h-10 px-4 text-[15px] font-bold text-[#31302e] rotate-[0.5deg]"
                 >
                   保存
-                </button>
+                </Button>
               </div>
             </div>
             <div>
@@ -105,30 +108,31 @@ export default function AdminSettingsPage() {
                 修改密码
               </label>
               <div className="flex items-center gap-2">
-                <input
+                <Input
                   type="password"
                   value={oldPwd}
                   onChange={(e) => setOldPwd(e.target.value)}
                   placeholder="原密码"
-                  className="w-full max-w-[160px] h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+                  className="w-full max-w-[160px] h-10"
                 />
-                <input
+                <Input
                   type="password"
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
                   placeholder="新密码（至少 6 位）"
-                  className="w-full max-w-[200px] h-10 px-3 bg-white sketch-border font-hand-body text-[14px] text-[#31302e] placeholder:text-[#a39e98] outline-none"
+                  className="w-full max-w-[200px] h-10"
                 />
-                <button
+                <Button
                   onClick={() => {
                     if (!oldPwd || !newPwd) return show("请填写完整", "err");
                     if (newPwd.length < 6) return show("新密码至少 6 位", "err");
                     changePassword.mutate({ oldPassword: oldPwd, newPassword: newPwd });
                   }}
-                  className="h-10 px-4 bg-white sketch-border font-hand-display text-[15px] font-bold text-[#31302e] hover:text-[#0075de] rotate-[-0.5deg] hover:rotate-0 transition-transform"
+                  variant="outline"
+                  className="h-10 px-4 text-[15px] font-bold text-[#31302e] rotate-[-0.5deg]"
                 >
                   修改
-                </button>
+                </Button>
               </div>
               <p className="mt-1 font-hand-body text-[12px] text-[#a39e98]">密码使用 bcrypt 加密存储</p>
             </div>

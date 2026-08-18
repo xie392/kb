@@ -3,11 +3,23 @@
 import { useState } from "react";
 import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function TrashList({ initial }: { initial: { id: string; title: string; updatedAt: string }[] }) {
   const utils = api.useUtils();
   const [items, setItems] = useState(initial);
   const [msg, setMsg] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const restore = api.article.restore.useMutation({
     onSuccess: async (_, vars) => {
@@ -32,7 +44,7 @@ export default function TrashList({ initial }: { initial: { id: string; title: s
   return (
     <div>
       {msg && (
-        <div className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up">
+        <div aria-live="polite" className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up">
           <span className="font-hand-display text-[16px] font-bold text-[#2a9d99]">✓ {msg}</span>
         </div>
       )}
@@ -53,18 +65,20 @@ export default function TrashList({ initial }: { initial: { id: string; title: s
               <span className="font-hand-body text-[16px] text-[#615d59] line-through truncate flex-1">
                 {article.title}
               </span>
-              <button
+              <Button
                 onClick={() => restore.mutate({ ids: [article.id] })}
-                className="font-hand-display text-[15px] text-[#0075de] hover:underline shrink-0"
+                variant="ghost"
+                className="px-1.5 h-auto text-[15px] font-hand-display text-[#0075de] hover:underline shrink-0"
               >
                 恢复
-              </button>
-              <button
-                onClick={() => hardDelete.mutate({ ids: [article.id] })}
-                className="font-hand-display text-[15px] text-red-400 hover:underline shrink-0"
+              </Button>
+              <Button
+                onClick={() => setConfirmId(article.id)}
+                variant="ghost"
+                className="px-1.5 h-auto text-[15px] font-hand-display text-red-400 hover:underline shrink-0"
               >
                 永久删除
-              </button>
+              </Button>
             </div>
           ))
         ) : (
@@ -83,6 +97,39 @@ export default function TrashList({ initial }: { initial: { id: string; title: s
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={confirmId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+              确认永久删除？
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+              删除后不可恢复，确定要永久删除这篇笔记吗？
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="ghost" className="text-[14px] text-[#615d59] hover:text-[#31302e]">
+              取消
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              className="text-[14px] font-bold"
+              onClick={() => {
+                if (confirmId) hardDelete.mutate({ ids: [confirmId] });
+                setConfirmId(null);
+              }}
+            >
+              永久删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

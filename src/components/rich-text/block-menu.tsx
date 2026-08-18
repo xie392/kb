@@ -7,6 +7,7 @@ import { useEditorState } from "@tiptap/react";
 import { NodeSelection, type EditorState } from "@tiptap/pm/state";
 import { ToolbarDivider } from "./toolbar";
 import { TableGlobalToolbar, TableCellToolbar, TableGrip, TableContextMenu, tableShouldShow } from "./table-controls";
+import { Button } from "@/components/ui/button";
 import type { ImageAlign, ImageStyle } from "./types";
 import {
   IconRotate,
@@ -32,20 +33,20 @@ function MenuBtn({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon"
       title={title}
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`w-7 h-7 grid place-items-center rounded-md text-[12px] transition-colors ${
-        active
-          ? "bg-[#0075de]/10 text-[#0075de]"
-          : "text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e]"
+      className={`transition-colors ${
+        active ? "bg-[#0075de]/10 text-[#0075de]" : ""
       } ${disabled ? "opacity-30 cursor-not-allowed pointer-events-none" : ""}`}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 

@@ -5,7 +5,7 @@ export default function HomeLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="min-h-screen bg-transparent font-hand-body text-[#31302e]">
+    <div className="min-h-screen bg-transparent font-hand-body text-[#31302e] flex flex-col">
       {/* 手绘顶部导航 */}
       <header className="sticky top-0 z-50 bg-[#fbfaf6]/90 backdrop-blur-sm border-b-2 border-dashed border-[#e6e6e6]">
         <div className="max-w-[1000px] mx-auto px-4 sm:px-6 h-[64px] flex items-center justify-between">
@@ -22,7 +22,7 @@ export default function HomeLayout({
         </div>
       </header>
 
-      {children}
+      <main id="main" className="flex-1">{children}</main>
 
       {/* 手绘页脚 */}
       <footer className="border-t-2 border-dashed border-[#e6e6e6] py-8">

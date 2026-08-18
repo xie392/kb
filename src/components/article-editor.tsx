@@ -10,6 +10,9 @@ import {
 } from "@/components/rich-text";
 import TagSelect from "@/components/tag-select";
 import CategorySelect from "@/components/category-select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { ADMIN_HOME } from "@/lib/config";
 
 interface Props {
@@ -43,7 +46,6 @@ export default function ArticleEditor({ article }: Props) {
   const [tagIds, setTagIds] = useState<string[]>(article?.tagIds ?? []);
   const [outline, setOutline] = useState<OutlineItem[]>([]);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   const { data: cats } = api.category.tree.useQuery();
   const { data: tags } = api.tag.list.useQuery();
@@ -57,18 +59,18 @@ export default function ArticleEditor({ article }: Props) {
   });
 
   const create = api.article.create.useMutation({
-    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
-    onError: (e) => show(`保存失败：${e.message}`, "err"),
+    onSuccess: () => { toast.success("已保存"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
+    onError: (e) => toast.error(`保存失败：${e.message}`),
   });
   const update = api.article.update.useMutation({
-    onSuccess: () => { show("已保存", "ok"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
-    onError: (e) => show(`保存失败：${e.message}`, "err"),
+    onSuccess: () => { toast.success("已保存"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
+    onError: (e) => toast.error(`保存失败：${e.message}`),
   });
   const createTag = api.tag.create.useMutation({
-    onError: (e) => show(`创建标签失败：${e.message}`, "err"),
+    onError: (e) => toast.error(`创建标签失败：${e.message}`),
   });
   const createCategory = api.category.create.useMutation({
-    onError: (e) => show(`创建分类失败：${e.message}`, "err"),
+    onError: (e) => toast.error(`创建分类失败：${e.message}`),
   });
   // 图片上传统一走附件管理（会写入 Attachment 记录，可在附件管理中查看/管理）
   const uploadImage = api.attachment.create.useMutation();
@@ -84,13 +86,8 @@ export default function ArticleEditor({ article }: Props) {
     return res.url;
   };
 
-  const show = (text: string, type: "ok" | "err") => {
-    setMsg({ type, text });
-    setTimeout(() => setMsg(null), 2500);
-  };
-
   const onSave = () => {
-    if (!title.trim()) return show("请输入标题", "err");
+    if (!title.trim()) return toast.error("请输入标题");
     setSaving(true);
     const payload = { title: title.trim(), content, categoryId: categoryId || null, visibility, tagIds };
     const cb = { onSuccess: () => setSaving(false), onError: () => setSaving(false) };
@@ -118,15 +115,18 @@ export default function ArticleEditor({ article }: Props) {
       <div className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-sm border-b border-[#e6e6e6]">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => router.back()}
-              className="w-8 h-8 rounded-[6px] grid place-items-center text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e] transition-colors"
               title="返回"
+              aria-label="返回"
+              className="hover:text-ink-secondary"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10 3L5 8l5 5" />
               </svg>
-            </button>
+            </Button>
             <span className="text-[14px] text-[#a39e98]">{isEdit ? "编辑文章" : "写笔记"}</span>
           </div>
 
@@ -158,31 +158,18 @@ export default function ArticleEditor({ article }: Props) {
                 保存中…
               </span>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={onSave}
                 disabled={!title.trim()}
-                className={`h-8 px-4 rounded-full text-[13px] font-medium transition-all ${
-                  title.trim()
-                    ? "bg-[#0075de] text-white hover:bg-[#005bab] active:scale-[0.97]"
-                    : "bg-[#e6e6e6] text-[#a39e98] cursor-not-allowed"
-                }`}
+                className="px-4 disabled:bg-[#e6e6e6] disabled:text-[#a39e98] disabled:opacity-100"
               >
                 保存
-              </button>
+              </Button>
             )}
           </div>
         </div>
       </div>
-
-      {/* 消息提示 */}
-      {msg && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-white sketch-border sketch-shadow text-[13px] font-medium animate-fade-in">
-          <span className={msg.type === "ok" ? "text-[#2a9d99]" : "text-red-500"}>
-            {msg.type === "ok" ? "✓" : "✗"} {msg.text}
-          </span>
-        </div>
-      )}
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
       <div className="shrink-0 bg-white border-b border-[#e6e6e6]">
@@ -195,12 +182,13 @@ export default function ArticleEditor({ article }: Props) {
         <div className="max-w-3xl mx-auto">
           {/* 标题输入 */}
           <div className="px-6 pt-3 pb-1">
-            <input
+            <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="无标题"
-              className="w-full text-[28px] sm:text-[32px] font-bold leading-tight text-[#31302e] placeholder:text-[#c5c0b9] bg-transparent border-none outline-none focus:ring-0 font-sans"
+              className="h-auto bg-transparent px-0 py-0 text-[28px] sm:text-[32px] font-bold leading-tight font-sans focus-visible:ring-0"
+              style={{ border: "none" }}
             />
           </div>
 

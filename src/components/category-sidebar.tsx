@@ -210,7 +210,7 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
             href="/"
             className="flex items-center gap-1.5 py-0.5 px-1.5 font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de] hover:bg-white/60 rounded-sm transition-colors"
           >
-            <span>🏠</span> 首页
+            <span aria-hidden="true">🏠</span> 首页
           </Link>
           {tree.map((node) => (
             <CategoryNode

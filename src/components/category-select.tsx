@@ -191,7 +191,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
       <PopoverContent
         align="start"
         sideOffset={4}
-        className="w-64 rounded-md border border-[#e6e6e6] bg-white p-1 shadow-lg ring-0"
+        className="w-64 p-1"
       >
         {/* 搜索框 */}
         <div className="px-1 pb-1.5">
