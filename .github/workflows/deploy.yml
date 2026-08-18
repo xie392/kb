@@ -13,18 +13,50 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 同步代码到服务器
+      - name: 准备 BuildKit
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=m.daocloud.io/docker.io/docker/buildkit-binaries:latest
+
+      - name: 构建镜像
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: kb:latest
+          build-args: |
+            NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          cache-from: type=registry,ref=kb:latest
+          cache-to: type=inline
+
+      - name: 打包镜像
+        run: |
+          docker save kb:latest | gzip > kb.tar.gz
+          ls -lh kb.tar.gz
+
+      - name: 同步部署文件到服务器
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: ".,!.git,!node_modules,!.next,!*.db,!*.db-journal,!dev.db"
+          source: "docker-compose.yml,Caddyfile"
           target: "/opt/kb/"
-          timeout: "300s"
-          strip_components: 1
+          timeout: "120s"
 
-      - name: 服务器构建镜像并部署
+      - name: 传输镜像到服务器
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "kb.tar.gz"
+          target: "/opt/kb/"
+          timeout: "1800s"
+
+      - name: 加载镜像并启动
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -34,11 +66,7 @@ jobs:
           script: |
             set -e
             cd /opt/kb
-
-            # 创建必要目录
             mkdir -p data
-
-            # 创建 .env（如不存在）
             if [ ! -f .env ]; then
               SECRET=$(openssl rand -base64 32)
               {
@@ -59,16 +87,10 @@ jobs:
               echo "ℹ️ .env 已存在"
             fi
             chmod 600 .env
-
-            # 构建镜像
-            docker build -t kb:latest .
-
-            # 启动服务
+            docker load < kb.tar.gz
+            rm -f kb.tar.gz
             docker compose up -d
-
-            # 清理
-            docker builder prune -f
-
+            docker image prune -f
             echo "✅ 部署完成"
           envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
         env:
