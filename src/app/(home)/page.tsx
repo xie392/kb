@@ -183,9 +183,9 @@ export default async function HomePage() {
       {/* 精选 */}
       <section className="max-w-250 mx-auto px-4 sm:px-6 pb-14">
         <div className="flex items-center gap-3 mb-4">
-          <span className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
+          <h2 className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
             精选笔记
-          </span>
+          </h2>
           <span className="flex-1 pencil-line h-[2px]" />
         </div>
 
@@ -231,9 +231,9 @@ export default async function HomePage() {
       {/* 全部文章 */}
       <section className="max-w-250 mx-auto px-4 sm:px-6 pb-16">
         <div className="flex items-center gap-3 mb-4">
-          <span className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
+          <h2 className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
             全部文章
-          </span>
+          </h2>
           <span className="font-hand-body text-[15px] text-ink-faint">{rest.length} 篇</span>
           <span className="flex-1 pencil-line h-[2px]" />
           <Link href="/favorites" className="font-hand-display text-[16px] text-primary hover:underline">

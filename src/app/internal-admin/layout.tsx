@@ -3,6 +3,7 @@ import Link from "next/link";
 import AdminHeader from "./admin-header";
 import AdminNav from "@/components/admin-nav";
 import { ADMIN_HOME } from "@/lib/config";
+import "@/app/editor.css";
 
 // 后台页面不参与索引：用页面级 noindex 而非 robots.txt Disallow，
 // 避免在公开的 robots.txt 中暴露后台路径。

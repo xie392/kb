@@ -9,6 +9,7 @@ import { extractToc } from "@/lib/toc";
 import { highlightCodeBlocks } from "@/lib/code-highlight";
 import ArticleToc from "@/components/article-toc";
 import ArticleCodeCopy from "@/components/article-code-copy";
+import "@/app/editor.css";
 
 // generateMetadata 与页面组件共用，同一请求内只查询一次数据库
 const getArticle = cache(async (id: string) => {
@@ -99,20 +100,12 @@ export default async function ArticlePage({
   };
 
   const caller = await createServerCaller();
-  const list = await caller.article.list({
-    status: "normal",
-    page: 1,
-    pageSize: 100,
-  });
+  // 定向查询上一篇/下一篇，避免每篇都全量拉取列表
+  const { prev, next } = await caller.article.adjacent({ id });
 
   const { items: tocItems, html: contentWithIds } = extractToc(
     highlightCodeBlocks(article.content),
   );
-
-  const index = list.items.findIndex((a) => a.id === id);
-  const prev = index > 0 ? list.items[index - 1] : null;
-  const next =
-    index >= 0 && index < list.items.length - 1 ? list.items[index + 1] : null;
 
   return (
     <>
@@ -136,7 +129,7 @@ export default async function ArticlePage({
             </span>
           </nav>
 
-          <article className="bg-white sketch-border sketch-shadow p-5 sm:p-8 lg:p-12 fade-up">
+          <article className="bg-white sketch-border sketch-shadow p-5 sm:p-8 lg:p-12">
             <header className="mb-10">
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <span className="font-hand-body text-[15px] px-1.5 text-sticker-pink">

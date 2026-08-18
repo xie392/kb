@@ -1,18 +1,16 @@
-# 服务器部署编排：放在服务器 /opt/kb 目录，与 .env 同级
 services:
   kb:
-    image: kb:latest # 本地镜像名，由 CI 直传 docker load 导入，不从远程拉取
+    image: kb:latest
     container_name: kb
     restart: unless-stopped
     ports:
-      - "3000:3000" # 调试口（IP:3000 直连验证用）；正式流量走 caddy 反代
-    env_file: .env # 服务器 .env：DATABASE_URL 指向 /data 下的数据库
+      - "127.0.0.1:3000:3000"
+    env_file: .env
     volumes:
-      - ./data:/data # 持久化 SQLite 数据库与附件，升级不丢数据
+      - ./data:/data
     networks:
       - kb-net
 
-  # Caddy 反向代理：自动申请/续期 Let's Encrypt 证书，域名 HTTPS 入口
   caddy:
     image: caddy:2
     container_name: caddy
@@ -22,7 +20,7 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data # 证书持久化，续期不丢
+      - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - kb

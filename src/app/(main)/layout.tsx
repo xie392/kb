@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SiteNav from "@/components/site-nav";
+import { Logo } from "@/components/logo";
 import { createServerCaller } from "@/trpc/server";
 
 const FOOTER_COLORS = ["#0075de", "#ff64c8", "#62aef0", "#2a9d99", "#dd5b00"];
@@ -23,9 +24,7 @@ export default async function MainLayout({
       <header className="sticky top-0 z-50 bg-[#fbfaf6]/90 backdrop-blur-sm border-b-2 border-dashed border-hairline">
         <div className="max-w-250 mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="w-9 h-9 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[20px] font-bold text-secondary rotate-[-4deg] group-hover:rotate-0 transition-transform">
-              知
-            </span>
+            <Logo size="sm" className="group-hover:rotate-0 transition-transform" />
             <span className="font-hand-display text-[24px] font-bold text-ink-secondary rotate-[-1deg]">
               我的知识库
             </span>

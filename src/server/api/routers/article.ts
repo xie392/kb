@@ -96,6 +96,71 @@ export const articleRouter = router({
       };
     }),
 
+  adjacent: publicProcedure
+    .input(z.object({ id: z.string().min(1).max(50) }))
+    .query(async ({ ctx, input }) => {
+      // 与 list 一致：未登录只能看到公开文章
+      const vis = ctx.user ? undefined : { visibility: "public" as const };
+
+      const self = await ctx.db.article.findUnique({
+        where: { id: input.id },
+        select: { isPinned: true, updatedAt: true },
+      });
+      if (!self) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const pick = { id: true, title: true } as const;
+      const base = { status: "normal" as const, ...vis };
+
+      // 列表顺序 = [置顶组 updatedAt 倒序] ++ [非置顶组 updatedAt 倒序]
+      // 上一篇：当前组内更晚更新的，否则是上一组的最后一篇
+      let prev = null;
+      if (self.isPinned) {
+        prev = await ctx.db.article.findFirst({
+          where: { ...base, isPinned: true, updatedAt: { gt: self.updatedAt } },
+          orderBy: { updatedAt: "asc" },
+          select: pick,
+        });
+      } else {
+        prev = await ctx.db.article.findFirst({
+          where: { ...base, isPinned: false, updatedAt: { gt: self.updatedAt } },
+          orderBy: { updatedAt: "asc" },
+          select: pick,
+        });
+        if (!prev) {
+          prev = await ctx.db.article.findFirst({
+            where: { ...base, isPinned: true },
+            orderBy: { updatedAt: "asc" },
+            select: pick,
+          });
+        }
+      }
+
+      // 下一篇：当前组内更早更新的，否则是下一组的第一篇
+      let next = null;
+      if (self.isPinned) {
+        next = await ctx.db.article.findFirst({
+          where: { ...base, isPinned: true, updatedAt: { lt: self.updatedAt } },
+          orderBy: { updatedAt: "desc" },
+          select: pick,
+        });
+        if (!next) {
+          next = await ctx.db.article.findFirst({
+            where: { ...base, isPinned: false },
+            orderBy: { updatedAt: "desc" },
+            select: pick,
+          });
+        }
+      } else {
+        next = await ctx.db.article.findFirst({
+          where: { ...base, isPinned: false, updatedAt: { lt: self.updatedAt } },
+          orderBy: { updatedAt: "desc" },
+          select: pick,
+        });
+      }
+
+      return { prev, next };
+    }),
+
   create: protectedProcedure
     .input(
       z.object({

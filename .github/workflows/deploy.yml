@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches: [main]
-  workflow_dispatch: # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -20,10 +20,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          load: true # 加载到 runner 本地 docker，用于打包直传
+          load: true
           tags: kb:latest
           build-args: |
             NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
       - name: 打包镜像
         run: |
@@ -48,7 +49,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "kb.tar.gz"
           target: "/opt/kb/"
-          timeout: "1800s" # 大文件传输，30 分钟上限
+          timeout: "1800s"
 
       - name: 加载镜像并启动
         uses: appleboy/ssh-action@v1
@@ -60,7 +61,29 @@ jobs:
           script: |
             set -e
             cd /opt/kb
+            mkdir -p data
+            if [ ! -f .env ]; then
+              SECRET=$(openssl rand -base64 32)
+              {
+                echo "AUTH_SECRET=\"${SECRET}\""
+                echo "DATABASE_URL=\"file:/data/dev.db\""
+                echo "ATTACHMENT_STORAGE_DIR=\"/data/attachments\""
+                echo "AUTH_TRUST_HOST=\"true\""
+                echo "NEXT_PUBLIC_ADMIN_BASE_PATH=\"${ADMIN_BASE_PATH}\""
+                echo "NEXT_PUBLIC_SITE_URL=\"${SITE_URL}\""
+              } > .env
+              chmod 600 .env
+              echo "✅ 已创建 .env（AUTH_SECRET 随机生成，请妥善备份）"
+            else
+              echo "ℹ️ .env 已存在，跳过创建"
+            fi
+            chmod 600 .env
             docker load < kb.tar.gz
             rm -f kb.tar.gz
             docker compose up -d
             docker image prune -f
+            echo "✅ 部署完成"
+          envs: ADMIN_BASE_PATH,SITE_URL
+        env:
+          ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
+          SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}

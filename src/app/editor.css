@@ -1,0 +1,613 @@
+/* Editor + Reader styles (TipTap / prose-kb) — only loaded on article and editor pages */
+
+/* 富文本阅读样式 */
+@utility prose-kb {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--color-ink-secondary);
+}
+
+/* TipTap 编辑器占位提示 */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-ink-faint);
+  pointer-events: none;
+  height: 0;
+}
+
+.prose-kb h1 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.23;
+  letter-spacing: -0.625px;
+  color: var(--color-ink);
+  margin: 2em 0 0.75em;
+}
+.prose-kb h2 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.27;
+  letter-spacing: -0.25px;
+  color: var(--color-ink);
+  margin: 1.75em 0 0.6em;
+}
+.prose-kb h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.5em 0 0.5em;
+}
+.prose-kb h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.25em 0 0.5em;
+}
+.prose-kb h5 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.1em 0 0.4em;
+}
+.prose-kb h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1em 0 0.4em;
+}
+.prose-kb p {
+  margin: 0.9em 0;
+}
+.prose-kb > :first-child {
+  margin-top: 0;
+}
+.prose-kb ul,
+.prose-kb ol {
+  margin: 0.9em 0;
+  padding-left: 1.5em;
+}
+.prose-kb ul {
+  list-style: disc;
+}
+.prose-kb ol {
+  list-style: decimal;
+}
+.prose-kb blockquote {
+  border-left: 3px solid var(--color-hairline);
+  padding-left: 1em;
+  color: var(--color-ink-muted);
+  margin: 1.2em 0;
+}
+/* ─── 链接卡片（编辑器 + 阅读页共用） ─── */
+.kb-link-card {
+  position: relative;
+  margin: 1.2em 0;
+  border: 1.5px solid rgba(49, 48, 46, 0.45);
+  border-radius: 10px;
+  background: var(--color-canvas);
+  overflow: hidden;
+}
+.kb-link-card,
+.kb-link-card-inner {
+  display: flex;
+  align-items: stretch;
+  text-decoration: none;
+}
+.kb-link-card-thumb {
+  width: 96px;
+  min-height: 72px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-right: 1.5px solid rgba(49, 48, 46, 0.2);
+}
+.kb-link-card-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-faint);
+  background: var(--color-canvas-soft);
+}
+.kb-link-card-logo {
+  width: 96px;
+  min-height: 72px;
+  flex-shrink: 0;
+  padding: 16px;
+  object-fit: contain;
+  background: var(--color-canvas-soft);
+  border-right: 1.5px solid rgba(49, 48, 46, 0.2);
+}
+.kb-link-card-body {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.kb-link-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kb-link-card-desc {
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.kb-link-card-url {
+  font-size: 11.5px;
+  color: var(--color-ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kb-link-card-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-hairline);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.kb-link-card-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--color-ink-muted);
+  transition: color 0.15s, background 0.15s;
+}
+.kb-link-card-actions button:hover {
+  color: var(--color-ink);
+  background: var(--color-canvas-soft);
+}
+.prose-kb code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  background-color: var(--color-canvas-soft);
+  border: 1px solid var(--color-hairline);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+.prose-kb pre {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  border-radius: 12px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+}
+.prose-kb pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* ── 代码块（编辑器 + 阅读页共用）：语法高亮明暗主题 ── */
+
+/* 主题变量（阅读页 pre.kb-code 与编辑器 div.kb-code-block 均带 data-theme） */
+.prose-kb .kb-code[data-theme="light"],
+.prose-kb .kb-code-block[data-theme="light"] {
+  --kb-code-bg: #f6f5f4;
+  --kb-code-fg: #31302e;
+  --kb-code-comment: #6e7781;
+  --kb-code-keyword: #cf222e;
+  --kb-code-string: #0a3069;
+  --kb-code-number: #0550ae;
+  --kb-code-title: #8250df;
+  --kb-code-built-in: #953800;
+  --kb-code-attr: #0550ae;
+  --kb-code-meta: #953800;
+  --kb-code-operator: #31302e;
+}
+.prose-kb .kb-code[data-theme="dark"],
+.prose-kb .kb-code-block[data-theme="dark"] {
+  --kb-code-bg: #0d1117;
+  --kb-code-fg: #e6edf3;
+  --kb-code-comment: #8b949e;
+  --kb-code-keyword: #ff7b72;
+  --kb-code-string: #a5d6ff;
+  --kb-code-number: #79c0ff;
+  --kb-code-title: #d2a8ff;
+  --kb-code-built-in: #ffa657;
+  --kb-code-attr: #79c0ff;
+  --kb-code-meta: #ffa657;
+  --kb-code-operator: #e6edf3;
+}
+
+/* 块容器（阅读页 pre / 编辑器 .kb-code-block 内 pre） */
+.prose-kb .kb-code,
+.prose-kb .kb-code-block pre {
+  background-color: var(--kb-code-bg);
+  color: var(--kb-code-fg);
+  border-radius: 12px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  font-size: 0.875em;
+  line-height: 1.65;
+  text-shadow: none;
+}
+/* 编辑器：容器本身圆角 + 选中描边，pre 顶部为悬浮工具条留白 */
+.prose-kb .kb-code-block {
+  border-radius: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.prose-kb .kb-code-block pre {
+  padding-top: 44px;
+  margin: 0;
+}
+.prose-kb .kb-code-block[data-selected="true"] {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 阅读页代码块复制按钮 */
+.prose-kb .kb-code-wrap {
+  position: relative;
+}
+.prose-kb .kb-code-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.prose-kb .kb-code-wrap:hover .kb-code-copy,
+.prose-kb .kb-code-copy:focus-visible {
+  opacity: 1;
+}
+.prose-kb .kb-code-copy[data-theme="light"] {
+  color: #8a8580;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: #e0ddd8;
+}
+.prose-kb .kb-code-copy[data-theme="light"]:hover {
+  color: #31302e;
+  background: #ffffff;
+}
+.prose-kb .kb-code-copy[data-theme="dark"] {
+  color: #9d9d9d;
+  background: rgba(13, 17, 23, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.prose-kb .kb-code-copy[data-theme="dark"]:hover {
+  color: #ffffff;
+  background: rgba(22, 27, 34, 0.95);
+}
+.prose-kb .kb-code-copy--copied,
+.prose-kb .kb-code-copy--copied[data-theme="light"] {
+  color: var(--color-primary);
+  border-color: transparent;
+}
+.prose-kb .kb-code-copy--copied[data-theme="dark"] {
+  color: #58a6ff;
+  border-color: transparent;
+}
+
+/* code 元素还原为纯净的代码样式（覆盖行内 code 样式） */
+.prose-kb .kb-code code,
+.prose-kb .kb-code-block pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* 语法 token 配色 */
+.prose-kb .hljs-comment,
+.prose-kb .hljs-quote {
+  color: var(--kb-code-comment);
+  font-style: italic;
+}
+.prose-kb .hljs-keyword,
+.prose-kb .hljs-selector-tag,
+.prose-kb .hljs-template-tag,
+.prose-kb .hljs-deletion {
+  color: var(--kb-code-keyword);
+}
+.prose-kb .hljs-string,
+.prose-kb .hljs-regexp,
+.prose-kb .hljs-addition,
+.prose-kb .hljs-code {
+  color: var(--kb-code-string);
+}
+.prose-kb .hljs-number,
+.prose-kb .hljs-symbol,
+.prose-kb .hljs-bullet,
+.prose-kb .hljs-variable,
+.prose-kb .hljs-template-variable,
+.prose-kb .hljs-meta .hljs-string {
+  color: var(--kb-code-number);
+}
+.prose-kb .hljs-title,
+.prose-kb .hljs-title.function_,
+.prose-kb .hljs-function .hljs-title,
+.prose-kb .hljs-title.class_,
+.prose-kb .hljs-type {
+  color: var(--kb-code-title);
+}
+.prose-kb .hljs-built_in,
+.prose-kb .hljs-section,
+.prose-kb .hljs-params,
+.prose-kb .hljs-meta {
+  color: var(--kb-code-built-in);
+}
+.prose-kb .hljs-attr,
+.prose-kb .hljs-name,
+.prose-kb .hljs-selector-id,
+.prose-kb .hljs-selector-class,
+.prose-kb .hljs-selector-attr,
+.prose-kb .hljs-selector-pseudo {
+  color: var(--kb-code-attr);
+}
+.prose-kb .hljs-emphasis {
+  font-style: italic;
+}
+.prose-kb .hljs-strong {
+  font-weight: 700;
+}
+.prose-kb .hljs-operator,
+.prose-kb .hljs-punctuation {
+  color: var(--kb-code-operator);
+}
+.prose-kb .hljs-link {
+  color: var(--kb-code-title);
+  text-decoration: underline;
+}
+.prose-kb a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-kb img {
+  display: block;
+  margin: 1.2em auto; /* 普通图片默认居中；kb-img-wrap 内的图片由内联样式/容器控制 */
+  border-radius: 12px;
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.15s ease;
+}
+/* 带旋转/对齐的图片：外层容器按旋转包围盒预留空间（aspect-ratio），
+ * 内层图片绝对居中并旋转，避免 transform 悬浮覆盖相邻内容。 */
+.prose-kb .kb-img-wrap {
+  position: relative;
+  margin: 1.2em auto;
+  line-height: 0;
+}
+.prose-kb .kb-img-wrap img {
+  border-radius: 12px;
+}
+.prose-kb .kb-img-wrap img[data-style="border"] {
+  border: 1px solid #d8d5d0;
+}
+.prose-kb .kb-img-wrap img[data-style="shadow"] {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.prose-kb .node-image.ProseMirror-selectednode .kb-img-wrap img,
+.prose-kb .kb-img-wrap[data-selected="true"] img {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.prose-kb hr {
+  border: none;
+  border-top: 1px solid var(--color-hairline);
+  margin: 2em 0;
+}
+
+/* 高亮标记（马克笔） */
+.prose-kb mark {
+  background-color: #ffe483;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* 任务列表 */
+.prose-kb ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.prose-kb ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0.4em 0;
+}
+.prose-kb ul[data-type="taskList"] li > label {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  user-select: none;
+  flex-shrink: 0;
+}
+.prose-kb ul[data-type="taskList"] li > label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+.prose-kb ul[data-type="taskList"] li > div {
+  flex: 1;
+  min-width: 0;
+}
+.prose-kb ul[data-type="taskList"] li > div > :first-child {
+  margin-top: 0;
+}
+.prose-kb ul[data-type="taskList"] li > div > :last-child {
+  margin-bottom: 0;
+}
+.prose-kb ul[data-type="taskList"] li[data-checked="true"] > div {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* 表格 */
+.prose-kb table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.2em 0;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+/* 编辑器内启用固定布局，配合列宽拖拽的 colgroup */
+.ProseMirror.prose-kb table {
+  table-layout: fixed;
+}
+.prose-kb th,
+.prose-kb td {
+  border: 1px solid var(--color-hairline);
+  padding: 6px 12px;
+  text-align: left;
+  vertical-align: top;
+  position: relative;
+  min-width: 48px;
+}
+.prose-kb th {
+  background-color: var(--color-canvas-soft);
+  font-weight: 600;
+}
+/* 多选单元格高亮（prosemirror-tables 注入 .selectedCell 装饰） */
+.prose-kb .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 117, 222, 0.1);
+  z-index: 2;
+  pointer-events: none;
+}
+/* 列宽拖拽手柄 */
+.prose-kb .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--color-primary);
+  pointer-events: none;
+  z-index: 3;
+}
+.prose-kb .resize-cursor,
+.prose-kb .resize-cursor * {
+  cursor: col-resize;
+}
+
+/* 表格外包裹（tiptap TableView 生成），允许横向溢出以容纳左上角全选手柄 */
+.ProseMirror.prose-kb .tableWrapper {
+  position: relative;
+  margin: 1.2em 0;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+.ProseMirror.prose-kb .tableWrapper table {
+  margin: 0;
+}
+
+/* 左上角全选手柄（九宫格图标） */
+.kb-table-grip {
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #b6b2ad;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.kb-table-grip:hover {
+  color: var(--color-primary);
+  background: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+/* 右键单元格菜单 */
+.kb-context-menu {
+  min-width: 148px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-family: inherit;
+}
+.kb-context-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  font-size: 13px;
+  color: #31302e;
+  cursor: pointer;
+  font-family: inherit;
+}
+.kb-context-item:hover {
+  background: #f4f2ef;
+}
+.kb-context-item.is-danger {
+  color: #cf222e;
+}
+.kb-context-item.is-danger:hover {
+  background: #fdecec;
+}
+.kb-context-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: #eceae6;
+}
+
+/* 代码块与任务列表在编辑时的选中态；图片节点用内边框，去掉 tiptap 外层 node-image 的外框 */
+.prose-kb .ProseMirror-selectednode {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.prose-kb .node-image.ProseMirror-selectednode,
+.prose-kb .node-image .ProseMirror-selectednode {
+  outline: none;
+}

@@ -25,6 +25,23 @@ const nextConfig: NextConfig = {
       ],
     };
   },
+  async headers() {
+    return [
+      {
+        // 首页也是 auth 相关的动态渲染，默认 no-store 会禁用 bfcache
+        source: "/",
+        headers: [
+          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/article/:id",
+        headers: [
+          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

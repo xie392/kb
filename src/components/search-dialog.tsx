@@ -72,8 +72,8 @@ export default function SearchDialog() {
           <circle cx="9" cy="9" r="5.5" />
           <path d="M13.5 13.5L17 17" strokeLinecap="round" />
         </svg>
-        搜索
-        <kbd className="hidden sm:inline font-hand-body text-[12px] text-ink-faint border border-hairline rounded px-1">
+        <span>搜索</span>
+        <kbd aria-hidden="true" className="hidden sm:inline font-hand-body text-[12px] text-ink-faint border border-hairline rounded px-1">
           ⌘K
         </kbd>
       </button>

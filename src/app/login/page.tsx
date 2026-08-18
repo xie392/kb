@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ADMIN_HOME } from "@/lib/config";
 import { SketchDecorations } from "@/components/sketch/sketch-decorations";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -46,9 +47,7 @@ export default function LoginPage() {
       <section className="hidden lg:flex flex-col justify-center p-12 xl:pl-28 relative overflow-hidden z-10">
         <div className="relative max-w-md">
           <div className="flex items-center gap-2">
-            <span className="w-10 h-10 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[22px] font-bold text-secondary rotate-[-4deg]">
-              知
-            </span>
+            <Logo size="md" />
             <span className="font-hand-display text-[26px] font-bold text-ink-secondary rotate-[-1deg]">
               我的知识库
             </span>
@@ -78,9 +77,7 @@ export default function LoginPage() {
       <section className="flex items-center justify-center p-6 relative z-10">
         <div className="w-full max-w-100 fade-up">
           <div className="flex items-center gap-2 mb-10 lg:hidden">
-            <span className="w-10 h-10 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[22px] font-bold text-secondary rotate-[-4deg]">
-              知
-            </span>
+            <Logo size="md" />
             <span className="font-hand-display text-[26px] font-bold text-ink-secondary">我的知识库</span>
           </div>
 
