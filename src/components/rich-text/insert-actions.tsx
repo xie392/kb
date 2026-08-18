@@ -13,6 +13,7 @@ import {
   HandTable,
   HandTaskList,
 } from "./hand-icons";
+import { openLinkDialog } from "./link-dialog";
 
 export interface InsertAction {
   id: string;
@@ -302,14 +303,7 @@ export function getInsertActions({
       icon: <HandLink className="h-4 w-4" />,
       run: () => {
         prepareInsert();
-        const prev = editor.getAttributes("link").href as string | undefined;
-        const url = window.prompt("链接 URL", prev ?? "https://");
-        if (url === null) return;
-        if (url === "") {
-          editor.chain().focus().extendMarkRange("link").unsetLink().run();
-          return;
-        }
-        editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+        openLinkDialog();
       },
     },
   ];

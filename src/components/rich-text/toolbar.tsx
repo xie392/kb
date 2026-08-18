@@ -47,6 +47,7 @@ import {
   HandUndo,
 } from "./hand-icons";
 import { IconAlignCenter, IconAlignLeft, IconAlignRight } from "./icons";
+import { openLinkDialog } from "./link-dialog";
 
 /* ─── 工具栏基础组件 ─── */
 
@@ -150,13 +151,7 @@ export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): Too
         const url = window.prompt("图片 URL（或 base64 数据）");
         if (url) editor.chain().focus().setImage({ src: url }).run();
       }, icon: opts?.uploading ? <LoaderIcon /> : <HandImage className="h-4 w-4" /> },
-      { title: "链接", onClick: () => {
-        const prev = editor.getAttributes("link").href as string | undefined;
-        const url = window.prompt("链接 URL", prev ?? "https://");
-        if (url === null) return;
-        if (url === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
-        editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-      }, active: editor.isActive("link"), icon: <HandLink className="h-4 w-4" /> },
+      { title: "链接", onClick: () => openLinkDialog(), active: editor.isActive("link"), icon: <HandLink className="h-4 w-4" /> },
     ],
   ];
 }

@@ -1,0 +1,160 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { Editor } from "@tiptap/react";
+import { getMarkRange } from "@tiptap/core";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+interface LinkDialogProps {
+  editor: Editor | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function LinkDialog({ editor, open, onOpenChange }: LinkDialogProps) {
+  const [text, setText] = useState("");
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    if (!open || !editor) return;
+    const { from, to, empty } = editor.state.selection;
+    let selectedText = empty ? "" : editor.state.doc.textBetween(from, to, "\n", " ");
+    // 未选中整段但光标在链接内时，取链接覆盖的完整文本
+    if (!selectedText && editor.isActive("link")) {
+      const range = getMarkRange(
+        editor.state.doc.resolve(editor.state.selection.from),
+        editor.schema.marks.link
+      );
+      if (range) {
+        selectedText = editor.state.doc.textBetween(range.from, range.to, "\n", " ");
+      }
+    }
+    setText(selectedText);
+    setUrl((editor.getAttributes("link").href as string) ?? "");
+  }, [editor, open]);
+
+  const applyLink = () => {
+    if (!editor) return;
+    const href = url.trim();
+    const label = text.trim() || "链接";
+    const { from, to, empty } = editor.state.selection;
+
+    if (!href) {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      onOpenChange(false);
+      return;
+    }
+
+    const chain = editor.chain().focus();
+    if (empty) {
+      chain.insertContent({
+        type: "text",
+        text: label,
+        marks: [{ type: "link", attrs: { href } }],
+      });
+    } else {
+      const selectedText = editor.state.doc.textBetween(from, to, "\n", " ");
+      if (text.trim() && text.trim() !== selectedText) {
+        chain
+          .deleteRange({ from, to })
+          .insertContent({
+            type: "text",
+            text: label,
+            marks: [{ type: "link", attrs: { href } }],
+          });
+      } else {
+        chain.extendMarkRange("link").setLink({ href });
+      }
+    }
+    chain.run();
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="font-hand-display text-[17px] font-bold">链接</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 px-1">
+          <div className="space-y-1">
+            <label htmlFor="kb-link-text" className="text-xs text-ink-muted">
+              显示内容
+            </label>
+            <Input
+              id="kb-link-text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="链接上显示的文字"
+            />
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="kb-link-url" className="text-xs text-ink-muted">
+              链接地址
+            </label>
+            <Input
+              id="kb-link-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyLink();
+                }
+              }}
+            />
+          </div>
+        </div>
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              editor?.chain().focus().extendMarkRange("link").unsetLink().run();
+              onOpenChange(false);
+            }}
+          >
+            移除链接
+          </Button>
+          <Button type="button" onClick={applyLink}>
+            应用
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ─── 全局打开入口：工具栏/插入菜单/slash 菜单共用同一个弹窗 ─── */
+
+let requestOpen: (() => void) | null = null;
+
+export function openLinkDialog() {
+  requestOpen?.();
+}
+
+/** 挂载在编辑区，持有 editor 引用并接收全局打开请求 */
+export function LinkDialogHost({ editor }: { editor: Editor | null }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    requestOpen = () => setOpen(true);
+    return () => {
+      requestOpen = null;
+    };
+  }, []);
+
+  return <LinkDialog editor={editor} open={open} onOpenChange={setOpen} />;
+}

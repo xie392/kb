@@ -303,6 +303,35 @@ export function HandLink(props: HandIconProps) {
   );
 }
 
+export function HandUnlink(props: HandIconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M6 10 10 6" />
+      <path d="M7 3.6 8.6 2a3 3 0 0 1 4.2 4.2L11.2 7.4" />
+      <path d="M9 12.4 7.4 14a3 3 0 0 1-4.2-4.2L4.8 8.6" />
+      <path d="M2.8 3.2l10.4 10" />
+    </Svg>
+  );
+}
+
+export function HandExternalLink(props: HandIconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M13.4 9.6V13.4H2.6V2.6h3.8" />
+      <path d="M7 9 13 3M9.4 2.6h3.8v3.8" />
+    </Svg>
+  );
+}
+
+export function HandPencil(props: HandIconProps) {
+  return (
+    <Svg {...props}>
+      <path d="m10.8 2.8 2.4 2.4L6 12.4 3.2 13l.6-2.8z" />
+      <path d="M9.6 4 12 6.4M3.8 12.2l1.6.4" />
+    </Svg>
+  );
+}
+
 export function HandTable(props: HandIconProps) {
   return (
     <Svg {...props}>

@@ -4,6 +4,8 @@ import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
 import { BlockMenu } from "./block-menu";
 import { SlashMenu } from "./slash-menu";
+import { LinkBubble } from "./link-bubble";
+import { LinkDialogHost } from "./link-dialog";
 
 interface EditorAreaProps {
   editor: Editor | null;
@@ -28,6 +30,8 @@ export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
       <EditorContent editor={editor} />
       <BlockMenu editor={editor} />
       <SlashMenu editor={editor} onUploadImage={onUploadImage} />
+      <LinkBubble editor={editor} />
+      <LinkDialogHost editor={editor} />
     </div>
   );
 }
