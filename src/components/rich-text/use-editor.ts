@@ -22,6 +22,7 @@ import { Markdown } from "@tiptap/markdown";
 import { MarkdownPaste } from "./markdown-paste";
 import { CustomCodeBlock } from "./code-block-node";
 import { CustomImage } from "./image-node";
+import { LinkCard } from "./link-card";
 import type { OutlineItem } from "./types";
 
 export interface UseArticleEditorOptions {
@@ -53,7 +54,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       Superscript,
       TextStyle,
       Color,
-      TextAlign.configure({ types: ["heading", "paragraph", "taskItem"] }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Table.configure({ resizable: true, lastColumnResizable: false }),
@@ -61,6 +62,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       TableHeader,
       TableCell,
       CustomImage,
+      LinkCard,
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: placeholder ?? "开始写作…" }),
       Markdown,

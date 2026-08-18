@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import HandChart from "@/components/hand-chart";
 import { createServerCaller } from "@/trpc/server";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 function HandPost({
   article,

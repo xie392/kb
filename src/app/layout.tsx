@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Geist, Caveat, Patrick_Hand } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { SITE_URL } from "@/lib/config";
 import TRPCProvider from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -18,8 +19,30 @@ const patrick = Patrick_Hand({
 });
 
 export const metadata: Metadata = {
-  title: "个人知识库",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "个人知识库",
+    template: "%s | 个人知识库",
+  },
   description: "轻量化、私有化的个人知识管理工具",
+  keywords: ["知识库", "知识管理", "个人笔记", "博客"],
+  applicationName: "个人知识库",
+  robots: { index: true, follow: true },
+  icons: { icon: "/logo.svg" },
+  openGraph: {
+    type: "website",
+    locale: "zh_CN",
+    siteName: "个人知识库",
+    title: "个人知识库",
+    description: "轻量化、私有化的个人知识管理工具",
+    images: [{ url: "/logo.svg", width: 512, height: 512, alt: "个人知识库" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "个人知识库",
+    description: "轻量化、私有化的个人知识管理工具",
+    images: ["/logo.svg"],
+  },
 };
 
 export default function RootLayout({

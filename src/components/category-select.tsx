@@ -207,7 +207,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
               if (e.key === "Escape") setOpen(false);
             }}
             placeholder="搜索分类…"
-            className="w-full h-7 px-2.5 text-[12px] text-ink-muted bg-canvas-soft border border-transparent rounded-md outline-hidden focus:border-primary/40 placeholder:text-[#c5c0b9]"
+            className="w-full h-7 px-2 text-[12px] text-ink-secondary bg-transparent rounded-md outline-hidden border border-hairline focus:border-primary/50 placeholder:text-[#c5c0b9]"
           />
         </div>
 

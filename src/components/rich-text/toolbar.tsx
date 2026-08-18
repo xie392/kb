@@ -108,8 +108,9 @@ interface ToolbarImageOpts {
 }
 
 export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): ToolbarAction[][] {
-  const canLift = editor.can().chain().focus().liftListItem("listItem").run();
-  const canSink = editor.can().chain().focus().sinkListItem("listItem").run();
+  const listItemType = editor.isActive("taskItem") ? "taskItem" : "listItem";
+  const canLift = editor.can().chain().focus().liftListItem(listItemType).run();
+  const canSink = editor.can().chain().focus().sinkListItem(listItemType).run();
   return [
     [
       { title: "撤销", onClick: () => editor.chain().focus().undo().run(), icon: <HandUndo className="h-4 w-4" /> },
@@ -128,8 +129,8 @@ export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): Too
       { title: "无序列表", active: editor.isActive("bulletList"), onClick: () => editor.chain().focus().toggleBulletList().run(), icon: <HandList className="h-4 w-4" /> },
       { title: "有序列表", active: editor.isActive("orderedList"), onClick: () => editor.chain().focus().toggleOrderedList().run(), icon: <HandListOrdered className="h-4 w-4" /> },
       { title: "任务列表", active: editor.isActive("taskList"), onClick: () => editor.chain().focus().toggleTaskList().run(), icon: <HandTaskList className="h-4 w-4" /> },
-      { title: "减少缩进", disabled: !canLift, onClick: () => editor.chain().focus().liftListItem("listItem").run(), icon: <HandIndentDecrease className="h-4 w-4" /> },
-      { title: "增加缩进", disabled: !canSink, onClick: () => editor.chain().focus().sinkListItem("listItem").run(), icon: <HandIndentIncrease className="h-4 w-4" /> },
+      { title: "减少缩进", disabled: !canLift, onClick: () => editor.chain().focus().liftListItem(listItemType).run(), icon: <HandIndentDecrease className="h-4 w-4" /> },
+      { title: "增加缩进", disabled: !canSink, onClick: () => editor.chain().focus().sinkListItem(listItemType).run(), icon: <HandIndentIncrease className="h-4 w-4" /> },
     ],
     [
       { title: "左对齐", active: editor.isActive({ textAlign: "left" }), onClick: () => editor.chain().focus().setTextAlign("left").run(), icon: <IconAlignLeft /> },

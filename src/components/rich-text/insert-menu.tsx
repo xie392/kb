@@ -42,9 +42,14 @@ export function InsertMenu({ editor, openImagePicker }: InsertMenuProps) {
       >
         <HandPlus className="h-4 w-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-72 p-0">
-        <Command>
-          <CommandInput placeholder="搜索要插入的内容…" />
+      <DropdownMenuContent align="start" className="w-72 p-1">
+        <Command className="p-0">
+          <CommandInput
+            placeholder="搜索要插入的内容…"
+            className="h-7! *:data-[slot=input-group-addon]:pl-1.5! shadow-none! bg-transparent!"
+            wrapperClassName="p-0! pb-0!"
+            inputGroupClassName="border-0! bg-transparent! shadow-none! rounded-none!"
+          />
           <CommandList className="max-h-96">
             <CommandEmpty>没有找到相关内容</CommandEmpty>
             {GROUPS.map((group) => (

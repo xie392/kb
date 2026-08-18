@@ -8,6 +8,12 @@ import { NodeSelection, type EditorState } from "@tiptap/pm/state";
 import { ToolbarDivider } from "./toolbar";
 import { TableGlobalToolbar, TableCellToolbar, TableGrip, TableContextMenu, tableShouldShow } from "./table-controls";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ImageAlign, ImageStyle } from "./types";
 import {
   IconRotate,
@@ -33,20 +39,27 @@ function MenuBtn({
   children: React.ReactNode;
 }) {
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      title={title}
-      disabled={disabled}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      className={`transition-colors ${
-        active ? "bg-primary/10 text-primary" : ""
-      } ${disabled ? "opacity-30 cursor-not-allowed pointer-events-none" : ""}`}
-    >
-      {children}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={title}
+            disabled={disabled}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={onClick}
+            className={`transition-colors ${
+              active ? "bg-primary/10 text-primary" : ""
+            } ${disabled ? "opacity-30 cursor-not-allowed pointer-events-none" : ""}`}
+          >
+            {children}
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom">{title}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -146,6 +159,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
         shouldShow={shouldShow}
         options={bubbleOptions}
       >
+      <TooltipProvider delay={100}>
       <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-hairline shadow-lg">
         {nodeType === "image" && imgAttrs && (
           <>
@@ -204,6 +218,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
           <IconDelete />
         </MenuBtn>
       </div>
+      </TooltipProvider>
       </BubbleMenu>
     </>
   );

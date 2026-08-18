@@ -9,8 +9,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HandExternalLink, HandPencil, HandUnlink } from "./hand-icons";
+import { HandCard, HandExternalLink, HandPencil, HandUnlink } from "./hand-icons";
 import { openLinkDialog } from "./link-dialog";
+import { turnLinkToCard } from "./link-convert";
 
 function BubbleBtn({
   title,
@@ -76,6 +77,9 @@ export function LinkBubble({ editor }: { editor: Editor | null }) {
           }}
         >
           <HandExternalLink className="h-3.5 w-3.5" />
+        </BubbleBtn>
+        <BubbleBtn title="转为卡片" onClick={() => void turnLinkToCard(editor)}>
+          <HandCard className="h-3.5 w-3.5" />
         </BubbleBtn>
         <BubbleBtn
           title="取消链接"

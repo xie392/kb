@@ -1,11 +1,73 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { createServerCaller } from "@/trpc/server";
+import { SITE_URL } from "@/lib/config";
 import { extractToc } from "@/lib/toc";
 import { highlightCodeBlocks } from "@/lib/code-highlight";
 import ArticleToc from "@/components/article-toc";
 import ArticleCodeCopy from "@/components/article-code-copy";
+
+// generateMetadata 与页面组件共用，同一请求内只查询一次数据库
+const getArticle = cache(async (id: string) => {
+  const caller = await createServerCaller();
+  return caller.article.get({ id });
+});
+
+/** 去掉富文本标签，生成纯文本摘要 */
+function plainText(html: string) {
+  return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** 页面描述：优先用自定义摘要，否则从正文截取 */
+function getDescription(article: { summary: string | null; content: string }) {
+  return article.summary?.trim() || plainText(article.content).slice(0, 150);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  let article;
+  try {
+    article = await getArticle(id);
+  } catch {
+    return {};
+  }
+
+  const description = getDescription(article);
+  const keywords = [...article.tagNames];
+  if (article.categoryName) keywords.unshift(article.categoryName);
+
+  return {
+    title: article.title,
+    description,
+    keywords,
+    alternates: { canonical: `/article/${article.id}` },
+    // og:image 由同目录 opengraph-image.tsx 动态生成（1200×630），此处不再覆盖
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description,
+      url: `${SITE_URL}/article/${article.id}`,
+      siteName: "个人知识库",
+      locale: "zh_CN",
+      publishedTime: article.createdAt.toISOString(),
+      modifiedTime: article.updatedAt.toISOString(),
+      tags: article.tagNames,
+    },
+    // twitter:image 缺省时自动回退 og:image（动态生成图）
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description,
+    },
+  };
+}
 
 export default async function ArticlePage({
   params,
@@ -13,15 +75,30 @@ export default async function ArticlePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const caller = await createServerCaller();
 
   let article;
   try {
-    article = await caller.article.get({ id });
+    article = await getArticle(id);
   } catch {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: getDescription(article),
+    datePublished: article.createdAt.toISOString(),
+    dateModified: article.updatedAt.toISOString(),
+    author: { "@type": "Person", name: "xie392" },
+    keywords: article.tagNames.join(","),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/article/${article.id}`,
+    },
+  };
+
+  const caller = await createServerCaller();
   const list = await caller.article.list({
     status: "normal",
     page: 1,
@@ -39,6 +116,13 @@ export default async function ArticlePage({
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          // 转义 <，防止标题/摘要/标签等用户可控内容逃逸出 script 标签造成 XSS
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="flex-1 min-w-0">
         <div className="max-w-205 mx-auto">
           <nav className="flex items-center gap-2 font-hand-body text-[15px] text-ink-faint mb-8">
@@ -92,7 +176,7 @@ export default async function ArticlePage({
               </div>
             </header>
 
-            <div className="border-t-2 border-dashed border-hairline pt-8">
+            <div className="border-t-2 border-dashed border-hairline pt-4">
               <div
                 className="prose-kb"
                 dangerouslySetInnerHTML={{ __html: contentWithIds }}

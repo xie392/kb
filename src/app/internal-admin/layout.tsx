@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import AdminHeader from "./admin-header";
 import AdminNav from "@/components/admin-nav";
 import { ADMIN_HOME } from "@/lib/config";
+
+// 后台页面不参与索引：用页面级 noindex 而非 robots.txt Disallow，
+// 避免在公开的 robots.txt 中暴露后台路径。
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AdminLayout({
   children,

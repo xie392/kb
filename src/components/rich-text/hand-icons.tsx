@@ -340,3 +340,12 @@ export function HandTable(props: HandIconProps) {
     </Svg>
   );
 }
+
+export function HandCard(props: HandIconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5" />
+      <path d="M2.5 6.2h11M5.5 8.6h5M5.5 10.4h3.2" />
+    </Svg>
+  );
+}
