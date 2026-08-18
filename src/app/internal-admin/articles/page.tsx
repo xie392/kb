@@ -194,9 +194,15 @@ export default function AdminArticlesPage() {
                 <td className="px-3 py-3.5">
                   <div className="flex items-center gap-2">
                     {a.isPinned && <span className="text-primary">★</span>}
-                    <span className="font-hand-display text-[17px] font-bold text-ink-secondary truncate max-w-60">
+                    <Link
+                      href={`/article/${a.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-hand-display text-[17px] font-bold text-ink-secondary truncate max-w-60 hover:text-primary hover:underline transition-colors"
+                      title={a.title}
+                    >
                       {a.title}
-                    </span>
+                    </Link>
                   </div>
                 </td>
                 <td className="px-3 py-3.5 font-hand-body text-[14px] text-sticker-pink">
