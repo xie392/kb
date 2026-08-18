@@ -1,4 +1,4 @@
-FROM m.daocloud.io/docker.io/library/node:22-slim AS base
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH"
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ openssl \
@@ -24,7 +24,7 @@ ENV DATABASE_URL=$DATABASE_URL
 RUN pnpm exec prisma migrate deploy
 RUN pnpm build
 
-FROM m.daocloud.io/docker.io/library/node:22-slim AS runner
+FROM node:22-slim AS runner
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH" NODE_ENV=production PORT=3000
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 WORKDIR /app
