@@ -26,10 +26,13 @@ jobs:
             NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
+      - name: 安装 zstd
+        run: sudo apt-get install -y zstd
+
       - name: 打包镜像
         run: |
-          docker save kb:latest | gzip > kb.tar.gz
-          ls -lh kb.tar.gz
+          docker save kb:latest | zstd -T0 -19 -o kb.tar.zst
+          ls -lh kb.tar.zst
 
       - name: 同步部署文件到服务器
         uses: appleboy/scp-action@v0.1.7
@@ -47,7 +50,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "kb.tar.gz"
+          source: "kb.tar.zst"
           target: "/opt/kb/"
           timeout: "1800s"
 
@@ -82,8 +85,8 @@ jobs:
               echo "ℹ️ .env 已存在，跳过创建"
             fi
             chmod 600 .env
-            docker load < kb.tar.gz
-            rm -f kb.tar.gz
+            docker load < kb.tar.zst
+            rm -f kb.tar.zst
             docker compose up -d
             docker image prune -f
             echo "✅ 部署完成"

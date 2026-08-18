@@ -30,6 +30,9 @@ RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 WORKDIR /app
 COPY --from=build /app ./
 
+# 删除构建缓存，减小镜像体积
+RUN rm -rf .next/cache node_modules/.cache
+
 RUN mkdir -p /data
 VOLUME ["/data"]
 
