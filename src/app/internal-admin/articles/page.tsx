@@ -41,21 +41,26 @@ const statusTabs: { id: StatusFilter; label: string }[] = [
   { id: "trash", label: "回收站" },
 ];
 
+const PAGE_SIZE = 20;
+
 export default function AdminArticlesPage() {
   const [filter, setFilter] = useState<StatusFilter>("normal");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [visibilityUpdatingId, setVisibilityUpdatingId] = useState<string | null>(null);
   const [pendingHardDelete, setPendingHardDelete] = useState<string[] | null>(null);
 
   const { data, isFetching } = api.article.list.useQuery({
     status: filter,
-    page: 1,
-    pageSize: 100,
+    page,
+    pageSize: PAGE_SIZE,
   });
   const rows: Row[] = (data?.items ?? []).map((a) => ({
     ...a,
     updatedAt: String(a.updatedAt),
   }));
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const utils = api.useUtils();
   const invalidate = () => utils.article.list.invalidate();
@@ -111,7 +116,11 @@ export default function AdminArticlesPage() {
         {statusTabs.map((tab) => (
           <Button
             key={tab.id}
-            onClick={() => setFilter(tab.id)}
+            onClick={() => {
+              setFilter(tab.id);
+              setPage(1);
+              setSelected(new Set());
+            }}
             variant={filter === tab.id ? "outline" : "ghost"}
             className={`px-4 text-[17px] font-hand-display ${
               filter === tab.id
@@ -287,6 +296,55 @@ export default function AdminArticlesPage() {
           </tbody>
         </table>
       </div>
+
+      {/* 分页 */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-1">
+          <span className="font-hand-body text-[13px] text-ink-faint">
+            共 {total} 篇，第 {page} / {totalPages} 页
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="h-8 px-3 text-[13px] font-hand-body"
+            >
+              上一页
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+              .map((p, idx, arr) => (
+                <span key={p} className="flex items-center">
+                  {idx > 0 && arr[idx - 1] !== p - 1 && (
+                    <span className="px-1 text-ink-faint">…</span>
+                  )}
+                  <Button
+                    variant={p === page ? "outline" : "ghost"}
+                    size="sm"
+                    disabled={isFetching}
+                    onClick={() => setPage(p)}
+                    className={`h-8 w-8 p-0 text-[13px] font-hand-body ${
+                      p === page ? "text-primary font-bold" : "text-ink-muted"
+                    }`}
+                  >
+                    {p}
+                  </Button>
+                </span>
+              ))}
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="h-8 px-3 text-[13px] font-hand-body"
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AlertDialog
         open={pendingHardDelete !== null}

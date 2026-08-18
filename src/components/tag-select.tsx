@@ -141,7 +141,7 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
         sideOffset={4}
         className="w-64 p-1"
       >
-        <div className="px-1 pb-1.5">
+        <div className="px-1 pb-1">
           <input
             autoFocus
             type="text"
@@ -156,8 +156,9 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
               }
             }}
             placeholder="搜索或创建标签…"
-            className="w-full h-7 px-2.5 text-[12px] text-ink-muted bg-canvas-soft border border-transparent rounded-md outline-hidden focus:border-primary/40 placeholder:text-[#c5c0b9]"
+            className="w-full h-7 px-2 text-[13px] font-hand-body text-ink-secondary bg-transparent border-0 rounded-md outline-hidden placeholder:text-ink-faint"
           />
+          <div className="mx-1 h-px bg-hairline" />
         </div>
         <div className="max-h-50 overflow-y-auto">
           {filtered.map((t) => {

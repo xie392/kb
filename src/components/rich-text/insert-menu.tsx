@@ -46,11 +46,13 @@ export function InsertMenu({ editor, openImagePicker }: InsertMenuProps) {
         <Command className="p-0">
           <CommandInput
             placeholder="搜索要插入的内容…"
-            className="h-7! *:data-[slot=input-group-addon]:pl-1.5! shadow-none! bg-transparent!"
+            className="h-7! pl-2! shadow-none! bg-transparent!"
             wrapperClassName="p-0! pb-0!"
-            inputGroupClassName="border-0! bg-transparent! shadow-none! rounded-none!"
+            inputGroupClassName="border-0! bg-transparent! shadow-none! rounded-none! h-7!"
+            hideSearchIcon
+            showDivider
           />
-          <CommandList className="max-h-96">
+          <CommandList className="max-h-96 pt-0.5">
             <CommandEmpty>没有找到相关内容</CommandEmpty>
             {GROUPS.map((group) => (
               <CommandGroup key={group} heading={group}>

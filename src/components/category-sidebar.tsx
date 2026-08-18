@@ -168,6 +168,21 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
     return false;
   }
 
+  function findRootNode(nodes: CatNode[], targetId: string): CatNode | null {
+    for (const node of nodes) {
+      if (node.id === targetId) return node;
+      if (findRootNode(node.children, targetId)) return node;
+    }
+    return null;
+  }
+
+  const displayTree = activeCategoryId
+    ? (() => {
+        const root = findRootNode(tree, activeCategoryId);
+        return root ? [root] : tree;
+      })()
+    : tree;
+
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     if (activeCategoryId) {
@@ -178,14 +193,9 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
 
   useEffect(() => {
     if (!activeCategoryId) return;
-    setExpandedIds((prev) => {
-      if (prev.has(activeCategoryId)) return prev;
-      const pathIds = new Set<string>();
-      collectPath(treeRef.current, activeCategoryId, pathIds);
-      const next = new Set(prev);
-      for (const id of pathIds) next.add(id);
-      return next;
-    });
+    const pathIds = new Set<string>();
+    collectPath(treeRef.current, activeCategoryId, pathIds);
+    setExpandedIds(pathIds);
   }, [activeCategoryId]);
 
   const handleToggle = (id: string) => {
@@ -215,7 +225,7 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
           >
             <span aria-hidden="true">🏠</span> 首页
           </Link>
-          {tree.map((node) => (
+          {displayTree.map((node) => (
             <CategoryNode
               key={node.id}
               node={node}
@@ -226,7 +236,7 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
               depth={0}
             />
           ))}
-          {uncategorized.length > 0 && (
+          {!activeCategoryId && uncategorized.length > 0 && (
             <div>
               <div
                 className="flex items-center gap-1 py-0.5 px-1"

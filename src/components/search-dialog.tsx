@@ -85,7 +85,7 @@ export default function SearchDialog() {
         title="搜索"
         description="搜索标题、正文、分类或标签…"
       >
-        <Command shouldFilter={false}>
+        <Command shouldFilter={false} className="bg-transparent p-0">
           <CommandInput
             autoFocus
             value={keyword}
