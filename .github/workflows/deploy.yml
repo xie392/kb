@@ -6,55 +6,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 准备 BuildKit
-        uses: docker/setup-buildx-action@v3
-
-      - name: 构建镜像
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          load: true
-          tags: kb:latest
-          build-args: |
-            NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
-
-      - name: 安装 zstd
-        run: sudo apt-get install -y zstd
-
-      - name: 打包镜像
-        run: |
-          docker save kb:latest | zstd -T0 -19 -o kb.tar.zst
-          ls -lh kb.tar.zst
-
-      - name: 同步部署文件到服务器
+      - name: 同步代码到服务器
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yml,Caddyfile"
+          source: ".,!.git,!node_modules,!.next,!*.db,!*.db-journal,!dev.db"
           target: "/opt/kb/"
-          timeout: "120s"
+          timeout: "300s"
+          strip_components: 1
 
-      - name: 传输镜像到服务器
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "kb.tar.zst"
-          target: "/opt/kb/"
-          timeout: "1800s"
-
-      - name: 加载镜像并启动
+      - name: 服务器构建镜像并部署
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -64,7 +34,11 @@ jobs:
           script: |
             set -e
             cd /opt/kb
+
+            # 创建必要目录
             mkdir -p data
+
+            # 创建 .env（如不存在）
             if [ ! -f .env ]; then
               SECRET=$(openssl rand -base64 32)
               {
@@ -79,16 +53,22 @@ jobs:
                 echo "INIT_PASSWORD=\"${INIT_PASSWORD}\""
               } > .env
               chmod 600 .env
-              echo "✅ 已创建 .env（AUTH_SECRET 随机生成，请妥善备份）"
+              echo "✅ 已创建 .env"
               echo "   初始账号：${INIT_USERNAME}"
             else
-              echo "ℹ️ .env 已存在，跳过创建"
+              echo "ℹ️ .env 已存在"
             fi
             chmod 600 .env
-            docker load < kb.tar.zst
-            rm -f kb.tar.zst
+
+            # 构建镜像
+            docker build -t kb:latest .
+
+            # 启动服务
             docker compose up -d
-            docker image prune -f
+
+            # 清理
+            docker builder prune -f
+
             echo "✅ 部署完成"
           envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
         env:
