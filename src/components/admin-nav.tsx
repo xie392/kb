@@ -82,13 +82,13 @@ export default function AdminNav() {
           <Link
             key={item.label}
             href={item.href}
-            className={`flex items-center gap-2.5 px-2.5 py-[8px] sketch-border text-[16px] font-hand-display transition-colors ${
+            className={`flex items-center gap-2.5 px-2.5 py-2 sketch-border text-[16px] font-hand-display transition-colors ${
               active
-                ? "bg-[#f6f5f4] sketch-border text-[#0075de] font-bold"
-                : "text-[#615d59] hover:bg-[#f6f5f4]/60 hover:text-[#31302e]"
+                ? "bg-canvas-soft sketch-border text-primary font-bold"
+                : "text-ink-muted hover:bg-canvas-soft/60 hover:text-ink-secondary"
             }`}
           >
-            <span className={active ? "text-primary" : "text-[#a39e98]"}>
+            <span className={active ? "text-primary" : "text-ink-faint"}>
               <NavIcon name={item.icon} />
             </span>
             {item.label}

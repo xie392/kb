@@ -13,7 +13,7 @@ export default function LogoutButton() {
         router.push(ADMIN_LOGIN);
         router.refresh();
       }}
-      className="font-hand-body text-[14px] text-[#615d59] hover:text-[#0075de] transition-colors"
+      className="font-hand-body text-[14px] text-ink-muted hover:text-primary transition-colors"
     >
       退出登录
     </button>

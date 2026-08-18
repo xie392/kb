@@ -170,8 +170,8 @@ export default function AdminAttachmentsPage() {
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-hand-display text-[32px] font-bold text-[#213183]">附件管理</h2>
-          <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">
+          <h2 className="font-hand-display text-[32px] font-bold text-secondary">附件管理</h2>
+          <p className="font-hand-body text-[15px] text-ink-faint mt-0.5">
             共 {data?.total ?? 0} 个附件 · 图片 ≤ {ATTACH_LIMITS.image.label}，其他文件 ≤ {ATTACH_LIMITS.file.label} · 禁止可执行/脚本文件
           </p>
         </div>
@@ -185,7 +185,7 @@ export default function AdminAttachmentsPage() {
 
       {msg && (
         <div className={`mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up`}>
-          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-[#2a9d99]" : "text-red-500"}`}>
+          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-sticker-teal" : "text-red-500"}`}>
             {msg.type === "ok" ? "✓" : "✗"} {msg.text}
           </span>
         </div>
@@ -193,7 +193,7 @@ export default function AdminAttachmentsPage() {
 
       {/* 搜索栏 */}
       <div className="flex items-center gap-3 mb-4 bg-white sketch-border sketch-shadow px-4 py-3 fade-up">
-        <span className="font-hand-display text-[15px] font-bold text-[#615d59] shrink-0">搜索</span>
+        <span className="font-hand-display text-[15px] font-bold text-ink-muted shrink-0">搜索</span>
         <Input
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
@@ -215,7 +215,7 @@ export default function AdminAttachmentsPage() {
             }
           }}
         >
-          <SelectTrigger className="data-[size=default]:h-9 px-3 text-[14px] text-[#31302e]">
+          <SelectTrigger className="data-[size=default]:h-9 px-3 text-[14px] text-ink-secondary">
             <SelectValue placeholder="全部类型" />
           </SelectTrigger>
           <SelectContent>
@@ -241,7 +241,7 @@ export default function AdminAttachmentsPage() {
             setPage(1);
           }}
           variant="outline"
-          className="h-9 px-4 text-[15px] font-bold text-[#615d59] rotate-[-0.5deg]"
+          className="h-9 px-4 text-[15px] font-bold text-ink-muted rotate-[-0.5deg]"
         >
           重置
         </Button>
@@ -251,18 +251,18 @@ export default function AdminAttachmentsPage() {
       <div className="bg-white sketch-border sketch-shadow overflow-hidden fade-up">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-[#f6f5f4] border-b-2 border-dashed border-[#e6e6e6]">
-              <th className="w-16 px-4 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">预览</th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">文件名</th>
-              <th className="w-20 px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">类型</th>
-              <th className="w-24 px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">大小</th>
-              <th className="w-32 px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">上传时间</th>
-              <th className="w-52 px-4 py-3 text-right font-hand-display text-[14px] font-bold text-[#615d59]">操作</th>
+            <tr className="bg-canvas-soft border-b-2 border-dashed border-hairline">
+              <th className="w-16 px-4 py-3 font-hand-display text-[14px] font-bold text-ink-muted">预览</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">文件名</th>
+              <th className="w-20 px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">类型</th>
+              <th className="w-24 px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">大小</th>
+              <th className="w-32 px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">上传时间</th>
+              <th className="w-52 px-4 py-3 text-right font-hand-display text-[14px] font-bold text-ink-muted">操作</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((a) => (
-              <tr key={a.id} className="border-b border-dashed border-[#e6e6e6] last:border-0 hover:bg-[#f6f5f4]/60 transition-colors">
+              <tr key={a.id} className="border-b border-dashed border-hairline last:border-0 hover:bg-canvas-soft/60 transition-colors">
                 <td className="px-4 py-3">
                   {a.kind === "image" ? (
                     <img
@@ -271,8 +271,8 @@ export default function AdminAttachmentsPage() {
                       className="w-11 h-11 object-cover sketch-border shrink-0"
                     />
                   ) : (
-                    <span className="w-11 h-11 grid place-items-center bg-[#f6f5f4] sketch-border shrink-0">
-                      <svg className="w-5 h-5 text-[#a39e98]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <span className="w-11 h-11 grid place-items-center bg-canvas-soft sketch-border shrink-0">
+                      <svg className="w-5 h-5 text-ink-faint" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M11 3H6a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 6 17h8a1.5 1.5 0 0 0 1.5-1.5V8l-4.5-5z" strokeLinejoin="round" />
                         <path d="M11 3v4.5h4.5" strokeLinejoin="round" />
                       </svg>
@@ -290,13 +290,13 @@ export default function AdminAttachmentsPage() {
                           if (e.key === "Enter") saveRename();
                           if (e.key === "Escape") setRenamingId(null);
                         }}
-                        className="h-9 w-[240px]"
+                        className="h-9 w-60"
                       />
-                      <Button onClick={saveRename} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#0075de]">保存</Button>
-                      <Button onClick={() => setRenamingId(null)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#a39e98]">取消</Button>
+                      <Button onClick={saveRename} variant="ghost" className="px-1.5 h-auto text-[13px] text-primary">保存</Button>
+                      <Button onClick={() => setRenamingId(null)} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-faint">取消</Button>
                     </div>
                   ) : (
-                    <span className="font-hand-display text-[16px] font-bold text-[#31302e] truncate max-w-[260px] block" title={a.name}>
+                    <span className="font-hand-display text-[16px] font-bold text-ink-secondary truncate max-w-65 block" title={a.name}>
                       {a.name}
                     </span>
                   )}
@@ -304,23 +304,23 @@ export default function AdminAttachmentsPage() {
                 <td className="px-3 py-3">
                   <span
                     className={`font-hand-body text-[12px] px-2 py-0.5 sketch-border ${
-                      a.kind === "image" ? "text-[#0075de] bg-[#eaf4ff]" : "text-[#ff64c8] bg-[#fff0f9]"
+                      a.kind === "image" ? "text-primary bg-[#eaf4ff]" : "text-sticker-pink bg-[#fff0f9]"
                     }`}
                   >
                     {a.kind === "image" ? "图片" : "文件"}
                   </span>
                 </td>
-                <td className="px-3 py-3 font-hand-body text-[13px] text-[#a39e98] tabular-nums whitespace-nowrap">
+                <td className="px-3 py-3 font-hand-body text-[13px] text-ink-faint tabular-nums whitespace-nowrap">
                   {formatBytes(a.size)}
                 </td>
-                <td className="px-3 py-3 font-hand-body text-[13px] text-[#a39e98] whitespace-nowrap">
+                <td className="px-3 py-3 font-hand-body text-[13px] text-ink-faint whitespace-nowrap">
                   {formatDate(a.createdAt)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2.5">
-                    <Button onClick={() => setPreview(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">预览</Button>
-                    <Button onClick={() => copyLink(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">复制链接</Button>
-                    <Button onClick={() => startRename(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">重命名</Button>
+                    <Button onClick={() => setPreview(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-muted">预览</Button>
+                    <Button onClick={() => copyLink(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-muted">复制链接</Button>
+                    <Button onClick={() => startRename(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-muted">重命名</Button>
                     <Button onClick={() => setDeleteTarget(a)} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">删除</Button>
                   </div>
                 </td>
@@ -329,7 +329,7 @@ export default function AdminAttachmentsPage() {
             {rows.length === 0 && !isFetching && (
               <tr>
                 <td colSpan={6} className="px-4 py-14 text-center">
-                  <div className="font-hand-display text-[22px] font-bold text-[#a39e98] rotate-[-1deg]">
+                  <div className="font-hand-display text-[22px] font-bold text-ink-faint rotate-[-1deg]">
                     暂无附件{searchKeyword || kind !== "all" ? "（可尝试重置搜索）" : "，先上传一个吧"}
                   </div>
                 </td>
@@ -342,14 +342,14 @@ export default function AdminAttachmentsPage() {
       {/* 分页 */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4 fade-up">
-          <span className="font-hand-body text-[14px] text-[#a39e98]">
+          <span className="font-hand-body text-[14px] text-ink-faint">
             第 {page} / {totalPages} 页 · 共 {data?.total ?? 0} 个
           </span>
           <div className="flex items-center gap-2">
-            <Button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40">
+            <Button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-ink-muted disabled:opacity-40">
               上一页
             </Button>
-            <Button disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40">
+            <Button disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} variant="outline" className="h-9 px-4 text-[14px] font-bold text-ink-muted disabled:opacity-40">
               下一页
             </Button>
           </div>
@@ -360,8 +360,8 @@ export default function AdminAttachmentsPage() {
       <Dialog open={uploadOpen} onOpenChange={(o) => { setUploadOpen(o); if (!o) { setPicked(null); setUploadErr(null); } }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">上传附件</DialogTitle>
-            <DialogDescription className="font-hand-body text-[13px] text-[#a39e98]">
+            <DialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">上传附件</DialogTitle>
+            <DialogDescription className="font-hand-body text-[13px] text-ink-faint">
               图片 ≤ {ATTACH_LIMITS.image.label}（JPG/PNG/GIF/WebP），其他文件 ≤ {ATTACH_LIMITS.file.label}；禁止上传可执行、脚本等危险文件。
             </DialogDescription>
           </DialogHeader>
@@ -380,27 +380,27 @@ export default function AdminAttachmentsPage() {
                 e.preventDefault();
                 pickFile(e.dataTransfer.files?.[0] ?? null);
               }}
-              className="h-40 grid place-items-center bg-[#f6f5f4] sketch-dashed border-dashed border-2 border-[#d8d3cc] text-center hover:bg-[#f1f0ee] transition-colors"
+              className="h-40 grid place-items-center bg-canvas-soft sketch-dashed border-dashed border-2 border-[#d8d3cc] text-center hover:bg-[#f1f0ee] transition-colors"
             >
-              <span className="font-hand-display text-[16px] font-bold text-[#a39e98]">
+              <span className="font-hand-display text-[16px] font-bold text-ink-faint">
                 点击选择或拖拽文件到此处
               </span>
             </button>
           ) : (
-            <div className="flex items-center gap-3 bg-[#f6f5f4] sketch-border px-4 py-3">
+            <div className="flex items-center gap-3 bg-canvas-soft sketch-border px-4 py-3">
               <span className="w-10 h-10 grid place-items-center bg-white sketch-border shrink-0">
-                <svg className="w-5 h-5 text-[#0075de]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg className="w-5 h-5 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M11 3H6a1.5 1.5 0 0 0-1.5 1.5v11A1.5 1.5 0 0 0 6 17h8a1.5 1.5 0 0 0 1.5-1.5V8l-4.5-5z" strokeLinejoin="round" />
                   <path d="M11 3v4.5h4.5" strokeLinejoin="round" />
                 </svg>
               </span>
               <div className="flex-1 min-w-0">
-                <div className="font-hand-display text-[15px] font-bold text-[#31302e] truncate">{picked.name}</div>
-                <div className="font-hand-body text-[12px] text-[#a39e98] tabular-nums">
+                <div className="font-hand-display text-[15px] font-bold text-ink-secondary truncate">{picked.name}</div>
+                <div className="font-hand-body text-[12px] text-ink-faint tabular-nums">
                   {formatBytes(picked.size)} · {picked.type || "未知类型"}
                 </div>
               </div>
-              <Button onClick={() => { setPicked(null); setUploadErr(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#a39e98] hover:text-red-500">
+              <Button onClick={() => { setPicked(null); setUploadErr(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-faint hover:text-red-500">
                 更换
               </Button>
             </div>
@@ -415,7 +415,7 @@ export default function AdminAttachmentsPage() {
               onClick={() => setUploadOpen(false)}
               disabled={uploading}
               variant="outline"
-              className="h-9 px-4 text-[14px] font-bold text-[#615d59] disabled:opacity-40"
+              className="h-9 px-4 text-[14px] font-bold text-ink-muted disabled:opacity-40"
             >
               取消
             </Button>
@@ -434,18 +434,18 @@ export default function AdminAttachmentsPage() {
       <Dialog open={!!preview} onOpenChange={(o) => { if (!o) setPreview(null); }}>
         <DialogContent className={preview?.kind === "image" ? "max-w-lg" : "max-w-sm"}>
           <DialogHeader>
-            <DialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">附件预览</DialogTitle>
-            <DialogDescription className="font-hand-body text-[13px] text-[#a39e98] break-all">
+            <DialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">附件预览</DialogTitle>
+            <DialogDescription className="font-hand-body text-[13px] text-ink-faint break-all">
               {preview?.name}
             </DialogDescription>
           </DialogHeader>
           {preview?.kind === "image" ? (
-            <img src={preview.url} alt={preview.name} className="w-full max-h-[60vh] object-contain sketch-border bg-[#f6f5f4]" />
+            <img src={preview.url} alt={preview.name} className="w-full max-h-[60vh] object-contain sketch-border bg-canvas-soft" />
           ) : (
-            <div className="h-40 grid place-items-center bg-[#f6f5f4] sketch-dashed">
+            <div className="h-40 grid place-items-center bg-canvas-soft sketch-dashed">
               <div className="text-center">
-                <div className="font-hand-display text-[20px] font-bold text-[#a39e98]">非图片文件</div>
-                <div className="font-hand-body text-[13px] text-[#a39e98] mt-1">
+                <div className="font-hand-display text-[20px] font-bold text-ink-faint">非图片文件</div>
+                <div className="font-hand-body text-[13px] text-ink-faint mt-1">
                   {formatBytes(preview?.size ?? 0)} · {preview?.mimeType}
                 </div>
               </div>
@@ -466,17 +466,17 @@ export default function AdminAttachmentsPage() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">
               删除附件
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+            <AlertDialogDescription className="text-[13px] text-ink-muted">
               确定删除附件「
-              <span className="font-semibold text-[#31302e]">{deleteTarget?.name}</span>
+              <span className="font-semibold text-ink-secondary">{deleteTarget?.name}</span>
               」吗？删除后文件将无法恢复。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" className="text-[#615d59]">
+            <AlertDialogCancel variant="outline" className="text-ink-muted">
               取消
             </AlertDialogCancel>
             <AlertDialogAction

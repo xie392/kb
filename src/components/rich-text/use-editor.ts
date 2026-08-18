@@ -53,7 +53,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     content: value || "",
     editorProps: {
       attributes: {
-        class: "prose-kb focus:outline-none",
+        class: "prose-kb focus:outline-hidden",
       },
     },
     onUpdate: ({ editor }) => {

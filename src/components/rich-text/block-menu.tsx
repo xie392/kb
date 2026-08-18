@@ -42,7 +42,7 @@ function MenuBtn({
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={`transition-colors ${
-        active ? "bg-[#0075de]/10 text-[#0075de]" : ""
+        active ? "bg-primary/10 text-primary" : ""
       } ${disabled ? "opacity-30 cursor-not-allowed pointer-events-none" : ""}`}
     >
       {children}
@@ -146,7 +146,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
         shouldShow={shouldShow}
         options={bubbleOptions}
       >
-      <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
+      <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-hairline shadow-lg">
         {nodeType === "image" && imgAttrs && (
           <>
             <MenuBtn title="向左旋转 90°" onClick={() => setImageAttr({ rotation: (imgAttrs.rotation - 90) % 360 })}>
@@ -172,7 +172,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
                 <IconImageStyle />
               </MenuBtn>
               {styleOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 min-w-[110px] bg-white rounded-lg border border-[#e6e6e6] shadow-lg py-1 z-50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 min-w-[110px] bg-white rounded-lg border border-hairline shadow-lg py-1 z-50">
                   {(["none", "border", "shadow"] as ImageStyle[]).map((s) => (
                     <button
                       key={s}
@@ -181,8 +181,8 @@ function BlockMenu({ editor }: { editor: Editor }) {
                       onClick={() => { setImageAttr({ imgStyle: s }); setStyleOpen(false); }}
                       className={`w-full text-left px-3 py-1.5 text-[13px] transition-colors ${
                         imgAttrs.imgStyle === s
-                          ? "text-[#0075de] bg-[#0075de]/5 font-medium"
-                          : "text-[#615d59] hover:bg-[#f6f5f4]"
+                          ? "text-primary bg-primary/5 font-medium"
+                          : "text-ink-muted hover:bg-canvas-soft"
                       }`}
                     >
                       {styleLabels[s]}

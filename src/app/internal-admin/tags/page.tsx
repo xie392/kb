@@ -56,8 +56,8 @@ export default function AdminTagsPage() {
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-hand-display text-[32px] font-bold text-[#213183]">标签管理</h2>
-          <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">
+          <h2 className="font-hand-display text-[32px] font-bold text-secondary">标签管理</h2>
+          <p className="font-hand-body text-[15px] text-ink-faint mt-0.5">
             共 {tags?.length ?? 0} 个标签 · 全局通用
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function AdminTagsPage() {
             <Button
               onClick={() => cleanEmpty.mutate()}
               variant="outline"
-              className="h-10 px-4 text-[15px] font-bold text-[#615d59] rotate-[0.5deg]"
+              className="h-10 px-4 text-[15px] font-bold text-ink-muted rotate-[0.5deg]"
             >
               清理 {emptyCount} 个空标签
             </Button>
@@ -91,7 +91,7 @@ export default function AdminTagsPage() {
 
       {msg && (
         <div className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up">
-          <span className="font-hand-display text-[16px] font-bold text-[#2a9d99]">✓ {msg}</span>
+          <span className="font-hand-display text-[16px] font-bold text-sticker-teal">✓ {msg}</span>
         </div>
       )}
 
@@ -102,7 +102,7 @@ export default function AdminTagsPage() {
             {tags.map((tag, i) => (
               <div
                 key={tag.id}
-                className="flex items-center gap-3 px-4 py-3.5 sketch-dashed hover:bg-[#f6f5f4] transition-colors group"
+                className="flex items-center gap-3 px-4 py-3.5 sketch-dashed hover:bg-canvas-soft transition-colors group"
               >
                 <span
                   className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] shrink-0"
@@ -125,14 +125,14 @@ export default function AdminTagsPage() {
                     <Button
                       onClick={saveEdit}
                       variant="ghost"
-                      className="px-1.5 h-auto text-[13px] text-[#0075de]"
+                      className="px-1.5 h-auto text-[13px] text-primary"
                     >
                       保存
                     </Button>
                     <Button
                       onClick={() => setEditingId(null)}
                       variant="ghost"
-                      className="px-1.5 h-auto text-[13px] text-[#a39e98]"
+                      className="px-1.5 h-auto text-[13px] text-ink-faint"
                     >
                       取消
                     </Button>
@@ -140,15 +140,15 @@ export default function AdminTagsPage() {
                 ) : (
                   <>
                     <div className="flex-1 min-w-0">
-                      <div className="font-hand-display text-[17px] font-bold text-[#31302e] truncate">#{tag.name}</div>
-                      <div className="font-hand-body text-[12px] text-[#a39e98] tabular-nums">
+                      <div className="font-hand-display text-[17px] font-bold text-ink-secondary truncate">#{tag.name}</div>
+                      <div className="font-hand-body text-[12px] text-ink-faint tabular-nums">
                         {tag._count.articles} 篇笔记
                       </div>
                     </div>
                     <Button
                       onClick={() => startEdit(tag.id, tag.name)}
                       variant="ghost"
-                      className="px-1.5 h-auto text-[13px] text-[#a39e98] opacity-0 group-hover:opacity-100"
+                      className="px-1.5 h-auto text-[13px] text-ink-faint opacity-0 group-hover:opacity-100"
                     >
                       编辑
                     </Button>
@@ -165,7 +165,7 @@ export default function AdminTagsPage() {
             ))}
           </div>
         ) : (
-          <div className="py-14 text-center font-hand-display text-[22px] font-bold text-[#a39e98]">
+          <div className="py-14 text-center font-hand-display text-[22px] font-bold text-ink-faint">
             还没有标签，先新增一个吧
           </div>
         )}

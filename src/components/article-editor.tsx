@@ -112,7 +112,7 @@ export default function ArticleEditor({ article }: Props) {
   return (
     <div className="h-full flex flex-col bg-white">
       {/* ═══ 固定顶部操作栏 ═══ */}
-      <div className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-sm border-b border-[#e6e6e6]">
+      <div className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-sm border-b border-hairline">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -127,12 +127,12 @@ export default function ArticleEditor({ article }: Props) {
                 <path d="M10 3L5 8l5 5" />
               </svg>
             </Button>
-            <span className="text-[14px] text-[#a39e98]">{isEdit ? "编辑文章" : "写笔记"}</span>
+            <span className="text-[14px] text-ink-faint">{isEdit ? "编辑文章" : "写笔记"}</span>
           </div>
 
           <div className="flex items-center gap-3">
             {/* 权限切换 */}
-            <div className="flex items-center gap-0 p-0.5 bg-[#f6f5f4] rounded-full border border-[#e6e6e6]">
+            <div className="flex items-center gap-0 p-0.5 bg-canvas-soft rounded-full border border-hairline">
               {(["private", "public"] as const).map((v) => (
                 <button
                   key={v}
@@ -140,8 +140,8 @@ export default function ArticleEditor({ article }: Props) {
                   onClick={() => setVisibility(v)}
                   className={`px-3 h-7 text-[13px] font-medium rounded-full transition-all ${
                     visibility === v
-                      ? "bg-white text-[#0075de] shadow-sm border border-[#e6e6e6]"
-                      : "text-[#615d59] hover:text-[#31302e]"
+                      ? "bg-white text-primary shadow-xs border border-hairline"
+                      : "text-ink-muted hover:text-ink-secondary"
                   }`}
                 >
                   {v === "private" ? "私有" : "公开"}
@@ -151,7 +151,7 @@ export default function ArticleEditor({ article }: Props) {
 
             {/* 保存按钮 */}
             {saving ? (
-              <span className="text-[13px] text-[#a39e98] flex items-center gap-1.5">
+              <span className="text-[13px] text-ink-faint flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M2 8a6 6 0 1 1 11 3.5" strokeLinecap="round" />
                 </svg>
@@ -162,7 +162,7 @@ export default function ArticleEditor({ article }: Props) {
                 type="button"
                 onClick={onSave}
                 disabled={!title.trim()}
-                className="px-4 disabled:bg-[#e6e6e6] disabled:text-[#a39e98] disabled:opacity-100"
+                className="px-4 disabled:bg-hairline disabled:text-ink-faint disabled:opacity-100"
               >
                 保存
               </Button>
@@ -172,7 +172,7 @@ export default function ArticleEditor({ article }: Props) {
       </div>
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
-      <div className="shrink-0 bg-white border-b border-[#e6e6e6]">
+      <div className="shrink-0 bg-white border-b border-hairline">
         <EditorToolbar editor={editor} onUploadImage={handleUploadImage} />
       </div>
 
@@ -226,7 +226,7 @@ export default function ArticleEditor({ article }: Props) {
           </div>
 
           {/* 分隔线 */}
-          <div className="h-px bg-[#e6e6e6]" />
+          <div className="h-px bg-hairline" />
 
           {/* 富文本编辑区 */}
           <div>
@@ -237,8 +237,8 @@ export default function ArticleEditor({ article }: Props) {
 
       {/* ═══ 右侧大纲悬浮面板 ═══ */}
       {outline.length > 0 && (
-        <div className="hidden xl:block fixed right-6 top-[120px] w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
-          <div className="text-[12px] font-semibold text-[#a39e98] uppercase tracking-wider mb-3">大纲</div>
+        <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
+          <div className="text-[12px] font-semibold text-ink-faint uppercase tracking-wider mb-3">大纲</div>
           <nav className="space-y-0.5">
             {outline.map((item) => (
               <button
@@ -248,12 +248,12 @@ export default function ArticleEditor({ article }: Props) {
                     .querySelectorAll(".ProseMirror h1, .ProseMirror h2, .ProseMirror h3")
                     [outline.indexOf(item)]?.scrollIntoView({ behavior: "smooth", block: "center" })
                 }
-                className={`block w-full text-left text-[13px] py-1.5 px-2 rounded-md hover:bg-[#f6f5f4] transition-colors truncate ${
+                className={`block w-full text-left text-[13px] py-1.5 px-2 rounded-md hover:bg-canvas-soft transition-colors truncate ${
                   item.level === 1
-                    ? "text-[#31302e] font-semibold"
+                    ? "text-ink-secondary font-semibold"
                     : item.level === 2
-                    ? "text-[#615d59] pl-3"
-                    : "text-[#a39e98] pl-5"
+                    ? "text-ink-muted pl-3"
+                    : "text-ink-faint pl-5"
                 }`}
               >
                 {item.text}
@@ -264,11 +264,11 @@ export default function ArticleEditor({ article }: Props) {
       )}
 
       {/* ═══ 底部状态栏（固定在视口底部） ═══ */}
-      <div className="fixed bottom-0 left-[220px] right-0 bg-white/95 backdrop-blur-sm border-t border-[#e6e6e6] px-6 py-2 flex items-center gap-3 text-[12px] text-[#a39e98] z-30">
+      <div className="fixed bottom-0 left-55 right-0 bg-white/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
         <span>{wordCount > 0 ? `${wordCount} 字` : "空文档"}</span>
-        <span className="w-px h-3 bg-[#e6e6e6]" />
+        <span className="w-px h-3 bg-hairline" />
         <span>{isEdit ? "编辑模式" : "新建模式"}</span>
-        <span className="w-px h-3 bg-[#e6e6e6]" />
+        <span className="w-px h-3 bg-hairline" />
         <span className="hidden sm:inline">⌘S 保存</span>
       </div>
     </div>

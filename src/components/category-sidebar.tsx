@@ -34,10 +34,10 @@ function ArticleItem({
   return (
     <Link
       href={`/article/${article.id}`}
-      className={`block font-hand-body text-[13px] leading-tight py-0.5 px-1.5 rounded-sm transition-colors truncate ${
+      className={`block font-hand-body text-[13px] leading-tight py-0.5 px-1.5 rounded-xs transition-colors truncate ${
         isActive
-          ? "bg-[#0075de]/10 text-[#0075de] font-bold"
-          : "text-[#615d59] hover:text-[#0075de] hover:bg-white/60"
+          ? "bg-primary/10 text-primary font-bold"
+          : "text-ink-muted hover:text-primary hover:bg-white/60"
       }`}
       style={{ paddingLeft: `${depth * 10 + 22}px` }}
       title={article.title}
@@ -70,14 +70,14 @@ function CategoryNode({
     <div>
       <button
         type="button"
-        className="group w-full flex items-center gap-1 py-0.5 px-1 rounded-sm cursor-pointer hover:bg-white/60 transition-colors text-left"
+        className="group w-full flex items-center gap-1 py-0.5 px-1 rounded-xs cursor-pointer hover:bg-white/60 transition-colors text-left"
         style={{ paddingLeft: `${depth * 10 + 2}px` }}
         onClick={() => hasContent && onToggle(node.id)}
         aria-expanded={expanded}
       >
         {hasContent ? (
           <span
-            className={`w-3.5 h-3.5 shrink-0 grid place-items-center font-hand-display text-[10px] text-[#a39e98] transition-transform ${
+            className={`w-3.5 h-3.5 shrink-0 grid place-items-center font-hand-display text-[10px] text-ink-faint transition-transform ${
               expanded ? "rotate-90" : ""
             }`}
           >
@@ -98,12 +98,12 @@ function CategoryNode({
           }}
         />
         <span
-          className="flex-1 min-w-0 font-hand-display text-[14px] font-bold text-[#31302e] group-hover:text-[#0075de] transition-colors truncate"
+          className="flex-1 min-w-0 font-hand-display text-[14px] font-bold text-ink-secondary group-hover:text-primary transition-colors truncate"
           title={node.name}
         >
           {node.name}
         </span>
-        <span className="shrink-0 font-hand-body text-[11px] text-[#a39e98]">
+        <span className="shrink-0 font-hand-body text-[11px] text-ink-faint">
           {node.count}
         </span>
       </button>
@@ -197,9 +197,9 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
   const uncategorized = articles.filter((a) => !a.categoryId);
 
   return (
-    <aside className="hidden xl:block w-[220px] shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-100px)] overflow-y-auto">
+    <aside className="hidden xl:block w-55 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
       <div>
-        <div className="font-hand-display text-[17px] font-bold text-[#213183] mb-2 flex items-center gap-2">
+        <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
           <span className="w-5 h-5 grid place-items-center sketch-border bg-white text-[12px] rotate-[-3deg]">
             ☰
           </span>
@@ -208,7 +208,7 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
         <div className="sketch-dashed p-1.5 bg-white/50 space-y-0.5">
           <Link
             href="/"
-            className="flex items-center gap-1.5 py-0.5 px-1.5 font-hand-body text-[13px] text-[#615d59] hover:text-[#0075de] hover:bg-white/60 rounded-sm transition-colors"
+            className="flex items-center gap-1.5 py-0.5 px-1.5 font-hand-body text-[13px] text-ink-muted hover:text-primary hover:bg-white/60 rounded-xs transition-colors"
           >
             <span aria-hidden="true">🏠</span> 首页
           </Link>
@@ -230,11 +230,11 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
                 style={{ paddingLeft: 2 }}
               >
                 <span className="w-3.5 h-3.5 shrink-0" />
-                <span className="w-1.5 h-1.5 rounded-full shrink-0 rotate-12 bg-[#a39e98]" />
-                <span className="flex-1 font-hand-display text-[14px] font-bold text-[#31302e]">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0 rotate-12 bg-ink-faint" />
+                <span className="flex-1 font-hand-display text-[14px] font-bold text-ink-secondary">
                   未分类
                 </span>
-                <span className="text-[11px] font-hand-body text-[#a39e98]">
+                <span className="text-[11px] font-hand-body text-ink-faint">
                   {uncategorized.length}
                 </span>
               </div>

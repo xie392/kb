@@ -80,15 +80,15 @@ export default function AdminCategoriesPage() {
   const renderNode = (c: NonNullable<typeof cats>[number], depth: number): React.ReactNode => (
     <div key={c.id}>
       <div
-        className="flex items-center gap-3 hover:bg-[#f6f5f4]/60 transition-colors group"
+        className="flex items-center gap-3 hover:bg-canvas-soft/60 transition-colors group"
         style={{ paddingLeft: 20 + depth * 36, paddingTop: depth === 0 ? 16 : 12, paddingBottom: depth === 0 ? 16 : 12, paddingRight: 20 }}
       >
         {depth === 0 ? (
-          <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-[#0075de] shrink-0">
+          <span className="w-8 h-8 grid place-items-center text-white font-hand-display text-[15px] font-bold sketch-border rotate-[-3deg] bg-primary shrink-0">
             {c.name[0]}
           </span>
         ) : (
-          <span className="font-hand-body text-[14px] text-[#a39e98] w-5 shrink-0">└</span>
+          <span className="font-hand-body text-[14px] text-ink-faint w-5 shrink-0">└</span>
         )}
         {editingId === c.id ? (
           <>
@@ -105,14 +105,14 @@ export default function AdminCategoriesPage() {
             <Button
               onClick={saveEdit}
               variant="ghost"
-              className="px-1.5 h-auto text-[14px] text-[#0075de]"
+              className="px-1.5 h-auto text-[14px] text-primary"
             >
               保存
             </Button>
             <Button
               onClick={() => setEditingId(null)}
               variant="ghost"
-              className="px-1.5 h-auto text-[14px] text-[#a39e98]"
+              className="px-1.5 h-auto text-[14px] text-ink-faint"
             >
               取消
             </Button>
@@ -120,15 +120,15 @@ export default function AdminCategoriesPage() {
         ) : (
           <>
             <span
-              className={`font-hand-display font-bold flex-1 truncate ${depth === 0 ? "text-[20px] text-[#31302e]" : "text-[17px] text-[#615d59]"}`}
+              className={`font-hand-display font-bold flex-1 truncate ${depth === 0 ? "text-[20px] text-ink-secondary" : "text-[17px] text-ink-muted"}`}
             >
               {c.name}
             </span>
-            <span className="font-hand-body text-[14px] text-[#a39e98] tabular-nums shrink-0">{c.count} 篇</span>
+            <span className="font-hand-body text-[14px] text-ink-faint tabular-nums shrink-0">{c.count} 篇</span>
             <Button
               onClick={() => startEdit(c)}
               variant="ghost"
-              className="px-1.5 h-auto text-[14px] text-[#a39e98] opacity-0 group-hover:opacity-100"
+              className="px-1.5 h-auto text-[14px] text-ink-faint opacity-0 group-hover:opacity-100"
             >
               编辑
             </Button>
@@ -150,15 +150,15 @@ export default function AdminCategoriesPage() {
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-hand-display text-[32px] font-bold text-[#213183]">分类管理</h2>
-          <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">管理分类层级结构与排序</p>
+          <h2 className="font-hand-display text-[32px] font-bold text-secondary">分类管理</h2>
+          <p className="font-hand-body text-[15px] text-ink-faint mt-0.5">管理分类层级结构与排序</p>
         </div>
         <div className="flex items-center gap-2">
           <Select
             value={newParent}
             onValueChange={(v) => setNewParent(v ?? "")}
           >
-            <SelectTrigger className="data-[size=default]:h-10 px-3 text-[14px] text-[#31302e]">
+            <SelectTrigger className="data-[size=default]:h-10 px-3 text-[14px] text-ink-secondary">
               <SelectValue placeholder="作为一级分类" />
             </SelectTrigger>
             <SelectContent>
@@ -188,17 +188,17 @@ export default function AdminCategoriesPage() {
 
       {msg && (
         <div className={`mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up`}>
-          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-[#2a9d99]" : "text-red-500"}`}>
+          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-sticker-teal" : "text-red-500"}`}>
             {msg.type === "ok" ? "✓" : "✗"} {msg.text}
           </span>
         </div>
       )}
 
       {/* 分类树 */}
-      <div className="bg-white sketch-border sketch-shadow divide-y divide-dashed divide-[#e6e6e6] fade-up">
+      <div className="bg-white sketch-border sketch-shadow divide-y divide-dashed divide-hairline fade-up">
         {cats?.map((cat) => renderNode(cat, 0))}
         {!cats?.length && (
-          <div className="py-14 text-center font-hand-display text-[22px] font-bold text-[#a39e98]">
+          <div className="py-14 text-center font-hand-display text-[22px] font-bold text-ink-faint">
             还没有分类，先新增一个吧
           </div>
         )}
@@ -213,14 +213,14 @@ export default function AdminCategoriesPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">
               删除分类
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+            <AlertDialogDescription className="text-[13px] text-ink-muted">
               {deleteTarget &&
                 (deleteTarget.count > 0 ? (
                   <>
-                    分类「<span className="font-semibold text-[#31302e]">{deleteTarget.name}</span>」
+                    分类「<span className="font-semibold text-ink-secondary">{deleteTarget.name}</span>」
                     下有{" "}
                     <span className="font-semibold text-red-500">{deleteTarget.count}</span>{" "}
                     篇文章，请先删除该分类下的文章后再删除该分类。
@@ -228,14 +228,14 @@ export default function AdminCategoriesPage() {
                 ) : (
                   <>
                     确定删除分类「
-                    <span className="font-semibold text-[#31302e]">{deleteTarget.name}</span>
+                    <span className="font-semibold text-ink-secondary">{deleteTarget.name}</span>
                     」吗？该分类下没有文章，删除后不可恢复。
                   </>
                 ))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" className="text-[#615d59]">
+            <AlertDialogCancel variant="outline" className="text-ink-muted">
               取消
             </AlertDialogCancel>
             {deleteTarget && deleteTarget.count === 0 && (

@@ -49,39 +49,39 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="p-8 w-full">
-      <h2 className="font-hand-display text-[32px] font-bold text-[#213183] mb-6">系统设置</h2>
+      <h2 className="font-hand-display text-[32px] font-bold text-secondary mb-6">系统设置</h2>
 
       {msg && (
         <div className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit fade-up">
-          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-[#2a9d99]" : "text-red-500"}`}>
+          <span className={`font-hand-display text-[16px] font-bold ${msg.type === "ok" ? "text-sticker-teal" : "text-red-500"}`}>
             {msg.type === "ok" ? "✓" : "✗"} {msg.text}
           </span>
         </div>
       )}
 
-      <div className="space-y-6 max-w-[760px]">
+      <div className="space-y-6 max-w-190">
         {/* 账号设置 */}
         <section className="bg-white sketch-border sketch-shadow p-6 fade-up">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="font-hand-display text-[22px] font-bold text-[#31302e] marker-underline inline-block">
+            <h3 className="font-hand-display text-[22px] font-bold text-ink-secondary marker-underline inline-block">
               账号设置
             </h3>
-            <span className="font-hand-body text-[13px] text-[#a39e98]">单用户模式</span>
+            <span className="font-hand-body text-[13px] text-ink-faint">单用户模式</span>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block font-hand-display text-[16px] font-bold text-[#31302e] mb-1.5">
+              <label className="block font-hand-display text-[16px] font-bold text-ink-secondary mb-1.5">
                 用户名
               </label>
               <Input
                 value={profile?.username ?? "…"}
                 disabled
-                className="w-full max-w-[360px] h-10 bg-[#f6f5f4] text-[#a39e98]"
+                className="w-full max-w-90 h-10 bg-canvas-soft text-ink-faint"
               />
-              <p className="mt-1 font-hand-body text-[12px] text-[#a39e98]">用户名不可修改</p>
+              <p className="mt-1 font-hand-body text-[12px] text-ink-faint">用户名不可修改</p>
             </div>
             <div>
-              <label className="block font-hand-display text-[16px] font-bold text-[#31302e] mb-1.5">
+              <label className="block font-hand-display text-[16px] font-bold text-ink-secondary mb-1.5">
                 昵称
               </label>
               <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function AdminSettingsPage() {
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder={profile?.nickname ?? "设置昵称"}
-                  className="w-full max-w-[360px] h-10"
+                  className="w-full max-w-90 h-10"
                 />
                 <Button
                   onClick={() => {
@@ -97,14 +97,14 @@ export default function AdminSettingsPage() {
                     updateProfile.mutate({ nickname: nickname.trim() });
                   }}
                   variant="outline"
-                  className="h-10 px-4 text-[15px] font-bold text-[#31302e] rotate-[0.5deg]"
+                  className="h-10 px-4 text-[15px] font-bold text-ink-secondary rotate-[0.5deg]"
                 >
                   保存
                 </Button>
               </div>
             </div>
             <div>
-              <label className="block font-hand-display text-[16px] font-bold text-[#31302e] mb-1.5">
+              <label className="block font-hand-display text-[16px] font-bold text-ink-secondary mb-1.5">
                 修改密码
               </label>
               <div className="flex items-center gap-2">
@@ -113,14 +113,14 @@ export default function AdminSettingsPage() {
                   value={oldPwd}
                   onChange={(e) => setOldPwd(e.target.value)}
                   placeholder="原密码"
-                  className="w-full max-w-[160px] h-10"
+                  className="w-full max-w-40 h-10"
                 />
                 <Input
                   type="password"
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
                   placeholder="新密码（至少 6 位）"
-                  className="w-full max-w-[200px] h-10"
+                  className="w-full max-w-50 h-10"
                 />
                 <Button
                   onClick={() => {
@@ -129,34 +129,34 @@ export default function AdminSettingsPage() {
                     changePassword.mutate({ oldPassword: oldPwd, newPassword: newPwd });
                   }}
                   variant="outline"
-                  className="h-10 px-4 text-[15px] font-bold text-[#31302e] rotate-[-0.5deg]"
+                  className="h-10 px-4 text-[15px] font-bold text-ink-secondary rotate-[-0.5deg]"
                 >
                   修改
                 </Button>
               </div>
-              <p className="mt-1 font-hand-body text-[12px] text-[#a39e98]">密码使用 bcrypt 加密存储</p>
+              <p className="mt-1 font-hand-body text-[12px] text-ink-faint">密码使用 bcrypt 加密存储</p>
             </div>
           </div>
         </section>
 
         {/* 数据备份 */}
         <section className="bg-white sketch-border sketch-shadow p-6 fade-up" style={{ animationDelay: "80ms" }}>
-          <h3 className="font-hand-display text-[22px] font-bold text-[#31302e] marker-underline inline-block mb-5">
+          <h3 className="font-hand-display text-[22px] font-bold text-ink-secondary marker-underline inline-block mb-5">
             数据备份
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={doBackup}
-              className="flex flex-col items-center gap-2 px-4 py-5 sketch-dashed hover:bg-[#f6f5f4] transition-colors"
+              className="flex flex-col items-center gap-2 px-4 py-5 sketch-dashed hover:bg-canvas-soft transition-colors"
             >
-              <span className="font-hand-display text-[20px] font-bold text-[#0075de]">⬇</span>
-              <span className="font-hand-display text-[17px] font-bold text-[#31302e]">一键导出备份</span>
-              <span className="font-hand-body text-[13px] text-[#a39e98]">全量 JSON 下载</span>
+              <span className="font-hand-display text-[20px] font-bold text-primary">⬇</span>
+              <span className="font-hand-display text-[17px] font-bold text-ink-secondary">一键导出备份</span>
+              <span className="font-hand-body text-[13px] text-ink-faint">全量 JSON 下载</span>
             </button>
             <div className="flex flex-col items-center gap-2 px-4 py-5 sketch-dashed opacity-50">
-              <span className="font-hand-display text-[20px] font-bold text-[#2a9d99]">⏱</span>
-              <span className="font-hand-display text-[17px] font-bold text-[#31302e]">定期自动备份</span>
-              <span className="font-hand-body text-[13px] text-[#a39e98]">规划中</span>
+              <span className="font-hand-display text-[20px] font-bold text-sticker-teal">⏱</span>
+              <span className="font-hand-display text-[17px] font-bold text-ink-secondary">定期自动备份</span>
+              <span className="font-hand-body text-[13px] text-ink-faint">规划中</span>
             </div>
           </div>
         </section>

@@ -38,8 +38,8 @@ function TbBtn({
       onClick={onClick}
       className={`h-7 min-w-7 px-1.5 grid place-items-center rounded text-[12px] transition-colors ${
         active
-          ? "bg-[#0075de]/10 text-[#0075de]"
-          : "text-[#615d59] hover:bg-[#f0efec] hover:text-[#31302e]"
+          ? "bg-primary/10 text-primary"
+          : "text-ink-muted hover:bg-[#f0efec] hover:text-ink-secondary"
       }`}
     >
       {children}
@@ -48,7 +48,7 @@ function TbBtn({
 }
 
 function TbDivider() {
-  return <span className="mx-0.5 h-4 w-px bg-[#e6e6e6]" />;
+  return <span className="mx-0.5 h-4 w-px bg-hairline" />;
 }
 
 const chain = (editor: Editor) => editor.chain().focus();
@@ -123,7 +123,7 @@ export function TablePicker({ editor }: { editor: Editor }) {
       </TbBtn>
       {open && (
         <div
-          className="kb-table-picker absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 rounded-lg border border-[#e6e6e6] bg-white p-3 shadow-lg"
+          className="kb-table-picker absolute left-1/2 -translate-x-1/2 top-full mt-1.5 z-50 rounded-lg border border-hairline bg-white p-3 shadow-lg"
           onMouseLeave={() => setHover({ cols: 0, rows: 0 })}
         >
           <div className="grid gap-[3px]" style={{ gridTemplateColumns: `repeat(${PICKER_COLS}, 18px)` }}>
@@ -137,14 +137,14 @@ export function TablePicker({ editor }: { editor: Editor }) {
                     onMouseEnter={() => setHover({ cols: c + 1, rows: r + 1 })}
                     onClick={() => insert(c + 1, r + 1)}
                     className={`h-[18px] w-[18px] rounded-[2px] border transition-colors ${
-                      active ? "bg-[#0075de] border-[#0075de]" : "bg-white border-[#d8d5d0] hover:border-[#9abfe6]"
+                      active ? "bg-primary border-primary" : "bg-white border-[#d8d5d0] hover:border-[#9abfe6]"
                     }`}
                   />
                 );
               })
             )}
           </div>
-          <div className="mt-2 text-center font-hand-body text-[13px] text-[#615d59]">
+          <div className="mt-2 text-center font-hand-body text-[13px] text-ink-muted">
             {hover.cols > 0 ? `${hover.cols} × ${hover.rows}` : "拖动选择行列"}
           </div>
         </div>
@@ -180,7 +180,7 @@ function resetTableWidth(editor: Editor) {
 export function TableGlobalToolbar({ editor }: { editor: Editor }) {
   const c = chain(editor);
   return (
-    <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
+    <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-hairline shadow-lg">
       <TbBtn title="自适应宽度（清除固定列宽）" onClick={() => resetTableWidth(editor)}>
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="3" width="12" height="10" rx="1" />
@@ -208,7 +208,7 @@ export function TableCellToolbar({ editor }: { editor: Editor }) {
   const c = chain(editor);
 
   return (
-    <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-[#e6e6e6] shadow-lg">
+    <div className="flex items-center gap-0.5 px-1 py-1 bg-white rounded-lg border border-hairline shadow-lg">
       <TbBtn title="合并单元格" onClick={run(() => c.mergeCells().run())}>
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="3" width="12" height="10" rx="1" />

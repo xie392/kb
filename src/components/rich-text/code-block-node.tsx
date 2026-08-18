@@ -189,7 +189,7 @@ function CodeBlockView({ node, updateAttributes, deleteNode, selected }: CodeBlo
 
   const btnBase = dark
     ? "text-[#9d9d9d] hover:text-white hover:bg-white/10"
-    : "text-[#8a8580] hover:text-[#31302e] hover:bg-black/5";
+    : "text-[#8a8580] hover:text-ink-secondary hover:bg-black/5";
 
   return (
     <NodeViewWrapper
@@ -201,7 +201,7 @@ function CodeBlockView({ node, updateAttributes, deleteNode, selected }: CodeBlo
     >
       {/* 悬浮工具条 */}
       <div
-        className={`absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border px-1 py-0.5 opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${
+        className={`absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border px-1 py-0.5 opacity-0 shadow-xs transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 ${
           dark
             ? "border-white/10 bg-[#0d1117]/90 backdrop-blur"
             : "border-[#e0ddd8] bg-white/90 backdrop-blur"
@@ -234,7 +234,7 @@ function CodeBlockView({ node, updateAttributes, deleteNode, selected }: CodeBlo
                     className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-xs ${
                       dark
                         ? "text-[#e6edf3] hover:bg-white/10"
-                        : "text-[#31302e] hover:bg-[#f4f2ef]"
+                        : "text-ink-secondary hover:bg-[#f4f2ef]"
                     } ${active ? "font-semibold" : ""}`}
                     onClick={() => {
                       updateAttributes({ language: l.value });

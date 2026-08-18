@@ -49,9 +49,9 @@ export default function ArticleToc({ items }: ArticleTocProps) {
   };
 
   return (
-    <aside className="hidden xl:block w-[200px] shrink-0 sticky top-[80px] self-start max-h-[calc(100vh-100px)] overflow-y-auto">
+    <aside className="hidden xl:block w-50 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
       <div>
-        <div className="font-hand-display text-[17px] font-bold text-[#213183] mb-2 flex items-center gap-2">
+        <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
           <span className="w-5 h-5 grid place-items-center sketch-border-2 bg-white text-[12px] rotate-[2deg]">
             ¶
           </span>
@@ -67,15 +67,15 @@ export default function ArticleToc({ items }: ArticleTocProps) {
                   <a
                     href={`#${item.id}`}
                     onClick={(e) => handleClick(e, item.id)}
-                    className={`block font-hand-body text-[13px] leading-tight py-0.5 px-1.5 rounded-sm transition-colors truncate ${
+                    className={`block font-hand-body text-[13px] leading-tight py-0.5 px-1.5 rounded-xs transition-colors truncate ${
                       isActive
-                        ? "text-[#0075de] font-bold bg-[#0075de]/10"
-                        : "text-[#615d59] hover:text-[#0075de] hover:bg-white/60"
+                        ? "text-primary font-bold bg-primary/10"
+                        : "text-ink-muted hover:text-primary hover:bg-white/60"
                     }`}
                     style={{ paddingLeft: `${indent + 6}px` }}
                     title={item.text}
                   >
-                    {item.level > 1 && <span className="text-[#a39e98] mr-0.5">·</span>}
+                    {item.level > 1 && <span className="text-ink-faint mr-0.5">·</span>}
                     {item.text}
                   </a>
                 </li>

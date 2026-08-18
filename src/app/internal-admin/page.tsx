@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
     <div className="p-8 w-full">
       {isFetching && (
         <div aria-live="polite" className="mb-4 sticky-note sketch-border px-4 py-2 rotate-[-1deg] w-fit">
-          <span className="font-hand-display text-[16px] font-bold text-[#a39e98]">加载中…</span>
+          <span className="font-hand-display text-[16px] font-bold text-ink-faint">加载中…</span>
         </div>
       )}
 
@@ -35,13 +35,13 @@ export default function AdminDashboardPage() {
               <span className="w-9 h-9 grid place-items-center text-white font-hand-display text-[18px] font-bold sketch-border rotate-[-3deg]" style={{ backgroundColor: s.color }}>
                 {s.value}
               </span>
-              <span className="font-hand-body text-[13px] text-[#a39e98]">{s.delta}</span>
+              <span className="font-hand-body text-[13px] text-ink-faint">{s.delta}</span>
             </div>
             <div className="mt-4">
-              <div className="font-hand-display text-[32px] font-bold text-[#31302e] tabular-nums leading-none">
+              <div className="font-hand-display text-[32px] font-bold text-ink-secondary tabular-nums leading-none">
                 {s.value}
               </div>
-              <div className="mt-1 font-hand-body text-[14px] text-[#615d59]">{s.label}</div>
+              <div className="mt-1 font-hand-body text-[14px] text-ink-muted">{s.label}</div>
             </div>
           </div>
         ))}
@@ -52,16 +52,16 @@ export default function AdminDashboardPage() {
         <div className="bg-white sketch-border sketch-shadow p-6 lg:col-span-3 fade-up" style={{ animationDelay: "240ms" }}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-hand-display text-[22px] font-bold text-[#31302e] marker-underline inline-block">
+              <h3 className="font-hand-display text-[22px] font-bold text-ink-secondary marker-underline inline-block">
                 近 30 天新增趋势
               </h3>
-              <p className="font-hand-body text-[13px] text-[#a39e98] mt-1">每日新增笔记数</p>
+              <p className="font-hand-body text-[13px] text-ink-faint mt-1">每日新增笔记数</p>
             </div>
           </div>
-          <div className="flex items-end gap-[4px] h-[160px]">
+          <div className="flex items-end gap-1 h-40">
             {(data?.trend ?? []).map((t, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
-                <span className="text-[10px] text-[#a39e98] opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
+                <span className="text-[10px] text-ink-faint opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">
                   {t.count}
                 </span>
                 <div
@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
 
         {/* 分类分布 */}
         <div className="bg-white sketch-border sketch-shadow p-6 lg:col-span-2 fade-up" style={{ animationDelay: "300ms" }}>
-          <h3 className="font-hand-display text-[22px] font-bold text-[#31302e] marker-underline inline-block">
+          <h3 className="font-hand-display text-[22px] font-bold text-ink-secondary marker-underline inline-block">
             分类分布
           </h3>
           <div className="mt-6 space-y-4">
@@ -88,14 +88,14 @@ export default function AdminDashboardPage() {
               return (
                 <div key={cat.id}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-hand-body text-[14px] text-[#31302e]">
+                    <span className="font-hand-body text-[14px] text-ink-secondary">
                       {cat.name}
                     </span>
-                    <span className="font-hand-body text-[13px] text-[#a39e98] tabular-nums">
+                    <span className="font-hand-body text-[13px] text-ink-faint tabular-nums">
                       {cat.count} 篇
                     </span>
                   </div>
-                  <div className="h-3 rounded-full bg-[#f6f5f4] border border-dashed border-[#e6e6e6] overflow-hidden">
+                  <div className="h-3 rounded-full bg-canvas-soft border border-dashed border-hairline overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{ width: `${Math.max(pct, 4)}%`, backgroundColor: CARD_COLORS[i % 4] }}
@@ -106,18 +106,18 @@ export default function AdminDashboardPage() {
             })}
           </div>
           {data && (
-            <div className="mt-6 pt-4 border-t-2 border-dashed border-[#e6e6e6] grid grid-cols-3 gap-3 text-center">
+            <div className="mt-6 pt-4 border-t-2 border-dashed border-hairline grid grid-cols-3 gap-3 text-center">
               <div>
-                <div className="font-hand-display text-[22px] font-bold text-[#31302e] tabular-nums">{data.trash}</div>
-                <div className="font-hand-body text-[12px] text-[#a39e98]">回收站</div>
+                <div className="font-hand-display text-[22px] font-bold text-ink-secondary tabular-nums">{data.trash}</div>
+                <div className="font-hand-body text-[12px] text-ink-faint">回收站</div>
               </div>
               <div>
-                <div className="font-hand-display text-[22px] font-bold text-[#31302e] tabular-nums">{data.publicCount}</div>
-                <div className="font-hand-body text-[12px] text-[#a39e98]">公开文章</div>
+                <div className="font-hand-display text-[22px] font-bold text-ink-secondary tabular-nums">{data.publicCount}</div>
+                <div className="font-hand-body text-[12px] text-ink-faint">公开文章</div>
               </div>
               <div>
-                <div className="font-hand-display text-[22px] font-bold text-[#31302e] tabular-nums">{data.privateCount}</div>
-                <div className="font-hand-body text-[12px] text-[#a39e98]">私有文章</div>
+                <div className="font-hand-display text-[22px] font-bold text-ink-secondary tabular-nums">{data.privateCount}</div>
+                <div className="font-hand-body text-[12px] text-ink-faint">私有文章</div>
               </div>
             </div>
           )}

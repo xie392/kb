@@ -65,7 +65,7 @@ export default function SearchDialog() {
       {/* 触发按钮 */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3.5 py-1.5 bg-white sketch-border sketch-shadow font-hand-display text-[16px] text-[#615d59] hover:text-[#0075de] hover:-translate-y-0.5 transition-[color,transform] rotate-[0.5deg]"
+        className="flex items-center gap-2 px-3.5 py-1.5 bg-white sketch-border sketch-shadow font-hand-display text-[16px] text-ink-muted hover:text-primary hover:-translate-y-0.5 transition-[color,transform] rotate-[0.5deg]"
         aria-label="搜索"
       >
         <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -73,7 +73,7 @@ export default function SearchDialog() {
           <path d="M13.5 13.5L17 17" strokeLinecap="round" />
         </svg>
         搜索
-        <kbd className="hidden sm:inline font-hand-body text-[12px] text-[#a39e98] border border-[#e6e6e6] rounded px-1">
+        <kbd className="hidden sm:inline font-hand-body text-[12px] text-ink-faint border border-hairline rounded px-1">
           ⌘K
         </kbd>
       </button>
@@ -95,25 +95,25 @@ export default function SearchDialog() {
           <CommandList>
             {!kw ? (
               <div className="py-12 text-center">
-                <div className="font-hand-display text-[24px] font-bold text-[#a39e98] rotate-[-1deg]">
+                <div className="font-hand-display text-[24px] font-bold text-ink-faint rotate-[-1deg]">
                   输入关键词开始搜索
                 </div>
-                <div className="mt-2 font-hand-body text-[14px] text-[#a39e98]">
+                <div className="mt-2 font-hand-body text-[14px] text-ink-faint">
                   支持标题、正文摘要、分类、标签
                 </div>
               </div>
             ) : isFetching ? (
               <div className="py-12 text-center">
-                <div className="font-hand-display text-[20px] font-bold text-[#a39e98]">
+                <div className="font-hand-display text-[20px] font-bold text-ink-faint">
                   搜索中…
                 </div>
               </div>
             ) : hits.length === 0 ? (
               <CommandEmpty>
-                <div className="font-hand-display text-[24px] font-bold text-[#a39e98] rotate-[-1deg]">
+                <div className="font-hand-display text-[24px] font-bold text-ink-faint rotate-[-1deg]">
                   没有找到「{keyword}」
                 </div>
-                <div className="mt-2 font-hand-body text-[14px] text-[#a39e98]">
+                <div className="mt-2 font-hand-body text-[14px] text-ink-faint">
                   换个关键词试试？
                 </div>
               </CommandEmpty>
@@ -129,21 +129,21 @@ export default function SearchDialog() {
                     }}
                     className="items-start gap-3 px-5 py-4"
                   >
-                    <span className="w-2 h-2 rounded-full rotate-12 mt-2 shrink-0 bg-[#62aef0]" />
+                    <span className="w-2 h-2 rounded-full rotate-12 mt-2 shrink-0 bg-sticker-sky" />
                     <div className="flex-1 min-w-0">
-                      <span className="font-hand-body text-[12px] text-[#a39e98]">
+                      <span className="font-hand-body text-[12px] text-ink-faint">
                         {formatDate(String(a.updatedAt))}
                       </span>
-                      <div className="mt-0.5 font-hand-display text-[19px] font-bold text-[#31302e]">
+                      <div className="mt-0.5 font-hand-display text-[19px] font-bold text-ink-secondary">
                         {highlight(a.title, keyword)}
                       </div>
                       {a.summary && (
-                        <div className="mt-0.5 font-hand-body text-[14px] text-[#615d59] line-clamp-1">
+                        <div className="mt-0.5 font-hand-body text-[14px] text-ink-muted line-clamp-1">
                           {highlight(a.summary, keyword)}
                         </div>
                       )}
                     </div>
-                    <span className="font-hand-display text-[16px] text-[#0075de] opacity-0 group-hover/command-item:opacity-100 transition-opacity shrink-0 mt-1">
+                    <span className="font-hand-display text-[16px] text-primary opacity-0 group-hover/command-item:opacity-100 transition-opacity shrink-0 mt-1">
                       →
                     </span>
                   </CommandItem>

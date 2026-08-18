@@ -72,14 +72,14 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
       {/* 触发器：已选 chips（单行，超出合并为 +N） */}
       <PopoverTrigger
         render={
-          <div className="relative flex items-center gap-1.5 min-h-[28px] max-w-[280px] px-2.5 pr-8 py-1 bg-white border border-[#e6e6e6] rounded-md cursor-pointer text-left overflow-hidden" />
+          <div className="relative flex items-center gap-1.5 min-h-7 max-w-70 px-2.5 pr-8 py-1 bg-white border border-hairline rounded-md cursor-pointer text-left overflow-hidden" />
         }
         nativeButton={false}
       >
         {visibleTags.map((t) => (
           <span
             key={t.id}
-            className="h-6 inline-flex items-center gap-1 px-2 text-[12px] rounded-full bg-[#0075de]/8 text-[#0075de] border border-[#0075de]/30 shrink-0"
+            className="h-6 inline-flex items-center gap-1 px-2 text-[12px] rounded-full bg-primary/8 text-primary border border-primary/30 shrink-0"
           >
             #{t.name}
             <button
@@ -89,7 +89,7 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
                 e.stopPropagation();
                 toggle(t.id);
               }}
-              className="hover:text-[#0075de] leading-none"
+              className="hover:text-primary leading-none"
             >
               &times;
             </button>
@@ -99,14 +99,14 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
           <Tooltip>
             <TooltipTrigger
               render={
-                <span className="h-6 inline-flex items-center px-2 text-[12px] text-[#615d59] bg-[#f6f5f4] border border-[#e6e6e6] rounded-full shrink-0 cursor-default">
+                <span className="h-6 inline-flex items-center px-2 text-[12px] text-ink-muted bg-canvas-soft border border-hairline rounded-full shrink-0 cursor-default">
                   +{extraCount}
                 </span>
               }
             />
             <TooltipContent
               side="top"
-              className="max-w-xs rounded-md bg-[#31302e] text-white border-none text-[12px] px-3 py-1.5"
+              className="max-w-xs rounded-md bg-ink-secondary text-white border-none text-[12px] px-3 py-1.5"
             >
               <span className="font-medium">已选 {extraCount} 个：</span>
               <span className="text-[#d8d4cd]">{hiddenTags.map((t) => t.name).join("、")}</span>
@@ -126,7 +126,7 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
               e.stopPropagation();
               onChange([]);
             }}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center rounded text-[#a39e98] hover:bg-[#f6f5f4] hover:text-[#31302e]"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center rounded text-ink-faint hover:bg-canvas-soft hover:text-ink-secondary"
           >
             <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M4 4l8 8M12 4l-8 8" />
@@ -156,10 +156,10 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
               }
             }}
             placeholder="搜索或创建标签…"
-            className="w-full h-7 px-2.5 text-[12px] text-[#615d59] bg-[#f6f5f4] border border-transparent rounded-md outline-none focus:border-[#0075de]/40 placeholder:text-[#c5c0b9]"
+            className="w-full h-7 px-2.5 text-[12px] text-ink-muted bg-canvas-soft border border-transparent rounded-md outline-hidden focus:border-primary/40 placeholder:text-[#c5c0b9]"
           />
         </div>
-        <div className="max-h-[200px] overflow-y-auto">
+        <div className="max-h-50 overflow-y-auto">
           {filtered.map((t) => {
             const selected = value.includes(t.id);
             return (
@@ -170,14 +170,14 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
                 onClick={() => toggle(t.id)}
                 className={`flex items-center w-full text-left px-2.5 py-1.5 text-[12px] rounded-md transition-colors ${
                   selected
-                    ? "bg-[#0075de]/8 text-[#0075de] font-medium"
-                    : "text-[#31302e] hover:bg-[#f6f5f4]"
+                    ? "bg-primary/8 text-primary font-medium"
+                    : "text-ink-secondary hover:bg-canvas-soft"
                 }`}
               >
                 <span className="truncate">
                   #{t.name}
                   {typeof t._count?.articles === "number" && (
-                    <span className="ml-1.5 text-[#a39e98] font-normal">{t._count.articles}</span>
+                    <span className="ml-1.5 text-ink-faint font-normal">{t._count.articles}</span>
                   )}
                 </span>
                 {selected && (
@@ -199,19 +199,19 @@ export default function TagSelect({ options, value, onChange, onCreate }: Props)
             );
           })}
           {filtered.length === 0 && !canCreate && (
-            <div className="px-2.5 py-1.5 text-[12px] text-[#a39e98]">
+            <div className="px-2.5 py-1.5 text-[12px] text-ink-faint">
               {kw ? "无匹配标签" : "输入关键词搜索标签"}
             </div>
           )}
           {canCreate && (
             <>
-              <div className="h-px bg-[#e6e6e6] mx-1" />
+              <div className="h-px bg-hairline mx-1" />
               <button
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleCreate}
                 disabled={creating}
-                className="block w-full text-left px-2.5 py-1.5 text-[12px] text-[#0075de] rounded-md hover:bg-[#f6f5f4] transition-colors disabled:opacity-50"
+                className="block w-full text-left px-2.5 py-1.5 text-[12px] text-primary rounded-md hover:bg-canvas-soft transition-colors disabled:opacity-50"
               >
                 {creating ? "创建中…" : `+ 创建 "#${keyword.trim()}"`}
               </button>

@@ -104,8 +104,8 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
           }}
           className={`flex-1 flex items-center gap-1.5 text-left pl-3 pr-7 py-1.5 text-[12px] transition-colors ${
             value === c.id
-              ? "bg-[#0075de]/8 text-[#0075de] font-medium"
-              : "text-[#31302e] hover:bg-[#f6f5f4]"
+              ? "bg-primary/8 text-primary font-medium"
+              : "text-ink-secondary hover:bg-canvas-soft"
           }`}
           style={{ paddingLeft: 12 + depth * 16 }}
         >
@@ -114,13 +114,13 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
               <path d="M4 3h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" opacity="0.5" />
             </svg>
           ) : (
-            <svg className="w-3 h-3 text-[#a39e98] shrink-0" viewBox="0 0 16 16" fill="currentColor">
+            <svg className="w-3 h-3 text-ink-faint shrink-0" viewBox="0 0 16 16" fill="currentColor">
               <rect x="3" y="3" width="10" height="10" rx="1.5" opacity="0.6" />
             </svg>
           )}
           <span className="truncate">{c.name}</span>
           {typeof c.count === "number" && c.count > 0 && (
-            <span className="text-[#a39e98] text-[11px] shrink-0">{c.count}</span>
+            <span className="text-ink-faint text-[11px] shrink-0">{c.count}</span>
           )}
         </button>
         {/* 创建子分类 */}
@@ -129,7 +129,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
           title={`在「${c.name}」下创建子分类`}
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => startCreateChild(c.id)}
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center rounded text-[#0075de] opacity-0 group-hover:opacity-100 hover:bg-[#0075de]/10 transition-opacity"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 grid place-items-center rounded text-primary opacity-0 group-hover:opacity-100 hover:bg-primary/10 transition-opacity"
         >
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M8 3v10M3 8h10" />
@@ -157,7 +157,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
               }
             }}
             placeholder={`在「${c.name}」下新建…`}
-            className="flex-1 h-6 px-2 text-[12px] text-[#31302e] bg-[#f6f5f4] border border-[#0075de]/40 rounded outline-none placeholder:text-[#c5c0b9]"
+            className="flex-1 h-6 px-2 text-[12px] text-ink-secondary bg-canvas-soft border border-primary/40 rounded outline-hidden placeholder:text-[#c5c0b9]"
           />
         </div>
       )}
@@ -170,12 +170,12 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
   return (
     <Popover open={open} onOpenChange={setOpen}>
       {/* 触发器 */}
-      <PopoverTrigger className="h-7 px-2.5 flex items-center gap-2 text-[12px] text-[#615d59] bg-white border border-[#e6e6e6] rounded-md outline-none focus:border-[#0075de]/50 cursor-pointer hover:bg-[#f6f5f4]/60 transition-colors">
-        <span className={selected ? "text-[#31302e]" : "text-[#a39e98]"}>
+      <PopoverTrigger className="h-7 px-2.5 flex items-center gap-2 text-[12px] text-ink-muted bg-white border border-hairline rounded-md outline-hidden focus:border-primary/50 cursor-pointer hover:bg-canvas-soft/60 transition-colors">
+        <span className={selected ? "text-ink-secondary" : "text-ink-faint"}>
           {selected ? selected.name : "未分类"}
         </span>
         <svg
-          className={`w-3 h-3 text-[#a39e98] transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-3 h-3 text-ink-faint transition-transform ${open ? "rotate-180" : ""}`}
           viewBox="0 0 16 16"
           fill="none"
           stroke="currentColor"
@@ -207,14 +207,14 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
               if (e.key === "Escape") setOpen(false);
             }}
             placeholder="搜索分类…"
-            className="w-full h-7 px-2.5 text-[12px] text-[#615d59] bg-[#f6f5f4] border border-transparent rounded-md outline-none focus:border-[#0075de]/40 placeholder:text-[#c5c0b9]"
+            className="w-full h-7 px-2.5 text-[12px] text-ink-muted bg-canvas-soft border border-transparent rounded-md outline-hidden focus:border-primary/40 placeholder:text-[#c5c0b9]"
           />
         </div>
 
         {/* 分类树 */}
-        <div className="max-h-[220px] overflow-y-auto">
+        <div className="max-h-55 overflow-y-auto">
           {filtered.length === 0 && (
-            <div className="px-3 py-2 text-[12px] text-[#a39e98]">
+            <div className="px-3 py-2 text-[12px] text-ink-faint">
               {kw ? "无匹配分类" : "暂无分类"}
             </div>
           )}
@@ -222,14 +222,14 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
         </div>
 
         {/* 底部：创建顶级分类 */}
-        <div className="border-t border-[#e6e6e6] mt-1 pt-1">
+        <div className="border-t border-hairline mt-1 pt-1">
           {canCreateTop ? (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleCreate(keyword, null)}
               disabled={busy}
-              className="w-full text-left px-2.5 py-1.5 text-[12px] text-[#0075de] rounded-md hover:bg-[#f6f5f4] transition-colors disabled:opacity-50"
+              className="w-full text-left px-2.5 py-1.5 text-[12px] text-primary rounded-md hover:bg-canvas-soft transition-colors disabled:opacity-50"
             >
               {busy ? "创建中…" : `+ 创建分类 "${keyword.trim()}"`}
             </button>
@@ -243,7 +243,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
                 setKeyword("");
                 setTimeout(() => createInputRef.current?.focus(), 30);
               }}
-              className="w-full text-left px-2.5 py-1.5 text-[12px] text-[#615d59] rounded-md hover:bg-[#f6f5f4] hover:text-[#0075de] transition-colors"
+              className="w-full text-left px-2.5 py-1.5 text-[12px] text-ink-muted rounded-md hover:bg-canvas-soft hover:text-primary transition-colors"
             >
               ＋ 新建分类
             </button>
@@ -264,7 +264,7 @@ export default function CategorySelect({ options, value, onChange, onCreate }: P
                   }
                 }}
                 placeholder="输入分类名，回车创建"
-                className="w-full h-6 px-2 text-[12px] text-[#31302e] bg-[#f6f5f4] border border-[#0075de]/40 rounded outline-none placeholder:text-[#c5c0b9]"
+                className="w-full h-6 px-2 text-[12px] text-ink-secondary bg-canvas-soft border border-primary/40 rounded outline-hidden placeholder:text-[#c5c0b9]"
               />
             </div>
           )}

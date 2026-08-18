@@ -93,8 +93,8 @@ export default function AdminArticlesPage() {
     <div className="p-8 w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-hand-display text-[32px] font-bold text-[#213183]">文章管理</h2>
-          <p className="font-hand-body text-[15px] text-[#a39e98] mt-0.5">
+          <h2 className="font-hand-display text-[32px] font-bold text-secondary">文章管理</h2>
+          <p className="font-hand-body text-[15px] text-ink-faint mt-0.5">
             共 {data?.total ?? 0} 篇{isFetching ? "（加载中…）" : ""}
           </p>
         </div>
@@ -115,8 +115,8 @@ export default function AdminArticlesPage() {
             variant={filter === tab.id ? "outline" : "ghost"}
             className={`px-4 text-[17px] font-hand-display ${
               filter === tab.id
-                ? "text-[#0075de] font-bold"
-                : "text-[#615d59] hover:text-[#0075de]"
+                ? "text-primary font-bold"
+                : "text-ink-muted hover:text-primary"
             }`}
           >
             {tab.label}
@@ -127,19 +127,19 @@ export default function AdminArticlesPage() {
       {/* 批量操作栏 */}
       {hasSelection && (
         <div className="flex items-center gap-3 mb-4 bg-white sketch-border sketch-shadow px-4 py-2.5 fade-up">
-          <span className="font-hand-display text-[15px] font-bold text-[#0075de]">
+          <span className="font-hand-display text-[15px] font-bold text-primary">
             已选 {selected.size} 项
           </span>
-          <span className="w-px h-5 bg-[#e6e6e6]" />
+          <span className="w-px h-5 bg-hairline" />
           {filter === "normal" ? (
             <>
-              <Button onClick={() => batch.mutate({ ids: selectedIds, isPinned: true })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
+              <Button onClick={() => batch.mutate({ ids: selectedIds, isPinned: true })} variant="ghost" className="px-1.5 h-auto text-[14px] text-ink-muted">
                 批量置顶
               </Button>
-              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "public" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
+              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "public" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-ink-muted">
                 批量公开
               </Button>
-              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "private" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#615d59]">
+              <Button onClick={() => batch.mutate({ ids: selectedIds, visibility: "private" })} variant="ghost" className="px-1.5 h-auto text-[14px] text-ink-muted">
                 批量私有
               </Button>
               <Button onClick={() => softDelete.mutate({ ids: selectedIds })} variant="ghost" className="px-1.5 h-auto text-[14px] text-red-400 hover:text-red-500">
@@ -148,7 +148,7 @@ export default function AdminArticlesPage() {
             </>
           ) : (
             <>
-              <Button onClick={() => restore.mutate({ ids: selectedIds })} variant="ghost" className="px-1.5 h-auto text-[14px] text-[#2a9d99] hover:underline">
+              <Button onClick={() => restore.mutate({ ids: selectedIds })} variant="ghost" className="px-1.5 h-auto text-[14px] text-sticker-teal hover:underline">
                 批量恢复
               </Button>
               <Button onClick={() => setPendingHardDelete(selectedIds)} variant="ghost" className="px-1.5 h-auto text-[14px] text-red-400 hover:text-red-500">
@@ -163,7 +163,7 @@ export default function AdminArticlesPage() {
       <div className="bg-white sketch-border sketch-shadow overflow-hidden fade-up">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-[#f6f5f4] border-b-2 border-dashed border-[#e6e6e6]">
+            <tr className="bg-canvas-soft border-b-2 border-dashed border-hairline">
               <th className="w-10 px-4 py-3">
                 <Checkbox
                   checked={selected.size === rows.length && rows.length > 0}
@@ -172,17 +172,17 @@ export default function AdminArticlesPage() {
                   aria-label="全选"
                 />
               </th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">标题</th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">分类</th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">标签</th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">权限</th>
-              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-[#615d59]">更新时间</th>
-              <th className="px-4 py-3 text-right font-hand-display text-[14px] font-bold text-[#615d59]">操作</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">标题</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">分类</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">标签</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">权限</th>
+              <th className="px-3 py-3 font-hand-display text-[14px] font-bold text-ink-muted">更新时间</th>
+              <th className="px-4 py-3 text-right font-hand-display text-[14px] font-bold text-ink-muted">操作</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((a) => (
-              <tr key={a.id} className="border-b border-dashed border-[#e6e6e6] last:border-0 hover:bg-[#f6f5f4]/60 transition-colors">
+              <tr key={a.id} className="border-b border-dashed border-hairline last:border-0 hover:bg-canvas-soft/60 transition-colors">
                 <td className="px-4 py-3.5">
                   <Checkbox
                     checked={selected.has(a.id)}
@@ -193,21 +193,21 @@ export default function AdminArticlesPage() {
                 </td>
                 <td className="px-3 py-3.5">
                   <div className="flex items-center gap-2">
-                    {a.isPinned && <span className="text-[#0075de]">★</span>}
-                    <span className="font-hand-display text-[17px] font-bold text-[#31302e] truncate max-w-[240px]">
+                    {a.isPinned && <span className="text-primary">★</span>}
+                    <span className="font-hand-display text-[17px] font-bold text-ink-secondary truncate max-w-60">
                       {a.title}
                     </span>
                   </div>
                 </td>
-                <td className="px-3 py-3.5 font-hand-body text-[14px] text-[#ff64c8]">
+                <td className="px-3 py-3.5 font-hand-body text-[14px] text-sticker-pink">
                   {a.categoryName ?? "未分类"}
                 </td>
                 <td className="px-3 py-3.5">
-                  <div className="flex items-center gap-1 flex-wrap max-w-[140px]">
+                  <div className="flex items-center gap-1 flex-wrap max-w-35">
                     {a.tagNames.slice(0, 2).map((t) => (
-                      <span key={t} className="font-hand-body text-[12px] text-[#a39e98]">#{t}</span>
+                      <span key={t} className="font-hand-body text-[12px] text-ink-faint">#{t}</span>
                     ))}
-                    {a.tagNames.length > 2 && <span className="font-hand-body text-[12px] text-[#a39e98]">+{a.tagNames.length - 2}</span>}
+                    {a.tagNames.length > 2 && <span className="font-hand-body text-[12px] text-ink-faint">+{a.tagNames.length - 2}</span>}
                   </div>
                 </td>
                 <td className="px-3 py-3.5">
@@ -222,8 +222,8 @@ export default function AdminArticlesPage() {
                       size="sm"
                       className={`px-1.5 text-[13px] ${
                         a.visibility === "public"
-                          ? "text-[#0075de]"
-                          : "text-[#a39e98]"
+                          ? "text-primary"
+                          : "text-ink-faint"
                       } disabled:opacity-50 disabled:cursor-wait`}
                     >
                       <SelectValue />
@@ -234,7 +234,7 @@ export default function AdminArticlesPage() {
                     </SelectContent>
                   </Select>
                 </td>
-                <td className="px-3 py-3.5 font-hand-body text-[13px] text-[#a39e98] whitespace-nowrap">
+                <td className="px-3 py-3.5 font-hand-body text-[13px] text-ink-faint whitespace-nowrap">
                   {formatDate(a.updatedAt)}
                 </td>
                 <td className="px-4 py-3.5">
@@ -244,11 +244,11 @@ export default function AdminArticlesPage() {
                         <Button
                           render={<Link href={`${ADMIN_HOME}/articles/${a.id}/edit`} />}
                           variant="ghost"
-                          className="px-1.5 h-auto text-[13px] text-[#615d59]"
+                          className="px-1.5 h-auto text-[13px] text-ink-muted"
                         >
                           编辑
                         </Button>
-                        <Button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#615d59]">
+                        <Button onClick={() => batch.mutate({ ids: [a.id], isPinned: !a.isPinned })} variant="ghost" className="px-1.5 h-auto text-[13px] text-ink-muted">
                           {a.isPinned ? "取消置顶" : "置顶"}
                         </Button>
                         <Button onClick={() => softDelete.mutate({ ids: [a.id] })} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">
@@ -257,7 +257,7 @@ export default function AdminArticlesPage() {
                       </>
                     ) : (
                       <>
-                        <Button onClick={() => restore.mutate({ ids: [a.id] })} variant="ghost" className="px-1.5 h-auto text-[13px] text-[#2a9d99] hover:underline">
+                        <Button onClick={() => restore.mutate({ ids: [a.id] })} variant="ghost" className="px-1.5 h-auto text-[13px] text-sticker-teal hover:underline">
                           恢复
                         </Button>
                         <Button onClick={() => setPendingHardDelete([a.id])} variant="ghost" className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500">
@@ -272,7 +272,7 @@ export default function AdminArticlesPage() {
             {rows.length === 0 && !isFetching && (
               <tr>
                 <td colSpan={7} className="px-4 py-14 text-center">
-                  <div className="font-hand-display text-[22px] font-bold text-[#a39e98] rotate-[-1deg]">
+                  <div className="font-hand-display text-[22px] font-bold text-ink-faint rotate-[-1deg]">
                     暂无{filter === "trash" ? "回收站" : ""}文章
                   </div>
                 </td>
@@ -290,17 +290,17 @@ export default function AdminArticlesPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">
               确认永久删除？
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-[#615d59]">
+            <AlertDialogDescription className="text-[13px] text-ink-muted">
               {pendingHardDelete && pendingHardDelete.length > 1
                 ? `将永久删除 ${pendingHardDelete.length} 篇文章，删除后不可恢复。`
                 : "删除后不可恢复，确定要永久删除这篇文章吗？"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel variant="ghost" className="text-[14px] text-[#615d59] hover:text-[#31302e]">
+            <AlertDialogCancel variant="ghost" className="text-[14px] text-ink-muted hover:text-ink-secondary">
               取消
             </AlertDialogCancel>
             <AlertDialogAction

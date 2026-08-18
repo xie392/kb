@@ -40,14 +40,14 @@ export default async function ArticlePage({
   return (
     <>
       <div className="flex-1 min-w-0">
-        <div className="max-w-[820px] mx-auto">
-          <nav className="flex items-center gap-2 font-hand-body text-[15px] text-[#a39e98] mb-8">
-            <Link href="/" className="hover:text-[#0075de] transition-colors">
+        <div className="max-w-205 mx-auto">
+          <nav className="flex items-center gap-2 font-hand-body text-[15px] text-ink-faint mb-8">
+            <Link href="/" className="hover:text-primary transition-colors">
               首页
             </Link>
-            <span className="text-[#e6e6e6]">/</span>
-            <span className="flex items-center gap-1.5 font-medium text-[#ff64c8]">
-              <span className="w-2 h-2 rounded-full rotate-12 bg-[#ff64c8]" />
+            <span className="text-hairline">/</span>
+            <span className="flex items-center gap-1.5 font-medium text-sticker-pink">
+              <span className="w-2 h-2 rounded-full rotate-12 bg-sticker-pink" />
               {article.categoryName ?? "未分类"}
             </span>
           </nav>
@@ -55,26 +55,26 @@ export default async function ArticlePage({
           <article className="bg-white sketch-border sketch-shadow p-5 sm:p-8 lg:p-12 fade-up">
             <header className="mb-10">
               <div className="flex items-center gap-2 flex-wrap mb-4">
-                <span className="font-hand-body text-[15px] px-1.5 text-[#ff64c8]">
+                <span className="font-hand-body text-[15px] px-1.5 text-sticker-pink">
                   【{article.categoryName ?? "未分类"}】
                 </span>
                 {article.isPinned && (
-                  <span className="marker-highlight font-hand-display text-[14px] text-[#523410] rotate-[-1deg]">
+                  <span className="marker-highlight font-hand-display text-[14px] text-sticker-brown rotate-[-1deg]">
                     ★ 置顶
                   </span>
                 )}
                 {article.visibility === "public" && (
-                  <span className="font-hand-body text-[14px] text-[#0075de] rotate-[0.5deg]">
+                  <span className="font-hand-body text-[14px] text-primary rotate-[0.5deg]">
                     〇 公开
                   </span>
                 )}
               </div>
 
-              <h1 className="font-hand-display text-[30px] sm:text-[40px] lg:text-[46px] font-bold leading-[1.15] text-[#213183] marker-underline inline-block">
+              <h1 className="font-hand-display text-[30px] sm:text-[40px] lg:text-[46px] font-bold leading-[1.15] text-secondary marker-underline inline-block">
                 {article.title}
               </h1>
 
-              <div className="mt-5 flex items-center gap-x-4 gap-y-1 flex-wrap font-hand-body text-[15px] text-[#a39e98]">
+              <div className="mt-5 flex items-center gap-x-4 gap-y-1 flex-wrap font-hand-body text-[15px] text-ink-faint">
                 <span>✎ 更新于 {formatDate(article.updatedAt.toISOString())}</span>
                 <span>·</span>
                 <span>创建于 {formatDate(article.createdAt.toISOString())}</span>
@@ -84,7 +84,7 @@ export default async function ArticlePage({
                 {article.tagNames.map((tag) => (
                   <span
                     key={tag}
-                    className="font-hand-body text-[14px] px-2.5 py-0.5 bg-[#f6f5f4] sketch-border text-[#615d59]"
+                    className="font-hand-body text-[14px] px-2.5 py-0.5 bg-canvas-soft sketch-border text-ink-muted"
                   >
                     #{tag}
                   </span>
@@ -92,7 +92,7 @@ export default async function ArticlePage({
               </div>
             </header>
 
-            <div className="border-t-2 border-dashed border-[#e6e6e6] pt-8">
+            <div className="border-t-2 border-dashed border-hairline pt-8">
               <div
                 className="prose-kb"
                 dangerouslySetInnerHTML={{ __html: contentWithIds }}
@@ -100,8 +100,8 @@ export default async function ArticlePage({
               <ArticleCodeCopy />
             </div>
 
-            <div className="mt-10 pt-6 border-t-2 border-dashed border-[#e6e6e6] flex items-center gap-3 font-hand-display">
-              <span className="font-hand-body text-[14px] text-[#a39e98]">
+            <div className="mt-10 pt-6 border-t-2 border-dashed border-hairline flex items-center gap-3 font-hand-display">
+              <span className="font-hand-body text-[14px] text-ink-faint">
                 {article.content.length > 800 ? "长文" : "短文"} · 约{" "}
                 {Math.max(1, Math.round(article.content.length / 400))} 分钟阅读
               </span>
@@ -114,15 +114,15 @@ export default async function ArticlePage({
                 href={`/article/${prev.id}`}
                 className="sticky-note sketch-border px-4 py-3 rotate-[-1deg] hover:rotate-0 transition-transform group"
               >
-                <div className="font-hand-body text-[13px] text-[#a39e98]">← 上一篇</div>
-                <div className="mt-1 font-hand-display text-[17px] font-bold text-[#523410] line-clamp-2 group-hover:text-[#0075de] transition-colors">
+                <div className="font-hand-body text-[13px] text-ink-faint">← 上一篇</div>
+                <div className="mt-1 font-hand-display text-[17px] font-bold text-sticker-brown line-clamp-2 group-hover:text-primary transition-colors">
                   {prev.title}
                 </div>
               </Link>
             ) : (
               <div className="sticky-note sketch-border px-4 py-3 rotate-[-1deg] opacity-40">
-                <div className="font-hand-body text-[13px] text-[#a39e98]">← 上一篇</div>
-                <div className="mt-1 font-hand-display text-[17px] text-[#a39e98]">没有了</div>
+                <div className="font-hand-body text-[13px] text-ink-faint">← 上一篇</div>
+                <div className="mt-1 font-hand-display text-[17px] text-ink-faint">没有了</div>
               </div>
             )}
             {next ? (
@@ -130,15 +130,15 @@ export default async function ArticlePage({
                 href={`/article/${next.id}`}
                 className="sticky-note sketch-border-2 px-4 py-3 rotate-[1deg] hover:rotate-0 transition-transform group text-right"
               >
-                <div className="font-hand-body text-[13px] text-[#a39e98]">下一篇 →</div>
-                <div className="mt-1 font-hand-display text-[17px] font-bold text-[#523410] line-clamp-2 group-hover:text-[#0075de] transition-colors">
+                <div className="font-hand-body text-[13px] text-ink-faint">下一篇 →</div>
+                <div className="mt-1 font-hand-display text-[17px] font-bold text-sticker-brown line-clamp-2 group-hover:text-primary transition-colors">
                   {next.title}
                 </div>
               </Link>
             ) : (
               <div className="sticky-note sketch-border-2 px-4 py-3 rotate-[1deg] opacity-40 text-right">
-                <div className="font-hand-body text-[13px] text-[#a39e98]">下一篇 →</div>
-                <div className="mt-1 font-hand-display text-[17px] text-[#a39e98]">没有了</div>
+                <div className="font-hand-body text-[13px] text-ink-faint">下一篇 →</div>
+                <div className="mt-1 font-hand-display text-[17px] text-ink-faint">没有了</div>
               </div>
             )}
           </div>

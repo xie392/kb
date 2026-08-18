@@ -46,8 +46,8 @@ export default function SiteNav() {
               href={link.href}
               className={`font-hand-display text-[17px] px-4 py-1.5 transition-colors ${
                 active
-                  ? "bg-white sketch-border sketch-shadow text-[#0075de] font-bold"
-                  : `text-[#615d59] hover:text-[#0075de] ${
+                  ? "bg-white sketch-border sketch-shadow text-primary font-bold"
+                  : `text-ink-muted hover:text-primary ${
                       i % 2 ? "rotate-[0.5deg]" : "rotate-[-0.5deg]"
                     }`
               }`}
@@ -83,8 +83,8 @@ export default function SiteNav() {
                   className={cn(
                     "font-hand-display text-[17px] transition-colors",
                     active
-                      ? "text-[#0075de] font-bold"
-                      : `text-[#615d59] hover:text-[#0075de] ${
+                      ? "text-primary font-bold"
+                      : `text-ink-muted hover:text-primary ${
                           i % 2 ? "rotate-[0.3deg]" : "rotate-[-0.3deg]"
                         }`
                   )}

@@ -68,7 +68,7 @@ export function ToolbarBtn({
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={`rounded-[6px] transition-colors duration-150 ${
-        active ? "bg-[#0075de]/10 text-[#0075de]" : ""
+        active ? "bg-primary/10 text-primary" : ""
       } ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
     >
       {children}
@@ -77,7 +77,7 @@ export function ToolbarBtn({
 }
 
 export function ToolbarDivider() {
-  return <div className="w-px h-5 bg-[#e6e6e6] mx-1 shrink-0" />;
+  return <div className="w-px h-5 bg-hairline mx-1 shrink-0" />;
 }
 
 /* ─── 工具栏分组数据 ─── */
@@ -190,7 +190,7 @@ export function EditorToolbar({
   if (!editor) return null;
 
   return (
-    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-[#e6e6e6] bg-white flex-wrap">
+    <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-hairline bg-white flex-wrap">
       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       {groups.map((group, gi) => (
         <div key={gi} className="flex items-center gap-0.5">
@@ -217,16 +217,16 @@ export function EditorToolbar({
           if (!open) setErrMsg(null);
         }}
       >
-        <AlertDialogContent className="rounded-xl border border-[#e6e6e6] bg-white shadow-lg">
+        <AlertDialogContent className="rounded-xl border border-hairline bg-white shadow-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-[#31302e]">
+            <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">
               提示
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-[#615d59]">{errMsg}</AlertDialogDescription>
+            <AlertDialogDescription className="text-[13px] text-ink-muted">{errMsg}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
-              className="bg-[#0075de] text-white hover:bg-[#005bab]"
+              className="bg-primary text-white hover:bg-primary-active"
               onClick={() => setErrMsg(null)}
             >
               知道了
