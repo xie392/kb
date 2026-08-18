@@ -334,6 +334,24 @@
   color: var(--color-ink);
   margin: 1.5em 0 0.5em;
 }
+.prose-kb h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.25em 0 0.5em;
+}
+.prose-kb h5 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.1em 0 0.4em;
+}
+.prose-kb h6 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1em 0 0.4em;
+}
 .prose-kb p {
   margin: 0.9em 0;
 }
@@ -647,6 +665,12 @@
   flex: 1;
   min-width: 0;
 }
+.prose-kb ul[data-type="taskList"] li[style*="text-align: center"] > div {
+  text-align: center;
+}
+.prose-kb ul[data-type="taskList"] li[style*="text-align: right"] > div {
+  text-align: right;
+}
 .prose-kb ul[data-type="taskList"] li[data-checked="true"] > div {
   text-decoration: line-through;
   opacity: 0.6;
@@ -904,6 +928,29 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* 宽滚动条（用于弹出菜单/下拉面板等可滚动浮层，比默认细滚动条更易拖动） */
+.scrollbar-wide {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(97, 93, 89, 0.3) transparent;
+}
+.scrollbar-wide::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-wide::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-wide::-webkit-scrollbar-thumb {
+  background-color: rgba(97, 93, 89, 0.3);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-wide::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(97, 93, 89, 0.5);
+  background-clip: padding-box;
+  border: 2px solid transparent;
 }
 
 /* sonner toast 手绘化 */

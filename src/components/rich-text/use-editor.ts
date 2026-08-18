@@ -6,6 +6,10 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
+import Subscript from "@tiptap/extension-subscript";
+import Superscript from "@tiptap/extension-superscript";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Table } from "@tiptap/extension-table";
@@ -32,12 +36,24 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
   const { value, onChange, onOutline, placeholder } = options;
 
   const editor = useEditor({
+    // 显式关闭 Tiptap 的 SSR 默认提示；编辑器在服务端不渲染、客户端挂载后再创建
+    immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] }, codeBlock: false }),
+      // StarterKit 新版本内置了 link/underline，这里关闭，避免与下方显式扩展重复注册
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3, 4, 5, 6] },
+        codeBlock: false,
+        link: false,
+        underline: false,
+      }),
       CustomCodeBlock,
       Underline,
-      Highlight.configure({ multicolor: false }),
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Highlight.configure({ multicolor: true }),
+      Subscript,
+      Superscript,
+      TextStyle,
+      Color,
+      TextAlign.configure({ types: ["heading", "paragraph", "taskItem"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Table.configure({ resizable: true, lastColumnResizable: false }),

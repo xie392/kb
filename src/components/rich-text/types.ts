@@ -29,6 +29,7 @@ export interface OutlineItem {
 export interface ToolbarAction {
   title: string;
   active?: boolean;
+  disabled?: boolean;
   onClick: () => void;
   icon: ReactNode;
 }

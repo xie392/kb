@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <filter id="roughen">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(96,93,89,0.08)" strokeWidth="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="512" height="512" fill="#fbfaf6"/>
+  <rect width="512" height="512" fill="url(#grid)"/>
+
+  <g filter="url(#roughen)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M 168 168 Q 162 165 156 168 Q 130 178 96 188 Q 80 193 76 208 Q 72 240 72 340 Q 72 356 88 360 Q 124 358 152 350 Q 162 347 168 348 Z"
+          stroke="#31302e" strokeWidth="3.2" fill="rgba(255,255,255,0.5)"/>
+    <path d="M 344 168 Q 350 165 356 168 Q 382 178 416 188 Q 432 193 436 208 Q 440 240 440 340 Q 440 356 424 360 Q 388 358 360 350 Q 350 347 344 348 Z"
+          stroke="#31302e" strokeWidth="3.2" fill="rgba(255,255,255,0.5)"/>
+
+    <path d="M 168 172 Q 168 220 168 344" stroke="#31302e" strokeWidth="2.8"/>
+    <path d="M 256 178 Q 252 180 250 186 Q 244 200 240 220 Q 236 244 232 272 Q 228 304 224 340" stroke="#31302e" strokeWidth="2.2" opacity="0.55"/>
+    <path d="M 256 178 Q 260 180 262 186 Q 268 200 272 220 Q 276 244 280 272 Q 284 304 288 340" stroke="#31302e" strokeWidth="2.2" opacity="0.55"/>
+
+    <path d="M 104 220 Q 130 214 156 218" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 100 248 Q 128 242 156 246" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 100 276 Q 128 270 156 274" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 100 304 Q 128 298 156 302" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 356 218 Q 382 214 408 220" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 356 246 Q 384 242 412 248" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 356 274 Q 384 270 412 276" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+    <path d="M 356 302 Q 384 298 412 304" stroke="#31302e" strokeWidth="2" opacity="0.5"/>
+
+    <path d="M 256 168 Q 228 156 200 158 Q 176 160 168 172" stroke="#0075de" strokeWidth="3.2"/>
+    <path d="M 256 168 Q 284 156 312 158 Q 336 160 344 172" stroke="#0075de" strokeWidth="3.2"/>
+
+    <circle cx="256" cy="162" r="5" fill="#0075de" stroke="none"/>
+
+    <g transform="translate(256 372)">
+      <path d="M -40 0 Q -44 -6 -40 -12 Q -36 -18 -28 -16 Q -20 -14 -14 -18 Q -8 -22 -2 -20 Q 4 -18 6 -12 Q 8 -6 4 0 Q 0 6 -8 8 Q -16 10 -24 8 Q -32 6 -40 0 Z"
+            stroke="#31302e" strokeWidth="2.2" fill="rgba(255,248,197,0.9)"/>
+      <text x="0" y="3" text-anchor="middle" font-family="'Georgia', serif" font-size="14" font-weight="700" fill="#31302e" stroke="none" filter="url(#roughen)">KB</text>
+    </g>
+
+    <path d="M 60 120 L 60 88 M 60 88 L 76 100 M 60 88 L 44 100" stroke="#2a9d99" strokeWidth="2.8" opacity="0.85"/>
+    <path d="M 448 108 L 454 92 L 460 108 L 476 108 L 463 118 L 468 134 L 454 124 L 440 134 L 445 118 L 432 108 Z"
+          stroke="#213183" strokeWidth="2.4" fill="rgba(214,182,246,0.4)" opacity="0.85"/>
+
+    <path d="M 96 392 Q 108 388 116 396 Q 124 404 120 416" stroke="#dd5b00" strokeWidth="2.4" opacity="0.75" fill="none"/>
+    <path d="M 404 400 Q 416 392 428 400" stroke="#ff64c8" strokeWidth="2.4" opacity="0.75" fill="none"/>
+
+    <circle cx="78" cy="156" r="3.5" fill="#0075de" opacity="0.7"/>
+    <circle cx="440" cy="156" r="3.5" fill="#1aae39" opacity="0.7"/>
+    <circle cx="56" cy="320" r="3" fill="#62aef0" opacity="0.6"/>
+    <circle cx="456" cy="320" r="3" fill="#d6b6f6" opacity="0.6"/>
+
+    <path d="M 132 120 Q 148 112 156 124" stroke="#31302e" strokeWidth="1.8" opacity="0.4" fill="none"/>
+    <path d="M 360 124 Q 372 116 380 128" stroke="#31302e" strokeWidth="1.8" opacity="0.4" fill="none"/>
+
+    <path d="M 196 132 L 200 124 L 204 132 L 212 132 L 206 138 L 208 146 L 200 142 L 192 146 L 194 138 L 188 132 Z"
+          fill="#0075de" opacity="0.55"/>
+  </g>
+
+  <text x="256" y="448" text-anchor="middle" font-family="'Georgia', 'Times New Roman', serif" font-size="22" font-weight="600" fill="#31302e" letter-spacing="2" filter="url(#roughen)">xie392</text>
+  <text x="256" y="472" text-anchor="middle" font-family="'Georgia', 'Times New Roman', serif" font-size="11" fill="#615d59" letter-spacing="3" filter="url(#roughen)">KNOWLEDGE BASE</text>
+</svg>

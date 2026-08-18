@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CatNode {
   id: string;
@@ -143,6 +143,9 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
   const activeArticle = articles.find((a) => a.id === activeArticleId) ?? null;
   const activeCategoryId = activeArticle?.categoryId ?? null;
 
+  const treeRef = useRef(tree);
+  treeRef.current = tree;
+
   const articlesByCat = new Map<string, ArticleLite[]>();
   for (const a of articles) {
     if (!a.categoryId) continue;
@@ -151,13 +154,13 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
     articlesByCat.set(a.categoryId, arr);
   }
 
-  function collectPath(node: CatNode, targetId: string, acc: Set<string>): boolean {
-    if (node.id === targetId) {
-      acc.add(node.id);
-      return true;
-    }
-    for (const child of node.children) {
-      if (collectPath(child, targetId, acc)) {
+  function collectPath(nodes: CatNode[], targetId: string, acc: Set<string>): boolean {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        acc.add(node.id);
+        return true;
+      }
+      if (collectPath(node.children, targetId, acc)) {
         acc.add(node.id);
         return true;
       }
@@ -168,7 +171,7 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     if (activeCategoryId) {
-      for (const node of tree) collectPath(node, activeCategoryId, initial);
+      collectPath(tree, activeCategoryId, initial);
     }
     return initial;
   });
@@ -178,12 +181,12 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
     setExpandedIds((prev) => {
       if (prev.has(activeCategoryId)) return prev;
       const pathIds = new Set<string>();
-      for (const node of tree) collectPath(node, activeCategoryId, pathIds);
+      collectPath(treeRef.current, activeCategoryId, pathIds);
       const next = new Set(prev);
       for (const id of pathIds) next.add(id);
       return next;
     });
-  }, [activeCategoryId, tree]);
+  }, [activeCategoryId]);
 
   const handleToggle = (id: string) => {
     setExpandedIds((prev) => {

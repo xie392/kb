@@ -230,7 +230,7 @@ export default function ArticleEditor({ article }: Props) {
 
           {/* 富文本编辑区 */}
           <div>
-            <EditorArea editor={editor} />
+            <EditorArea editor={editor} onUploadImage={handleUploadImage} />
           </div>
         </div>
       </div>
