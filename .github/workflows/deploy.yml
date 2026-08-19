@@ -14,9 +14,10 @@ jobs:
 
       # 打包源码：排除大目录和本地状态，只保留构建所需文件
       # 跨国只传源码（几 MB），不传镜像（几百 MB）
+      # 输出到 /tmp 避开当前目录，否则 tar 会报 "file changed as we read it"
       - name: 打包源码
         run: |
-          tar czf source.tar.gz \
+          tar czf /tmp/source.tar.gz \
             --exclude=node_modules \
             --exclude=.next \
             --exclude=.git \
@@ -25,8 +26,8 @@ jobs:
             --exclude='*.db' \
             --exclude='*.db-journal' \
             --exclude='.env*' \
-            --exclude='source.tar.gz' \
             .
+          mv /tmp/source.tar.gz source.tar.gz
           ls -lh source.tar.gz
 
       - name: 同步源码与部署文件到服务器
