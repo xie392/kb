@@ -104,15 +104,6 @@ importers:
       '@trpc/server':
         specifier: ^11.18.0
         version: 11.18.0(typescript@7.0.2)
-      '@types/node':
-        specifier: ^26.2.0
-        version: 26.2.0
-      '@types/react':
-        specifier: ^19.2.18
-        version: 19.2.18
-      '@types/react-dom':
-        specifier: ^19.2.4
-        version: 19.2.4(@types/react@19.2.18)
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -152,6 +143,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      prisma:
+        specifier: ^7.9.1
+        version: 7.9.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(better-sqlite3@13.0.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -170,12 +164,12 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      tsx:
+        specifier: ^4.23.12
+        version: 4.23.12
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
-      typescript:
-        specifier: ^7.0.2
-        version: 7.0.2
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -186,21 +180,27 @@ importers:
       '@types/markdown-it':
         specifier: ^14.2.0
         version: 14.2.0
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.4(@types/react@19.2.18)
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
       markdown-it:
         specifier: ^15.0.0
         version: 15.0.0
-      prisma:
-        specifier: ^7.9.1
-        version: 7.9.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(better-sqlite3@13.0.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2)
       shadcn:
         specifier: ^4.18.0
         version: 4.18.0(typescript@7.0.2)
-      tsx:
-        specifier: ^4.23.12
-        version: 4.23.12
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
 
 packages:
 
