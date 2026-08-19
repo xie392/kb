@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { api } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ADMIN_HOME } from "@/lib/config";
+import { ADMIN_HOME, ADMIN_LOGIN } from "@/lib/config";
 
 export default function AdminSettingsPage() {
   const utils = api.useUtils();
+  const router = useRouter();
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   // 昵称
@@ -18,9 +21,18 @@ export default function AdminSettingsPage() {
   // 密码
   const [oldPwd, setOldPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
 
   const changePassword = api.settings.changePassword.useMutation({
-    onSuccess: () => { setOldPwd(""); setNewPwd(""); show("密码已修改", "ok"); },
+    onSuccess: async () => {
+      setOldPwd(""); setNewPwd(""); setConfirmPwd("");
+      show("密码已修改，即将退出登录", "ok");
+      setTimeout(async () => {
+        await signOut({ redirect: false });
+        router.push(ADMIN_LOGIN);
+        router.refresh();
+      }, 1500);
+    },
     onError: (e) => show(e.message, "err"),
   });
   const updateProfile = api.settings.updateProfile.useMutation({
@@ -124,10 +136,18 @@ export default function AdminSettingsPage() {
                   placeholder="新密码（至少 6 位）"
                   className="w-full max-w-50 h-10"
                 />
+                <Input
+                  type="password"
+                  value={confirmPwd}
+                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  placeholder="确认新密码"
+                  className="w-full max-w-50 h-10"
+                />
                 <Button
                   onClick={() => {
-                    if (!oldPwd || !newPwd) return show("请填写完整", "err");
+                    if (!oldPwd || !newPwd || !confirmPwd) return show("请填写完整", "err");
                     if (newPwd.length < 6) return show("新密码至少 6 位", "err");
+                    if (newPwd !== confirmPwd) return show("两次输入的新密码不一致", "err");
                     changePassword.mutate({ oldPassword: oldPwd, newPassword: newPwd });
                   }}
                   variant="outline"

@@ -50,3 +50,4 @@ dev.db
 
 # 本地上传的图片
 public/uploads/
+backups/

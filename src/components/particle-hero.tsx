@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { SITE_NAME } from "@/lib/config";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -56,7 +57,7 @@ function sampleTextParticles(
   return { points, w: maxW, h: maxH };
 }
 
-export default function ParticleHero({ title = "我的知识库" }: { title?: string }) {
+export default function ParticleHero({ title = SITE_NAME }: { title?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
 

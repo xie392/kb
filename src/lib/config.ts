@@ -22,3 +22,8 @@ export const ADMIN_LOGIN = `${ADMIN_HOME}/login`;
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
 ).replace(/\/+$/, "");
+
+// 站点显示名称（导航 / 首页 / 登录页等前台展示）。
+// NEXT_PUBLIC_SITE_NAME 只配置名字部分（如 XIE392），"的知识库"为固定后缀。
+// 构建期注入，修改后需重新构建。
+export const SITE_NAME = `${process.env.NEXT_PUBLIC_SITE_NAME ?? "XIE392"}的知识库`;

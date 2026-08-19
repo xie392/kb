@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/format";
 import HandChart from "@/components/hand-chart";
 import HomeArticleFeed from "@/components/home-article-feed";
 import { createServerCaller } from "@/trpc/server";
+import { SITE_NAME } from "@/lib/config";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -35,7 +36,7 @@ export default async function HomePage() {
       {/* ─── 手绘 Hero ─── */}
       <section className="max-w-250 mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 text-center">
         <h1 className="font-hand-display text-[44px] sm:text-[64px] md:text-[80px] font-bold leading-none text-secondary rotate-[-2deg] inline-block">
-          我的知识库
+          {SITE_NAME}
           <span
             className="block w-full h-[6px] mt-2 rotate-[-1deg]"
             style={{

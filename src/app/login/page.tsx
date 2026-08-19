@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { ADMIN_HOME } from "@/lib/config";
+import { ADMIN_HOME, SITE_NAME } from "@/lib/config";
 import { SketchDecorations } from "@/components/sketch/sketch-decorations";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-2">
             <Logo size="md" />
             <span className="font-hand-display text-[26px] font-bold text-ink-secondary rotate-[-1deg]">
-              我的知识库
+              {SITE_NAME}
             </span>
           </div>
           <h1 className="mt-14 font-hand-display text-[50px] font-bold leading-[1.1] text-secondary rotate-[-1deg]">
@@ -78,7 +78,7 @@ export default function LoginPage() {
         <div className="w-full max-w-100 fade-up">
           <div className="flex items-center gap-2 mb-10 lg:hidden">
             <Logo size="md" />
-            <span className="font-hand-display text-[26px] font-bold text-ink-secondary">我的知识库</span>
+            <span className="font-hand-display text-[26px] font-bold text-ink-secondary">{SITE_NAME}</span>
           </div>
 
           <div className="bg-white sketch-border sketch-shadow p-8 relative">
@@ -105,12 +105,9 @@ export default function LoginPage() {
                 />
               </div>
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label htmlFor="password" className="block font-hand-display text-[17px] font-bold text-ink-secondary">
-                    密码
-                  </label>
-                  <span className="font-hand-body text-[13px] text-ink-faint">初始账号 admin / admin123</span>
-                </div>
+                <label htmlFor="password" className="block font-hand-display text-[17px] font-bold text-ink-secondary mb-1.5">
+                  密码
+                </label>
                 <Input
                   id="password"
                   type="password"
