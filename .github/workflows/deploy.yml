@@ -92,6 +92,9 @@ jobs:
             cd /opt/kb
             docker compose up -d
             docker image prune -f
+
+            # 清理构建产物：源码已打进镜像，repo 目录不再需要
+            rm -rf repo
             echo "✅ 部署完成"
         env:
           ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
