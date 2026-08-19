@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import type { Session } from "next-auth";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 import type { PrismaClient, User } from "@prisma/client";
@@ -9,7 +10,12 @@ interface CreateContextOptions {
 }
 
 export async function createTRPCContext() {
-  const session = await auth();
+  let session: Session | null = null;
+  try {
+    session = await auth();
+  } catch {
+    session = null;
+  }
   let user: User | null = null;
   if (session?.user?.id) {
     user = await db.user.findUnique({ where: { id: session.user.id } });
