@@ -14,7 +14,7 @@ export default function AdminHeader() {
   if (isEditorPage) return null;
 
   return (
-    <header className="sticky top-0 z-20 h-14 bg-[#fbfaf6]/90 backdrop-blur-sm border-b border-hairline flex items-center justify-between px-8">
+    <header className="sticky top-0 z-20 h-14 bg-canvas-soft/90 backdrop-blur-sm border-b border-hairline flex items-center justify-between px-8">
       <div className="text-[14px] text-ink-secondary">数据看板</div>
       <div className="flex items-center gap-3">
         <span className="inline-flex items-center gap-1.5 font-hand-body text-[14px] text-ink-muted">

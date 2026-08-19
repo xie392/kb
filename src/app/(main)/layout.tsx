@@ -9,7 +9,7 @@ export default function MainLayout({
   return (
     <div className="graph-paper min-h-screen flex flex-col font-hand-body text-ink-secondary">
       {/* 手绘顶部导航 */}
-      <header className="sticky top-0 z-50 bg-[#fbfaf6]/90 backdrop-blur-sm border-b-2 border-dashed border-hairline">
+      <header className="sticky top-0 z-50 bg-canvas-soft/90 backdrop-blur-sm border-b-2 border-dashed border-hairline">
         <div className="max-w-250 mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <Logo size="sm" className="group-hover:rotate-0 transition-transform" />

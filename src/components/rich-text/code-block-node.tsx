@@ -151,7 +151,7 @@ interface CodeBlockViewProps {
 function CodeBlockView({ node, updateAttributes, deleteNode, selected }: CodeBlockViewProps) {
   const attrs = node.attrs as { language?: string | null; theme?: CodeBlockTheme };
   const language = attrs.language ?? null;
-  const theme: CodeBlockTheme = attrs.theme === "dark" ? "dark" : "light";
+  const theme: CodeBlockTheme = attrs.theme === "light" ? "light" : "dark";
   const dark = theme === "dark";
 
   const [langOpen, setLangOpen] = useState(false);
@@ -297,7 +297,7 @@ function CodeBlockView({ node, updateAttributes, deleteNode, selected }: CodeBlo
 
 /**
  * 代码块扩展：在 CodeBlockLowlight（实时语法高亮）基础上增加
- * - theme 属性（light/dark），序列化为 `<pre data-theme="...">`
+ * - theme 属性（light/dark），默认 dark，序列化为 `<pre data-theme="...">`
  * - 自定义 NodeView，提供语言选择 / 主题切换 / 复制 / 删除工具条
  */
 export const CustomCodeBlock = CodeBlockLowlight.configure({
@@ -308,13 +308,11 @@ export const CustomCodeBlock = CodeBlockLowlight.configure({
     return {
       ...this.parent?.(),
       theme: {
-        default: "light",
+        default: "dark",
         parseHTML: (element: HTMLElement) =>
-          element.getAttribute("data-theme") ?? "light",
+          element.getAttribute("data-theme") === "light" ? "light" : "dark",
         renderHTML: (attributes: Record<string, unknown>) =>
-          attributes.theme && attributes.theme !== "light"
-            ? { "data-theme": attributes.theme }
-            : {},
+          attributes.theme === "light" ? { "data-theme": "light" } : {},
       },
     };
   },

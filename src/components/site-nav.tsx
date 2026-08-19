@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import SearchDialog from "@/components/search-dialog";
+import ThemeToggle from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -71,6 +72,7 @@ export default function SiteNav() {
             </Link>
           );
         })}
+        <ThemeToggle />
         <a
           href={GITHUB_URL}
           target="_blank"

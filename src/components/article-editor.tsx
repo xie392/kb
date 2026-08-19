@@ -112,7 +112,7 @@ export default function ArticleEditor({ article }: Props) {
   return (
     <div className="h-full flex flex-col bg-white">
       {/* ═══ 固定顶部操作栏 ═══ */}
-      <div className="sticky top-0 z-30 shrink-0 bg-white/95 backdrop-blur-sm border-b border-hairline">
+      <div className="sticky top-0 z-30 shrink-0 bg-canvas-soft/95 backdrop-blur-sm border-b border-hairline">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -264,7 +264,7 @@ export default function ArticleEditor({ article }: Props) {
       )}
 
       {/* ═══ 底部状态栏（固定在视口底部） ═══ */}
-      <div className="fixed bottom-0 left-55 right-0 bg-white/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
+      <div className="fixed bottom-0 left-55 right-0 bg-canvas-soft/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
         <span>{wordCount > 0 ? `${wordCount} 字` : "空文档"}</span>
         <span className="w-px h-3 bg-hairline" />
         <span>{isEdit ? "编辑模式" : "新建模式"}</span>

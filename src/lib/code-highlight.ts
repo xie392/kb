@@ -48,7 +48,7 @@ export function highlightCodeBlocks(html: string): string {
       );
       const language = langMatch ? langMatch[1] : null;
       const theme: CodeBlockTheme =
-        attrOf(preAttrs, "data-theme") === "dark" ? "dark" : "light";
+        attrOf(preAttrs, "data-theme") === "light" ? "light" : "dark";
 
       const source = decodeEntities(inner);
       let highlighted: string;

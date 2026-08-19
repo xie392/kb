@@ -207,7 +207,22 @@
 
 /* ── 代码块（编辑器 + 阅读页共用）：语法高亮明暗主题 ── */
 
-/* 主题变量（阅读页 pre.kb-code 与编辑器 div.kb-code-block 均带 data-theme） */
+/* 主题变量（阅读页 pre.kb-code 与编辑器 div.kb-code-block 均带 data-theme）。
+ * 默认暗色；仅 data-theme="light" 时覆盖为亮色变量。 */
+.prose-kb .kb-code,
+.prose-kb .kb-code-block {
+  --kb-code-bg: #0d1117;
+  --kb-code-fg: #e6edf3;
+  --kb-code-comment: #8b949e;
+  --kb-code-keyword: #ff7b72;
+  --kb-code-string: #a5d6ff;
+  --kb-code-number: #79c0ff;
+  --kb-code-title: #d2a8ff;
+  --kb-code-built-in: #ffa657;
+  --kb-code-attr: #79c0ff;
+  --kb-code-meta: #ffa657;
+  --kb-code-operator: #e6edf3;
+}
 .prose-kb .kb-code[data-theme="light"],
 .prose-kb .kb-code-block[data-theme="light"] {
   --kb-code-bg: #f6f5f4;
@@ -221,20 +236,6 @@
   --kb-code-attr: #0550ae;
   --kb-code-meta: #953800;
   --kb-code-operator: #31302e;
-}
-.prose-kb .kb-code[data-theme="dark"],
-.prose-kb .kb-code-block[data-theme="dark"] {
-  --kb-code-bg: #0d1117;
-  --kb-code-fg: #e6edf3;
-  --kb-code-comment: #8b949e;
-  --kb-code-keyword: #ff7b72;
-  --kb-code-string: #a5d6ff;
-  --kb-code-number: #79c0ff;
-  --kb-code-title: #d2a8ff;
-  --kb-code-built-in: #ffa657;
-  --kb-code-attr: #79c0ff;
-  --kb-code-meta: #ffa657;
-  --kb-code-operator: #e6edf3;
 }
 
 /* 块容器（阅读页 pre / 编辑器 .kb-code-block 内 pre） */
@@ -291,6 +292,16 @@
 .prose-kb .kb-code-copy:focus-visible {
   opacity: 1;
 }
+/* 默认暗色；data-theme="light" 覆盖 */
+.prose-kb .kb-code-copy {
+  color: #9d9d9d;
+  background: rgba(13, 17, 23, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.prose-kb .kb-code-copy:hover {
+  color: #ffffff;
+  background: rgba(22, 27, 34, 0.95);
+}
 .prose-kb .kb-code-copy[data-theme="light"] {
   color: #8a8580;
   background: rgba(255, 255, 255, 0.92);
@@ -300,23 +311,12 @@
   color: #31302e;
   background: #ffffff;
 }
-.prose-kb .kb-code-copy[data-theme="dark"] {
-  color: #9d9d9d;
-  background: rgba(13, 17, 23, 0.92);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-.prose-kb .kb-code-copy[data-theme="dark"]:hover {
-  color: #ffffff;
-  background: rgba(22, 27, 34, 0.95);
-}
-.prose-kb .kb-code-copy--copied,
-.prose-kb .kb-code-copy--copied[data-theme="light"] {
-  color: var(--color-primary);
-  border-color: transparent;
-}
-.prose-kb .kb-code-copy--copied[data-theme="dark"] {
+.prose-kb .kb-code-copy--copied {
   color: #58a6ff;
   border-color: transparent;
+}
+.prose-kb .kb-code-copy--copied[data-theme="light"] {
+  color: var(--color-primary);
 }
 
 /* code 元素还原为纯净的代码样式（覆盖行内 code 样式） */

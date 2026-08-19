@@ -6,6 +6,7 @@ import { SITE_URL } from "@/lib/config";
 import TRPCProvider from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
 import BackToTop from "@/components/back-to-top";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const caveat = Caveat({
@@ -54,6 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
+      suppressHydrationWarning
       className={cn("font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
       <body className="min-h-screen antialiased">
@@ -64,9 +66,16 @@ export default function RootLayout({
           跳到主要内容
         </a>
         <TRPCProvider>
-          {children}
-          <Toaster position="top-center" richColors />
-          <BackToTop />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster position="top-center" richColors />
+            <BackToTop />
+          </ThemeProvider>
         </TRPCProvider>
       </body>
     </html>

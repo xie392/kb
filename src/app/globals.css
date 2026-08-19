@@ -180,14 +180,14 @@
 
 /* ─── 手绘线框图风格 ─── */
 
-/* 方格纸背景 */
+/* 方格纸背景（颜色走主题变量，暗色下 .dark 会覆盖） */
 @utility graph-paper {
-  background-color: #fbfaf6;
+  background-color: var(--color-canvas-soft);
   background-image:
-    linear-gradient(rgba(96, 93, 89, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 93, 89, 0.07) 1px, transparent 1px),
-    linear-gradient(rgba(96, 93, 89, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(96, 93, 89, 0.04) 1px, transparent 1px);
+    linear-gradient(var(--graph-grid-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--graph-grid-strong) 1px, transparent 1px),
+    linear-gradient(var(--graph-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--graph-grid) 1px, transparent 1px);
   background-size:
     80px 80px,
     80px 80px,
@@ -254,29 +254,29 @@
 
 /* 手绘圆角（不规则） */
 @utility sketch-border {
-  border: 1.5px solid rgba(49, 48, 46, 0.75);
+  border: 1.5px solid var(--color-sketch-line);
   border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
 }
 
 /* 手绘边框变体（外凸圆角） */
 @utility sketch-border-2 {
-  border: 1.5px solid rgba(49, 48, 46, 0.75);
+  border: 1.5px solid var(--color-sketch-line);
   border-radius: 15px 255px 15px 225px / 225px 15px 255px 15px;
 }
 
 /* 手绘阴影 */
 @utility sketch-shadow {
   box-shadow:
-    3px 3px 0 rgba(49, 48, 46, 0.12),
-    6px 6px 16px rgba(49, 48, 46, 0.1);
+    3px 3px 0 var(--color-sketch-shadow),
+    6px 6px 16px var(--color-sketch-shadow-soft);
 }
 
 /* 手绘标签页 */
 @utility sketch-tab {
-  border: 1.5px solid rgba(49, 48, 46, 0.75);
+  border: 1.5px solid var(--color-sketch-line);
   border-bottom: none;
   border-radius: 10px 10px 0 0;
-  background: #fff;
+  background: var(--color-canvas);
   padding: 6px 16px;
   position: relative;
   top: 1.5px;
@@ -286,14 +286,14 @@
 @utility pencil-line {
   background-image: repeating-linear-gradient(
     to right,
-    rgba(49, 48, 46, 0.6) 0 2px,
+    var(--color-sketch-line-hair) 0 2px,
     transparent 2px 4px
   );
 }
 
 /* 手绘省略虚线框 */
 @utility sketch-dashed {
-  border: 1.5px dashed rgba(49, 48, 46, 0.45);
+  border: 1.5px dashed var(--color-sketch-line-soft);
   border-radius: 8px;
 }
 
@@ -375,27 +375,39 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* 手绘描边 / 阴影 / 方格纸网格线的主题变量（暗色下在 .dark 中覆盖） */
+  --color-sketch-line: rgba(49, 48, 46, 0.75);
+  --color-sketch-line-soft: rgba(49, 48, 46, 0.45);
+  --color-sketch-line-hair: rgba(49, 48, 46, 0.6);
+  --color-sketch-shadow: rgba(49, 48, 46, 0.12);
+  --color-sketch-shadow-soft: rgba(49, 48, 46, 0.1);
+  --graph-grid-strong: rgba(96, 93, 89, 0.07);
+  --graph-grid: rgba(96, 93, 89, 0.04);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  color-scheme: dark;
+
+  /* shadcn 语义 token — 暖色暗色（延续"暖纸"设计语言） */
+  --background: #1c1b19;
+  --foreground: #e6e3dd;
+  --card: #262522;
+  --card-foreground: #e6e3dd;
+  --popover: #262522;
+  --popover-foreground: #e6e3dd;
+  --primary: #3b8ee6;
+  --primary-foreground: #ffffff;
+  --secondary: #213183;
+  --secondary-foreground: #ffffff;
+  --muted: #262522;
+  --muted-foreground: #a6a29b;
+  --accent: #262522;
+  --accent-foreground: #e6e3dd;
+  --destructive: #ef4444;
+  --border: #38362f;
+  --input: #38362f;
+  --ring: #3b8ee6;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -409,7 +421,54 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* 自定义设计 token 的暗色值（docs/DESIGN.md：canvas/ink/hairline…） */
+  --color-primary: #3b8ee6;
+  --color-primary-active: #2f7fd8;
+  --color-canvas: #262522;
+  --color-canvas-soft: #1c1b19;
+  --color-hairline: #38362f;
+  --color-ink: #ffffff;
+  --color-ink-secondary: #e6e3dd;
+  --color-ink-muted: #a6a29b;
+  --color-ink-faint: #8a857c;
+
+  /* 手绘描边 / 阴影 / 方格纸网格线的暗色值 */
+  --color-sketch-line: rgba(230, 227, 221, 0.75);
+  --color-sketch-line-soft: rgba(230, 227, 221, 0.4);
+  --color-sketch-line-hair: rgba(230, 227, 221, 0.55);
+  --color-sketch-shadow: rgba(0, 0, 0, 0.55);
+  --color-sketch-shadow-soft: rgba(0, 0, 0, 0.4);
+  --graph-grid-strong: rgba(255, 255, 255, 0.06);
+  --graph-grid: rgba(255, 255, 255, 0.03);
 }
+
+/* 暗色下把组件里大量直接使用的"白色卡片"统一映射为暗色画布色，
+ * 避免白块在深底上刺眼（bg-white/xx 带透明度的写法不受影响）。 */
+.dark .bg-white {
+  background-color: var(--color-canvas);
+}
+
+/* 暗色下侧栏目录等半透明白底面板：50% 白在深底上会发灰，压到极低透明度 */
+.dark .bg-white\/50 {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* 暗色下把列表 hover 的白底高亮压暗 */
+.dark .hover\:bg-white\/60:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* 马克笔高亮始终是浅色底（黄/蓝），文字需保持深色，暗色下不能跟随 ink 变浅 */
+.marker-highlight {
+  color: #31302e;
+}
+
+/* 暗色下把 indigo 标题/链接色提亮，保证深底可读（bg-secondary 保持原色） */
+.dark .text-secondary {
+  color: #9aa7ff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -444,15 +503,31 @@
   border: 2px solid transparent;
 }
 
+/* 暗色滚动条 */
+.dark .scrollbar-wide {
+  scrollbar-color: rgba(166, 162, 155, 0.35) transparent;
+}
+.dark .scrollbar-wide::-webkit-scrollbar-thumb {
+  background-color: rgba(166, 162, 155, 0.35);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+.dark .scrollbar-wide::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(166, 162, 155, 0.55);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
 /* sonner toast 手绘化 */
 .sonner .cn-toast {
   font-family: var(--font-hand-body), "PingFang SC", sans-serif;
-  border: 1.5px solid rgba(49, 48, 46, 0.75);
+  border: 1.5px solid var(--color-sketch-line);
   border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
   box-shadow:
-    3px 3px 0 rgba(49, 48, 46, 0.12),
-    6px 6px 16px rgba(49, 48, 46, 0.1);
+    3px 3px 0 var(--color-sketch-shadow),
+    6px 6px 16px var(--color-sketch-shadow-soft);
 }
 .sonner .cn-toast [data-sonner-toast] {
-  background: #fff;
+  background: var(--color-canvas);
+  color: var(--color-ink-secondary);
 }

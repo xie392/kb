@@ -46,7 +46,8 @@ export default function ArticleCodeCopy() {
       const code = pre.querySelector("code");
       if (!code) continue;
 
-      const theme = pre.getAttribute("data-theme") === "dark" ? "dark" : "light";
+      const theme =
+        pre.getAttribute("data-theme") === "light" ? "light" : "dark";
       const parent = pre.parentNode;
 
       const wrapper = document.createElement("div");
