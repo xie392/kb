@@ -518,6 +518,15 @@
   border: 2px solid transparent;
 }
 
+/* TOC 隐藏滚动条但保留滚动功能 */
+.toc-scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.toc-scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* sonner toast 手绘化 */
 .sonner .cn-toast {
   font-family: var(--font-hand-body), "PingFang SC", sans-serif;

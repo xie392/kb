@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TocItem } from "@/lib/toc";
 
 interface ArticleTocProps {
@@ -9,6 +9,8 @@ interface ArticleTocProps {
 
 export default function ArticleToc({ items }: ArticleTocProps) {
   const [activeId, setActiveId] = useState<string>("");
+  const containerRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   useEffect(() => {
     if (items.length === 0) return;
@@ -36,6 +38,25 @@ export default function ArticleToc({ items }: ArticleTocProps) {
     return () => observer.disconnect();
   }, [items]);
 
+  useEffect(() => {
+    if (!activeId) return;
+    const container = containerRef.current;
+    const activeEl = itemRefs.current.get(activeId);
+    if (!container || !activeEl) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = activeEl.getBoundingClientRect();
+
+    if (
+      itemRect.top < containerRect.top + 8 ||
+      itemRect.bottom > containerRect.bottom - 8
+    ) {
+      const targetTop =
+        activeEl.offsetTop - container.clientHeight / 2 + activeEl.clientHeight / 2;
+      container.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+  }, [activeId]);
+
   if (items.length === 0) return null;
 
   const handleClick = (e: React.MouseEvent, id: string) => {
@@ -49,7 +70,10 @@ export default function ArticleToc({ items }: ArticleTocProps) {
   };
 
   return (
-    <aside className="hidden xl:block w-50 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
+    <aside
+      ref={containerRef}
+      className="hidden xl:block w-50 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto toc-scrollbar-hide"
+    >
       <div>
         <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
           <span className="w-5 h-5 grid place-items-center sketch-border-2 bg-white text-[12px] rotate-[2deg]">
@@ -65,6 +89,10 @@ export default function ArticleToc({ items }: ArticleTocProps) {
               return (
                 <li key={item.id}>
                   <a
+                    ref={(el) => {
+                      if (el) itemRefs.current.set(item.id, el);
+                      else itemRefs.current.delete(item.id);
+                    }}
                     href={`#${item.id}`}
                     onClick={(e) => handleClick(e, item.id)}
                     className={`block font-hand-body text-[13px] leading-tight py-0.5 px-1.5 rounded-xs transition-colors truncate ${
