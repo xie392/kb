@@ -17,7 +17,7 @@
 
 </div>
 
-![首页预览](./public/homepage-screenshot.png)
+![首页预览](./public/homepage-screenshot.png?v=2)
 
 <p align="center">
   <sub>手绘线框图风格 · 方格纸背景 · 马克笔高亮 · 便签装饰</sub>
