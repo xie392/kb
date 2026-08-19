@@ -6,15 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-
-      - name: 准备 BuildKit
-        uses: docker/setup-buildx-action@v3
 
       - name: 构建镜像
         uses: docker/build-push-action@v6
@@ -76,10 +73,10 @@ jobs:
                 echo "INIT_PASSWORD=\"${INIT_PASSWORD}\""
               } > .env
               chmod 600 .env
-              echo "✅ 已创建 .env（AUTH_SECRET 随机生成，请妥善备份）"
+              echo "✅ 已创建 .env"
               echo "   初始账号：${INIT_USERNAME}"
             else
-              echo "ℹ️ .env 已存在，跳过创建"
+              echo "ℹ️ .env 已存在"
             fi
             chmod 600 .env
             docker load < kb.tar.gz
