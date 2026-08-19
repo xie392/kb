@@ -93,28 +93,27 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="mb-10 sketch-dashed p-4 flex items-center gap-6 rotate-[-0.5deg] fade-up" style={{ animationDelay: "100ms" }}>
-          <div className="flex-1 min-w-0">
-            <div className="font-hand-display text-[20px] font-bold text-ink-secondary marker-underline inline-block">
-              近 30 天笔记增长
-            </div>
-            {trendTotal > 0 ? (
-              <>
-                <div className="mt-1 font-hand-body text-[13px] text-ink-faint">
-                  近 30 天共新增 {trendTotal} 篇 · 峰值 {trendPeak} 篇/天
-                </div>
-                <div className="mt-3"><HandChart data={trend} /></div>
-              </>
-            ) : (
-              <div className="mt-4 py-10 text-center font-hand-body text-[15px] text-ink-faint">
-                近 30 天还没有新笔记，去写第一篇吧 ✍️
+        <div className="hidden lg:block sticky-note sketch-border px-3 py-2 rotate-[-2deg] absolute -right-16 top-12 w-32 fade-up">
+          <div className="font-hand-body text-[13px] text-sticker-brown">真实数据</div>
+          <div className="font-hand-body text-[12px] text-ink-faint">每篇笔记都是记录</div>
+        </div>
+
+        <div className="mb-10 sketch-dashed p-4 rotate-[-0.5deg] fade-up" style={{ animationDelay: "100ms" }}>
+          <div className="font-hand-display text-[20px] font-bold text-ink-secondary marker-underline inline-block">
+            近 30 天笔记增长
+          </div>
+          {trendTotal > 0 ? (
+            <>
+              <div className="mt-1 font-hand-body text-[13px] text-ink-faint">
+                近 30 天共新增 {trendTotal} 篇 · 峰值 {trendPeak} 篇/天
               </div>
-            )}
-          </div>
-          <div className="hidden sm:block sticky-note sketch-border px-3 py-2 rotate-[2deg] shrink-0">
-            <div className="font-hand-body text-[13px] text-sticker-brown">真实数据</div>
-            <div className="font-hand-body text-[12px] text-ink-faint">每篇笔记都是记录</div>
-          </div>
+              <div className="mt-3"><HandChart data={trend} /></div>
+            </>
+          ) : (
+            <div className="mt-4 py-10 text-center font-hand-body text-[15px] text-ink-faint">
+              近 30 天还没有新笔记，去写第一篇吧 ✍️
+            </div>
+          )}
         </div>
       </div>
 
