@@ -24,6 +24,12 @@ async function main() {
     console.log(`👤 已存在 ${userCount} 个用户，跳过初始账号创建`);
   }
 
+  // 示例数据（分类/标签/文章）仅在非生产环境写入，生产环境只初始化管理员
+  if (process.env.NODE_ENV === "production") {
+    console.log("🏭 生产环境，跳过示例数据初始化");
+    return;
+  }
+
   // 分类树
   const work = await prisma.category.upsert({
     where: { id: "c-work" },
