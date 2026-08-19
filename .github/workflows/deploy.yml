@@ -8,57 +8,56 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 构建镜像
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          load: true
-          tags: kb:latest
-          build-args: |
-            NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
-            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
-
-      - name: 打包镜像
+      # 打包源码：排除大目录和本地状态，只保留构建所需文件
+      # 跨国只传源码（几 MB），不传镜像（几百 MB）
+      - name: 打包源码
         run: |
-          docker save kb:latest | gzip > kb.tar.gz
-          ls -lh kb.tar.gz
+          tar czf source.tar.gz \
+            --exclude=node_modules \
+            --exclude=.next \
+            --exclude=.git \
+            --exclude='public/uploads' \
+            --exclude='./data' \
+            --exclude='*.db' \
+            --exclude='*.db-journal' \
+            --exclude='.env*' \
+            --exclude='source.tar.gz' \
+            .
+          ls -lh source.tar.gz
 
-      - name: 同步部署文件到服务器
+      - name: 同步源码与部署文件到服务器
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yml,Caddyfile"
+          source: "source.tar.gz,docker-compose.yml,Caddyfile"
           target: "/opt/kb/"
-          timeout: "120s"
+          timeout: "300s"
 
-      - name: 传输镜像到服务器
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "kb.tar.gz"
-          target: "/opt/kb/"
-          timeout: "1800s"
-
-      - name: 加载镜像并启动
+      - name: 服务器构建并启动
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           command_timeout: "30m"
+          envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
           script: |
             set -e
             cd /opt/kb
             mkdir -p data
+
+            # 解压源码到 repo 目录（先清空旧文件）
+            rm -rf repo && mkdir repo
+            tar xzf source.tar.gz -C repo
+            rm -f source.tar.gz
+
+            # 初始化 .env（仅首次）
             if [ ! -f .env ]; then
               SECRET=$(openssl rand -base64 32)
               {
@@ -79,12 +78,20 @@ jobs:
               echo "ℹ️ .env 已存在"
             fi
             chmod 600 .env
-            docker load < kb.tar.gz
-            rm -f kb.tar.gz
+
+            # 在 repo 目录构建镜像
+            # Dockerfile 多阶段构建会自己装 python3/make/g++，宿主机不需要
+            cd repo
+            docker build \
+              --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${ADMIN_BASE_PATH}" \
+              --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
+              -t kb:latest .
+
+            # 启动（docker-compose.yml 在 /opt/kb 下，image 用本地 kb:latest）
+            cd /opt/kb
             docker compose up -d
             docker image prune -f
             echo "✅ 部署完成"
-          envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
         env:
           ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
           SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
