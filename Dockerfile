@@ -1,6 +1,19 @@
-FROM node:22-slim AS base
+# base 镜像走 DaoCloud 加速（国内 docker.io 拉取慢/不稳定）
+# 本地构建想用原镜像：docker build --build-arg NODE_IMAGE=node:22-slim ...
+ARG NODE_IMAGE=docker.m.daocloud.io/library/node:22-slim
+FROM ${NODE_IMAGE} AS base
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH"
-RUN apt-get update \
+# 国内服务器构建加速：apt 走阿里云镜像，npm 走淘宝镜像
+# 本地构建想关掉：docker build --build-arg APT_MIRROR= --build-arg NPM_MIRROR= ...
+ARG APT_MIRROR=mirrors.aliyun.com
+ARG NPM_MIRROR=https://registry.npmmirror.com
+ENV npm_config_registry=${NPM_MIRROR} \
+    COREPACK_NPM_REGISTRY=${NPM_MIRROR}
+RUN if [ -n "$APT_MIRROR" ]; then \
+        find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i "s|deb.debian.org|$APT_MIRROR|g" {} +; \
+    fi \
+    && apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ openssl \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable && corepack prepare pnpm@10.32.1 --activate
@@ -27,7 +40,7 @@ RUN pnpm build
 # 移除 devDependencies（typescript/@types 等），只保留运行时必需的生产依赖
 RUN pnpm prune --prod
 
-FROM node:22-slim AS runner
+FROM ${NODE_IMAGE} AS runner
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH" NODE_ENV=production PORT=3000
 RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
 WORKDIR /app
