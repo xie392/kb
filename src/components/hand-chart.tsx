@@ -20,10 +20,12 @@ export default function HandChart({
   data,
   barFill = "#0075de",
   lineStroke = "#213183",
+  responsive = false,
 }: {
   data: TrendItem[];
   barFill?: string;
   lineStroke?: string;
+  responsive?: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -168,7 +170,7 @@ export default function HandChart({
     <svg
       ref={svgRef}
       viewBox="0 0 640 240"
-      className="w-full h-auto"
+      className="w-full h-auto max-h-full"
       aria-label="近 30 天笔记增长"
     />
   );
