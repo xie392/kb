@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { SITE_URL } from "@/lib/config";
 import TRPCProvider from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
+import BackToTop from "@/components/back-to-top";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const caveat = Caveat({
@@ -65,6 +66,7 @@ export default function RootLayout({
         <TRPCProvider>
           {children}
           <Toaster position="top-center" richColors />
+          <BackToTop />
         </TRPCProvider>
       </body>
     </html>

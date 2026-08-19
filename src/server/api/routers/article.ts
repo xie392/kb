@@ -24,6 +24,7 @@ const listInput = z.object({
   visibility: z.enum(["private", "public"]).optional(),
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
+  cursor: z.number().int().min(1).nullish(),
 });
 
 export const articleRouter = router({
@@ -47,12 +48,14 @@ export const articleRouter = router({
       where.tags = { some: { tagId: input.tagId } };
     }
 
+    const page = input.cursor ?? input.page;
+
     const [items, total] = await Promise.all([
       ctx.db.article.findMany({
         where,
         select: articleSelect,
         orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
-        skip: (input.page - 1) * input.pageSize,
+        skip: (page - 1) * input.pageSize,
         take: input.pageSize,
       }),
       ctx.db.article.count({ where }),
@@ -65,8 +68,9 @@ export const articleRouter = router({
         tagNames: a.tags.map((t) => t.tag.name),
       })),
       total,
-      page: input.page,
+      page,
       pageSize: input.pageSize,
+      nextCursor: page * input.pageSize < total ? page + 1 : null,
     };
   }),
 

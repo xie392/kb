@@ -4,14 +4,19 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function startOfLocalDay(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
+  const MS_PER_DAY = 1000 * 60 * 60 * 24;
   const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    (startOfLocalDay(now) - startOfLocalDay(date)) / MS_PER_DAY
   );
 
-  if (diffDays === 0) {
+  if (diffDays <= 0) {
     return `今天 ${date.toLocaleTimeString("zh-CN", {
       hour: "2-digit",
       minute: "2-digit",

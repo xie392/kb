@@ -2,75 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import HandChart from "@/components/hand-chart";
+import HomeArticleFeed from "@/components/home-article-feed";
 import { createServerCaller } from "@/trpc/server";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
-
-function HandPost({
-  article,
-  index,
-}: {
-  article: {
-    id: string;
-    title: string;
-    summary: string | null;
-    categoryName: string | null;
-    tagNames: string[];
-    updatedAt: Date;
-    isPinned: boolean;
-    visibility: string;
-  };
-  index: number;
-}) {
-  return (
-    <Link
-      href={`/article/${article.id}`}
-      className="group flex items-start gap-4 py-4 px-4 hover:bg-white/60 transition-colors fade-up"
-      style={{ animationDelay: `${index * 60}ms` }}
-    >
-      <span className="w-10 h-10 shrink-0 grid place-items-center sketch-border sketch-shadow bg-white font-hand-display text-[18px] font-bold text-secondary rotate-[-3deg]">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          {article.categoryName && (
-            <span className="font-hand-body text-[14px] px-1.5 text-sticker-pink">
-              【{article.categoryName}】
-            </span>
-          )}
-          {article.isPinned && (
-            <span className="marker-highlight font-hand-display text-[13px] text-sticker-brown rotate-[-1deg]">
-              ★ 置顶
-            </span>
-          )}
-          <span className="font-hand-body text-[13px] text-ink-faint">
-            {formatDate(article.updatedAt.toISOString())}
-          </span>
-        </div>
-        <h3 className="mt-1 font-hand-display text-[24px] font-bold leading-snug text-ink-secondary group-hover:text-primary transition-colors marker-underline inline-block">
-          {article.title}
-        </h3>
-        {article.summary && (
-          <p className="mt-1 font-hand-body text-[15px] text-ink-muted leading-relaxed line-clamp-2">
-            {article.summary}
-          </p>
-        )}
-        <div className="mt-2 flex items-center gap-2 flex-wrap">
-          {article.tagNames.map((t) => (
-            <span key={t} className="font-hand-body text-[13px] text-ink-faint">
-              #{t}
-            </span>
-          ))}
-          <span className="font-hand-display text-[14px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            阅读 →
-          </span>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 export default async function HomePage() {
   const caller = await createServerCaller();
@@ -83,9 +20,9 @@ export default async function HomePage() {
 
   const articles = list.items;
   const featured = articles.filter((a) => a.isPinned || a.isFavorite).slice(0, 3);
-  const rest = articles.filter((a) => !featured.includes(a));
+  const featuredIds = featured.map((a) => a.id);
   const stats = [
-    { v: String(articles.length), l: "笔记总数" },
+    { v: String(list.total), l: "笔记总数" },
     { v: String(cats.length), l: "分类" },
     { v: String(tags.length), l: "标签" },
     { v: String(articles.filter((a) => a.isFavorite).length), l: "收藏" },
@@ -134,7 +71,7 @@ export default async function HomePage() {
           {cats.map((c, i) => (
             <Link
               key={c.id}
-              href={`/categories#${c.id}`}
+              href={`/categories?cat=${c.id}`}
               className={`font-hand-display text-[16px] sm:text-[18px] px-4 py-1.5 bg-white sketch-border sketch-shadow hover:-translate-y-0.5 transition-transform ${
                 i % 2 ? "rotate-[1deg]" : "rotate-[-1deg]"
               }`}
@@ -228,25 +165,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 全部文章 */}
-      <section className="max-w-250 mx-auto px-4 sm:px-6 pb-16">
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
-            全部文章
-          </h2>
-          <span className="font-hand-body text-[15px] text-ink-faint">{rest.length} 篇</span>
-          <span className="flex-1 pencil-line h-[2px]" />
-          <Link href="/favorites" className="font-hand-display text-[16px] text-primary hover:underline">
-            收藏夹 →
-          </Link>
-        </div>
-
-        <div className="bg-white sketch-border sketch-shadow divide-y divide-dashed divide-hairline">
-          {rest.map((article, i) => (
-            <HandPost key={article.id} article={article} index={i} />
-          ))}
-        </div>
-      </section>
+      {/* 全部文章（触底加载） */}
+      <HomeArticleFeed featuredIds={featuredIds} />
     </div>
   );
 }

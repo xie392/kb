@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { api } from "@/trpc/client";
 
 interface CatNode {
   id: string;
@@ -141,7 +142,14 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
   const activeArticleId = match ? match[1]! : null;
 
   const activeArticle = articles.find((a) => a.id === activeArticleId) ?? null;
-  const activeCategoryId = activeArticle?.categoryId ?? null;
+
+  // 当前文章不在前 100 篇列表里时，用精确查询兜底，保证能定位到它所属的分类
+  const activeArticleQuery = api.article.get.useQuery(
+    { id: activeArticleId ?? "" },
+    { enabled: !!activeArticleId }
+  );
+  const activeCategoryId =
+    activeArticleQuery.data?.category?.id ?? activeArticle?.categoryId ?? null;
 
   const treeRef = useRef(tree);
   treeRef.current = tree;

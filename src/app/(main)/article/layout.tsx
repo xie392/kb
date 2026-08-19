@@ -1,6 +1,5 @@
 import { createServerCaller } from "@/trpc/server";
 import CategorySidebar from "@/components/category-sidebar";
-import BackToTop from "@/components/back-to-top";
 
 export default async function ArticleLayout({
   children,
@@ -31,7 +30,6 @@ export default async function ArticleLayout({
         <CategorySidebar tree={pruneTree(tree)} articles={articles} />
         {children}
       </div>
-      <BackToTop />
     </>
   );
 }
