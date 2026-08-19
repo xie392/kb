@@ -8,8 +8,6 @@ export interface TrendItem {
   count: number;
 }
 
-const BAR_FILL = "#0075de";
-const LINE_STROKE = "#213183";
 const GRID_STROKE = "rgba(49,48,46,0.18)";
 const LABEL_FILL = "rgba(49,48,46,0.6)";
 
@@ -18,7 +16,15 @@ const LABEL_FILL = "rgba(49,48,46,0.6)";
  * - 含 Y 轴刻度网格、X 轴日期标签、峰值标注
  * - 数据极端不均时仍可读（线性比例 + 峰值数字）
  */
-export default function HandChart({ data }: { data: TrendItem[] }) {
+export default function HandChart({
+  data,
+  barFill = "#0075de",
+  lineStroke = "#213183",
+}: {
+  data: TrendItem[];
+  barFill?: string;
+  lineStroke?: string;
+}) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -88,12 +94,12 @@ export default function HandChart({ data }: { data: TrendItem[] }) {
       const y = yAt(it.count);
       svg.appendChild(
         rc.rectangle(x, y, barW, h, {
-          fill: BAR_FILL,
+          fill: barFill,
           fillStyle: "hachure",
           hachureAngle: 45,
           hachureGap: 4,
           roughness: 1.3,
-          stroke: BAR_FILL,
+          stroke: barFill,
           strokeWidth: 1,
         }),
       );
@@ -103,7 +109,7 @@ export default function HandChart({ data }: { data: TrendItem[] }) {
     const pts: [number, number][] = items.map((it, i) => [xAt(i), yAt(it.count)]);
     svg.appendChild(
       rc.linearPath(pts, {
-        stroke: LINE_STROKE,
+        stroke: lineStroke,
         strokeWidth: 2,
         roughness: 1.1,
         fill: "none",
@@ -117,7 +123,7 @@ export default function HandChart({ data }: { data: TrendItem[] }) {
         rc.circle(xAt(i), yAt(it.count), 5, {
           fill: "#fff",
           fillStyle: "solid",
-          stroke: LINE_STROKE,
+          stroke: lineStroke,
           strokeWidth: 1.5,
           roughness: 1.1,
         }),
@@ -134,7 +140,7 @@ export default function HandChart({ data }: { data: TrendItem[] }) {
         t.setAttribute("text-anchor", "middle");
         t.setAttribute("font-size", "12");
         t.setAttribute("font-weight", "700");
-        t.setAttribute("fill", LINE_STROKE);
+        t.setAttribute("fill", lineStroke);
         t.setAttribute("font-family", "inherit");
         t.textContent = String(max);
         svg.appendChild(t);
@@ -156,7 +162,7 @@ export default function HandChart({ data }: { data: TrendItem[] }) {
       t.textContent = label;
       svg.appendChild(t);
     });
-  }, [data]);
+  }, [data, barFill, lineStroke]);
 
   return (
     <svg

@@ -9,6 +9,7 @@ import { extractToc } from "@/lib/toc";
 import { highlightCodeBlocks } from "@/lib/code-highlight";
 import ArticleToc from "@/components/article-toc";
 import ArticleCodeCopy from "@/components/article-code-copy";
+import ArticleViewTracker from "@/components/article-view-tracker";
 import "@/app/editor.css";
 
 // generateMetadata 与页面组件共用，同一请求内只查询一次数据库
@@ -109,6 +110,7 @@ export default async function ArticlePage({
 
   return (
     <>
+      <ArticleViewTracker articleId={id} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -155,6 +157,14 @@ export default async function ArticlePage({
                 <span>✎ 更新于 {formatDate(article.updatedAt.toISOString())}</span>
                 <span>·</span>
                 <span>创建于 {formatDate(article.createdAt.toISOString())}</span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-ink-faint">
+                    <path d="M2.06 12.35a1.7 1.7 0 0 1 0-1.7C4.22 7.52 7.8 5.5 12 5.5s7.78 2.02 9.94 5.15a1.7 1.7 0 0 1 0 1.7C19.78 15.48 16.2 17.5 12 17.5s-7.78-2.02-9.94-5.15Z" />
+                    <circle cx="12" cy="11.5" r="3" />
+                  </svg>
+                  {article.viewCount} 次阅读
+                </span>
               </div>
 
               <div className="mt-5 flex items-center gap-2 flex-wrap">

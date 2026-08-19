@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 
@@ -9,6 +10,7 @@ const articleSelect = {
   visibility: true,
   isPinned: true,
   isFavorite: true,
+  viewCount: true,
   status: true,
   createdAt: true,
   updatedAt: true,
@@ -100,10 +102,59 @@ export const articleRouter = router({
       };
     }),
 
+  /** 记录一次文章阅读（Cookie 30分钟去重 + localStorage 前端去重） */
+  trackView: publicProcedure
+    .input(z.object({ id: z.string().min(1).max(50) }))
+    .mutation(async ({ ctx, input }) => {
+      const article = await ctx.db.article.findUnique({
+        where: { id: input.id },
+        select: { id: true, visibility: true, status: true },
+      });
+      if (!article || article.status !== "normal") return { ok: false, counted: false };
+      if (!ctx.user && article.visibility !== "public") return { ok: false, counted: false };
+
+      const cookieStore = await cookies();
+      const viewed = cookieStore.get("kb_viewed")?.value;
+      const viewedSet = new Set(viewed ? viewed.split(",").filter(Boolean) : []);
+      const key = input.id;
+
+      if (viewedSet.has(key)) {
+        return { ok: true, counted: false };
+      }
+
+      viewedSet.add(key);
+      const MAX_COOKIE_ITEMS = 40;
+      const arr = [...viewedSet].slice(-MAX_COOKIE_ITEMS);
+      const cookieVal = arr.join(",");
+      try {
+        cookieStore.set("kb_viewed", cookieVal, {
+          maxAge: 60 * 30,
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+        });
+      } catch {
+        // RSC 环境下 cookie 可能只读，忽略
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      await ctx.db.$transaction([
+        ctx.db.article.update({
+          where: { id: input.id },
+          data: { viewCount: { increment: 1 } },
+        }),
+        ctx.db.articleDailyView.upsert({
+          where: { articleId_date: { articleId: input.id, date: today } },
+          create: { articleId: input.id, date: today, count: 1 },
+          update: { count: { increment: 1 } },
+        }),
+      ]);
+      return { ok: true, counted: true };
+    }),
+
   adjacent: publicProcedure
     .input(z.object({ id: z.string().min(1).max(50) }))
     .query(async ({ ctx, input }) => {
-      // 与 list 一致：未登录只能看到公开文章
       const vis = ctx.user ? undefined : { visibility: "public" as const };
 
       const self = await ctx.db.article.findUnique({

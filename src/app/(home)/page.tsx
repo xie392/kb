@@ -126,16 +126,7 @@ export default async function HomePage() {
           <span className="flex-1 pencil-line h-[2px]" />
         </div>
 
-        <div className="flex items-end gap-1 mb-0 pl-3">
-          <span className="sketch-tab font-hand-display text-[15px] font-bold text-primary">全部</span>
-          {cats.slice(0, 2).map((c) => (
-            <span key={c.id} className="sketch-tab font-hand-body text-[14px] text-ink-faint opacity-70" style={{ top: 0 }}>
-              {c.name}
-            </span>
-          ))}
-        </div>
-
-        <div className="bg-white sketch-border sketch-shadow p-5 grid grid-cols-1 md:grid-cols-3 gap-5 -mt-[1px]">
+        <div className="bg-white sketch-border sketch-shadow p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
           {featured.map((article, i) => (
             <Link
               key={article.id}

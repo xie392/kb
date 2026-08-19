@@ -33,20 +33,33 @@ model Tag {
 }
 
 model Article {
-  id         String       @id @default(cuid())
+  id         String             @id @default(cuid())
   title      String
   content    String // 富文本 HTML
   summary    String?
   categoryId String?
-  category   Category?    @relation(fields: [categoryId], references: [id])
-  status     String       @default("normal") // normal | trash
-  visibility String       @default("private") // private | public
-  isPinned   Boolean      @default(false)
-  isFavorite Boolean      @default(false)
+  category   Category?          @relation(fields: [categoryId], references: [id])
+  status     String             @default("normal") // normal | trash
+  visibility String             @default("private") // private | public
+  isPinned   Boolean            @default(false)
+  isFavorite Boolean            @default(false)
+  viewCount  Int                @default(0)
   tags       ArticleTag[]
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  dailyViews ArticleDailyView[]
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
   deletedAt  DateTime?
+}
+
+model ArticleDailyView {
+  id        String   @id @default(cuid())
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  date      String // YYYY-MM-DD
+  count     Int      @default(0)
+
+  @@unique([articleId, date])
+  @@index([date])
 }
 
 model ArticleTag {
