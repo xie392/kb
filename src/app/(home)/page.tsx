@@ -20,13 +20,12 @@ export default async function HomePage() {
   ]);
 
   const articles = list.items;
-  const featured = articles.filter((a) => a.isPinned || a.isFavorite).slice(0, 3);
+  const featured = articles.filter((a) => a.isPinned).slice(0, 3);
   const featuredIds = featured.map((a) => a.id);
   const stats = [
     { v: String(list.total), l: "笔记总数" },
     { v: String(cats.length), l: "分类" },
     { v: String(tags.length), l: "标签" },
-    { v: String(articles.filter((a) => a.isFavorite).length), l: "收藏" },
   ];
   const trendTotal = trend.reduce((s, t) => s + t.count, 0);
   const trendPeak = Math.max(...trend.map((t) => t.count), 0);

@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
 const nextConfig: NextConfig = {
+  // better-sqlite3 为原生模块，webpack 打包后 __dirname 错位无法加载 .node 绑定，
+  // 必须外部化让运行时直接从 node_modules 加载
+  serverExternalPackages: [
+    "better-sqlite3",
+    "@prisma/client",
+    "@prisma/adapter-better-sqlite3",
+  ],
   // 附件目录由运行时环境变量配置，路径动态；忽略 Turbopack 的整树追踪警告
   // （本项目 Docker 全量部署，不依赖 standalone 产物）
   turbopack: {

@@ -42,7 +42,6 @@ model Article {
   status     String             @default("normal") // normal | trash
   visibility String             @default("private") // private | public
   isPinned   Boolean            @default(false)
-  isFavorite Boolean            @default(false)
   viewCount  Int                @default(0)
   tags       ArticleTag[]
   dailyViews ArticleDailyView[]

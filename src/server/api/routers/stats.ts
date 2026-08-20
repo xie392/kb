@@ -67,7 +67,6 @@ export const statsRouter = router({
       todayNew,
       weekNew,
       monthNew,
-      favorites,
       trash,
       publicCount,
       categories,
@@ -82,7 +81,6 @@ export const statsRouter = router({
       ctx.db.article.count({ where: { status: "normal", createdAt: { gte: startOfDay } } }),
       ctx.db.article.count({ where: { status: "normal", createdAt: { gte: startOfWeek } } }),
       ctx.db.article.count({ where: { status: "normal", createdAt: { gte: startOfMonth } } }),
-      ctx.db.article.count({ where: { status: "normal", isFavorite: true } }),
       ctx.db.article.count({ where: { status: "trash" } }),
       ctx.db.article.count({ where: { status: "normal", visibility: "public" } }),
       ctx.db.category.findMany({
@@ -125,7 +123,6 @@ export const statsRouter = router({
       todayNew,
       weekNew,
       monthNew,
-      favorites,
       trash,
       publicCount,
       privateCount: total - publicCount,

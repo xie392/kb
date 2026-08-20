@@ -9,7 +9,6 @@ const articleSelect = {
   summary: true,
   visibility: true,
   isPinned: true,
-  isFavorite: true,
   viewCount: true,
   status: true,
   createdAt: true,
@@ -255,7 +254,6 @@ export const articleRouter = router({
         categoryId: z.string().min(1).max(50).nullish(),
         visibility: z.enum(["private", "public"]).optional(),
         isPinned: z.boolean().optional(),
-        isFavorite: z.boolean().optional(),
         tagIds: z.array(z.string().min(1).max(50)).max(10).optional(),
       })
     )

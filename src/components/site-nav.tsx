@@ -33,7 +33,7 @@ const navLinks = [
   { label: "首页", href: "/" },
   { label: "知识库", href: "/categories" },
   { label: "标签", href: "/tags" },
-  { label: "收藏", href: "/favorites" },
+  { label: "关于我", href: "/about" },
 ];
 
 export default function SiteNav() {

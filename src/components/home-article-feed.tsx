@@ -109,9 +109,6 @@ export default function HomeArticleFeed({ featuredIds }: { featuredIds: string[]
         </h2>
         <span className="font-hand-body text-[15px] text-ink-faint">{total} 篇</span>
         <span className="flex-1 pencil-line h-[2px]" />
-        <Link href="/favorites" className="font-hand-display text-[16px] text-primary hover:underline">
-          收藏夹 →
-        </Link>
       </div>
 
       {isLoading ? (

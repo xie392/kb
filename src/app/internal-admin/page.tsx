@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
         { label: "总笔记数", value: data.total, delta: `今日 +${data.todayNew}`, color: NOTE_COLORS[0] },
         { label: "本周新增", value: data.weekNew, delta: "本周", color: NOTE_COLORS[1] },
         { label: "本月新增", value: data.monthNew, delta: "本月", color: NOTE_COLORS[2] },
-        { label: "收藏笔记", value: data.favorites, delta: "收藏", color: NOTE_COLORS[3] },
+        { label: "回收站", value: data.trash, delta: "软删除", color: NOTE_COLORS[3] },
       ]
     : [];
 
