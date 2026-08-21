@@ -70,7 +70,6 @@ export default function ArticleEditor({ article }: Props) {
     value: content,
     onChange: (html) => setContent(html),
     onOutline: setOutline,
-    placeholder: "开始写作…",
     onUploadImage: handleUploadImage,
   });
 

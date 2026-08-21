@@ -50,6 +50,21 @@ import { Attachment } from "./ext/attachment";
 
 import type { OutlineItem } from "./types";
 
+const PLACEHOLDER_TEXTS = [
+  "开始写作…",
+  "记录此刻的想法…",
+  "有什么新发现？",
+  "今天学到了什么？",
+  "写点什么吧…",
+  "随便写写，不用完美…",
+  "整理一下思路…",
+  "这一刻值得记录…",
+];
+
+function pickPlaceholder(): string {
+  return PLACEHOLDER_TEXTS[Math.floor(Math.random() * PLACEHOLDER_TEXTS.length)]!;
+}
+
 export interface UseArticleEditorOptions {
   value: string;
   onChange: (html: string) => void;
@@ -64,6 +79,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
   const { value, onChange, onOutline, placeholder, onUploadImage } = options;
 
   const lastInternalHTML = useRef<string>("");
+  const randomTextRef = useRef<string>(pickPlaceholder());
+  const lastPlaceholderPos = useRef<number>(-1);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -131,9 +148,16 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       Attachment,
       // 编辑器体验
       Placeholder.configure({
-        placeholder: placeholder ?? "开始写作…",
+        placeholder: ({ pos }) => {
+          if (placeholder) return placeholder;
+          if (pos !== lastPlaceholderPos.current) {
+            lastPlaceholderPos.current = pos;
+            randomTextRef.current = pickPlaceholder();
+          }
+          return randomTextRef.current;
+        },
         showOnlyCurrent: true,
-        includeChildren: true,
+        includeChildren: false,
       }),
       TrailingNode,
       Selection,
