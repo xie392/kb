@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { FloatingMenu } from "@tiptap/react/menus";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
 import {
   filterInsertActions,
   getInsertActions,
   getSlashCommandState,
+  type InsertAction,
   type SlashCommandState,
 } from "./insert-actions";
+import { getPreview, PREVIEW_WIDTH as PREVIEW_W, PREVIEW_GAP } from "./insert-preview";
 import { cn } from "@/lib/utils";
 
 interface SlashMenuProps {
   editor: Editor | null;
-  /** 有值时"图片"动作走本地文件选择（上传后插入图片） */
   onUploadImage?: (file: File) => Promise<string>;
 }
 
@@ -25,11 +26,17 @@ const INACTIVE: SlashCommandState = {
   key: "",
 };
 
+const MENU_WIDTH = 288;
+const MENU_MAX_HEIGHT = 340;
+const OFFSET = 8;
+
 export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
   const [slash, setSlash] = useState<SlashCommandState>(INACTIVE);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hiddenKey, setHiddenKey] = useState("");
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const allActions = useMemo(
     () =>
@@ -47,11 +54,41 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
     [allActions, slash.query]
   );
 
+  const updatePosition = useCallback(() => {
+    if (!editor) return;
+    const currentSlash = getSlashCommandState(editor);
+    if (!currentSlash.active || hiddenKey === currentSlash.key) {
+      setPos(null);
+      return;
+    }
+    const coords = editor.view.coordsAtPos(currentSlash.from);
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    let top = coords.bottom + OFFSET;
+    let left = coords.left;
+
+    if (menuRef.current) {
+      const menuH = menuRef.current.offsetHeight || MENU_MAX_HEIGHT;
+      const menuW = menuRef.current.offsetWidth || MENU_WIDTH;
+      if (top + menuH > vh - 12) {
+        top = coords.top - menuH - OFFSET;
+      }
+      if (left + menuW > vw - 12) {
+        left = vw - menuW - 12;
+      }
+      if (left < 12) left = 12;
+    }
+
+    setPos({ top, left });
+  }, [editor, hiddenKey]);
+
   useEffect(() => {
     if (!editor) return;
     const syncSlash = () => {
       setSlash(getSlashCommandState(editor));
       setActiveIndex(0);
+      requestAnimationFrame(updatePosition);
     };
     syncSlash();
     editor.on("update", syncSlash);
@@ -60,24 +97,48 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
       editor.off("update", syncSlash);
       editor.off("selectionUpdate", syncSlash);
     };
-  }, [editor]);
-
-  const listRef = useRef<HTMLDivElement>(null);
+  }, [editor, updatePosition]);
 
   useEffect(() => {
-    if (!listRef.current) return;
-    const el = listRef.current.children[activeIndex] as HTMLElement | undefined;
-    if (el) el.scrollIntoView({ block: "nearest" });
-  }, [activeIndex]);
+    if (!slash.active || hiddenKey === slash.key) {
+      setPos(null);
+      return;
+    }
+    requestAnimationFrame(updatePosition);
+
+    const onScroll = () => updatePosition();
+    const onResize = () => updatePosition();
+    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [slash.active, slash.key, hiddenKey, updatePosition]);
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const [previewPos, setPreviewPos] = useState<{ top: number } | null>(null);
+  const isVisible = slash.active && hiddenKey !== slash.key && pos !== null;
+
+  useEffect(() => {
+    if (!listRef.current || !isVisible) return;
+    const el = listRef.current.querySelector(`[data-idx="${activeIndex}"]`) as HTMLElement | null;
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
+      requestAnimationFrame(() => {
+        const listRect = listRef.current!.getBoundingClientRect();
+        const itemRect = el.getBoundingClientRect();
+        setPreviewPos({ top: itemRect.top - listRect.top });
+      });
+    }
+  }, [activeIndex, isVisible]);
 
   useEffect(() => {
     if (!editor) return;
-
     const handleKeyDown = (event: KeyboardEvent) => {
       const currentSlash = getSlashCommandState(editor);
       if (!currentSlash.active || hiddenKey === currentSlash.key || actions.length === 0)
         return;
-
       if (event.key === "ArrowDown") {
         event.preventDefault();
         setActiveIndex((index) => (index + 1) % actions.length);
@@ -92,12 +153,25 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
         setHiddenKey(currentSlash.key);
       }
     };
-
     editor.view.dom.addEventListener("keydown", handleKeyDown, true);
     return () => editor.view.dom.removeEventListener("keydown", handleKeyDown, true);
   }, [activeIndex, actions, editor, hiddenKey]);
 
+  useEffect(() => {
+    if (!editor) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        const currentSlash = getSlashCommandState(editor);
+        if (currentSlash.active) setHiddenKey(currentSlash.key);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [editor]);
+
   if (!editor) return null;
+
+  const visible = isVisible;
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,36 +189,66 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
     }
   };
 
-  return (
-    <>
-      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      <FloatingMenu
-        editor={editor}
-        options={{ placement: "bottom-start", offset: 8 }}
-        className="z-50 w-72 rounded-lg border border-hairline bg-white sketch-border sketch-shadow p-1.5"
-        shouldShow={({ editor: currentEditor }) => {
-          const currentSlash = getSlashCommandState(currentEditor);
-          return currentSlash.active && hiddenKey !== currentSlash.key;
-        }}
-      >
-        {actions.length === 0 ? (
-          <div className="px-3 py-6 text-center">
-            <div className="text-[13px] text-ink-muted">没有找到命令</div>
-            <div className="mt-0.5 text-[11px] text-ink-faint">试试输入 {slash.query ? `"/${slash.query}"` : "其他关键词"} 或按 ESC 退出</div>
-          </div>
-        ) : (
-          <div ref={listRef} className="scrollbar-wide flex max-h-[400px] flex-col gap-0.5 overflow-y-auto overscroll-contain pr-1">
+  const groups: { name: string; items: typeof actions }[] = [];
+  for (const a of actions) {
+    const last = groups[groups.length - 1];
+    if (last && last.name === a.group) last.items.push(a);
+    else groups.push({ name: a.group, items: [a] });
+  }
+
+  let activeAction: InsertAction | null = null;
+  let i = 0;
+  for (const g of groups) {
+    for (const item of g.items) {
+      if (i === activeIndex) { activeAction = item; break; }
+      i++;
+    }
+    if (activeAction) break;
+  }
+  const preview = visible && activeAction ? getPreview(activeAction.id) : null;
+  const previewLeftRight =
+    visible && pos !== null ? pos.left + MENU_WIDTH + PREVIEW_GAP : 0;
+  const previewLeftLeft =
+    visible && pos !== null ? pos.left - PREVIEW_W - PREVIEW_GAP : 0;
+  const previewOnRight =
+    visible && pos !== null && typeof window !== "undefined"
+      ? pos.left + MENU_WIDTH + PREVIEW_GAP + PREVIEW_W + 16 < window.innerWidth
+      : true;
+  const previewLeft = previewOnRight ? previewLeftRight : previewLeftLeft;
+  const previewTop =
+    visible && pos !== null && previewPos !== null && typeof window !== "undefined"
+      ? Math.min(pos.top + previewPos.top - 4, window.innerHeight - 160)
+      : 0;
+
+  const menu = visible ? (
+    <div
+      ref={menuRef}
+      className="z-[9999] w-72 overflow-hidden rounded-lg border border-hairline bg-white sketch-border sketch-shadow"
+      style={{
+        position: "fixed",
+        top: pos!.top,
+        left: pos!.left,
+        maxHeight: MENU_MAX_HEIGHT,
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      {actions.length === 0 ? (
+        <div className="px-3 py-8 text-center">
+          <div className="text-[13px] text-ink-muted">没有找到命令</div>
+          <div className="mt-1 text-[11px] text-ink-faint">试试其他关键词或按 ESC 退出</div>
+        </div>
+      ) : (
+        <>
+          <div
+            ref={listRef}
+            className="overflow-y-auto overscroll-contain py-1"
+            style={{ maxHeight: MENU_MAX_HEIGHT - 38 }}
+          >
             {(() => {
-              const groups: { name: string; items: typeof actions }[] = [];
-              for (const a of actions) {
-                const last = groups[groups.length - 1];
-                if (last && last.name === a.group) last.items.push(a);
-                else groups.push({ name: a.group, items: [a] });
-              }
               let flatIndex = 0;
               return groups.map((g) => (
                 <div key={g.name}>
-                  <div className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ink-faint font-hand-display">
+                  <div className="px-3 pt-2.5 pb-1 text-[11px] font-medium text-ink-faint font-hand-display">
                     {g.name}
                   </div>
                   {g.items.map((item) => {
@@ -153,40 +257,39 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
                       <button
                         key={item.id}
                         type="button"
+                        data-idx={idx}
                         onClick={() => item.run()}
                         onMouseEnter={() => setActiveIndex(idx)}
                         className={cn(
-                          "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors",
+                          "flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors",
                           activeIndex === idx
-                            ? "bg-primary/8 ring-1 ring-primary/30"
-                            : "hover:bg-canvas-soft"
+                            ? "bg-canvas-soft"
+                            : "hover:bg-canvas-soft/60"
                         )}
                       >
                         <span
                           className={cn(
-                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
-                            activeIndex === idx
-                              ? "bg-primary/15 text-primary"
-                              : "bg-canvas-soft text-ink-muted"
+                            "flex h-5 w-5 shrink-0 items-center justify-center text-ink-muted",
+                            activeIndex === idx && "text-ink-secondary"
                           )}
                         >
                           {item.icon}
                         </span>
-                        <span className="flex flex-1 flex-col">
-                          <span
-                            className={cn(
-                              "text-[13px] font-medium",
-                              activeIndex === idx ? "text-primary" : "text-ink-secondary"
-                            )}
-                          >
-                            {item.label}
-                          </span>
-                          {item.description && (
-                            <span className="text-[11px] text-ink-faint truncate">
-                              {item.description}
-                            </span>
+                        <span
+                          className={cn(
+                            "flex-1 text-[13.5px]",
+                            activeIndex === idx
+                              ? "font-medium text-ink"
+                              : "text-ink-secondary"
                           )}
+                        >
+                          {item.label}
                         </span>
+                        {item.shortcut && (
+                          <span className="shrink-0 text-[11px] font-mono text-ink-faint">
+                            {item.shortcut}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -194,8 +297,43 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
               ));
             })()}
           </div>
-        )}
-      </FloatingMenu>
+          <div className="flex items-center justify-between border-t border-hairline px-3 py-2">
+            <span className="text-[12px] text-ink-faint">关闭菜单</span>
+            <kbd className="rounded bg-canvas-soft px-1.5 py-0.5 text-[10px] font-mono text-ink-muted">
+              esc
+            </kbd>
+          </div>
+        </>
+      )}
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
+      {typeof document !== "undefined" && preview ? (
+        createPortal(
+          <div
+            className="z-[9998] pointer-events-none"
+            style={{
+              position: "fixed",
+              top: previewTop,
+              left: previewLeft,
+              width: PREVIEW_W,
+              transition: "top 0.08s ease-out",
+            }}
+          >
+            <div className="overflow-hidden rounded-lg bg-ink p-2 shadow-lg">
+              {preview.node}
+              <div className="mt-1.5 px-1 pb-0.5 text-[11px] font-medium text-white/90">
+                {preview.title}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      ) : null}
     </>
   );
 }

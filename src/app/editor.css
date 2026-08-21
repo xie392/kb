@@ -3,11 +3,17 @@
 /* 富文本阅读样式 */
 .prose-kb {
   font-size: 16px;
-  line-height: 1.75;
+  line-height: 1.7;
   color: var(--color-ink-secondary);
+  caret-color: var(--color-primary);
 }
 
-/* TipTap 编辑器占位提示 */
+/* 编辑器内：更紧凑的行距，Notion 风格 */
+.ProseMirror.prose-kb {
+  line-height: 1.6;
+}
+
+/* TipTap 编辑器占位提示（仅空编辑器首段） */
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -16,6 +22,46 @@
   height: 0;
 }
 
+/* 当前光标所在空块的占位提示（Notion 风格，仅当前块） */
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-ink-faint);
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror.prose-kb h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  color: var(--color-ink);
+  margin: 1.8em 0 0.5em;
+}
+.ProseMirror.prose-kb h2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.25px;
+  color: var(--color-ink);
+  margin: 1.6em 0 0.4em;
+}
+.ProseMirror.prose-kb h3 {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: 1.4em 0 0.35em;
+}
+.ProseMirror.prose-kb h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 1.2em 0 0.3em;
+}
+
+/* 阅读页标题样式（保持原有） */
 .prose-kb h1 {
   font-size: 26px;
   font-weight: 700;
@@ -56,11 +102,27 @@
   color: var(--color-ink);
   margin: 1em 0 0.4em;
 }
+
+/* 编辑器内段落：更紧凑 */
+.ProseMirror.prose-kb p {
+  margin: 0.5em 0;
+}
+
 .prose-kb p {
   margin: 0.9em 0;
 }
 .prose-kb > :first-child {
   margin-top: 0;
+}
+
+/* 编辑器选区样式 */
+.ProseMirror ::selection {
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+/* 编辑器焦点时去除默认 outline */
+.ProseMirror:focus {
+  outline: none;
 }
 .prose-kb ul,
 .prose-kb ol {
@@ -1425,9 +1487,12 @@
   align-items: center;
   gap: 1px;
   padding: 2px;
-  opacity: 1;
-  transition: opacity 0.15s ease;
+  opacity: 0;
+  transition: opacity 0.18s ease;
   pointer-events: auto;
+}
+.kb-block-handles:not(.is-hidden) {
+  opacity: 1;
 }
 .kb-block-handles.is-hidden {
   opacity: 0;
@@ -1442,30 +1507,31 @@
   padding: 0;
   color: var(--color-ink-faint, #b5b5b5);
   background: transparent;
-  border: 1px dashed transparent;
-  border-radius: 6px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  font-family: var(--font-hand-display, inherit);
-  font-size: 18px;
   line-height: 1;
-  transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+  transition: color 0.12s ease, background 0.12s ease;
 }
 .kb-block-handle:hover {
-  color: var(--color-primary, #6d28d9);
+  color: var(--color-ink-secondary, #525252);
   background: var(--color-canvas-soft, #f5f3ef);
-  border-color: var(--color-hairline, #d8d5d0);
 }
 .kb-block-handle:active {
-  transform: scale(0.92);
+  background: color-mix(in srgb, var(--color-ink-muted, #8a8a8a) 16%, transparent);
 }
 .kb-block-handle-drag {
   cursor: grab;
-  font-size: 14px;
 }
 .kb-block-handle-drag:active {
   cursor: grabbing;
 }
+.kb-block-handle svg {
+  width: 14px;
+  height: 14px;
+}
 .kb-block-handle-drag svg circle {
   fill: currentColor;
+  r: 1.2;
 }
 

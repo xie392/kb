@@ -32,6 +32,7 @@ export interface InsertAction {
   description: string;
   aliases?: string[];
   icon: React.ReactNode;
+  shortcut?: string;
   run: () => void;
 }
 
@@ -125,6 +126,7 @@ export function getInsertActions({
       label: "标题 1",
       description: "一级章节标题",
       aliases: ["h1", "biaoti1"],
+      shortcut: "#",
       icon: <HandHeading level={1} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -137,6 +139,7 @@ export function getInsertActions({
       label: "标题 2",
       description: "二级章节标题",
       aliases: ["h2", "biaoti2"],
+      shortcut: "##",
       icon: <HandHeading level={2} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -149,6 +152,7 @@ export function getInsertActions({
       label: "标题 3",
       description: "三级章节标题",
       aliases: ["h3", "biaoti3"],
+      shortcut: "###",
       icon: <HandHeading level={3} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -161,6 +165,7 @@ export function getInsertActions({
       label: "标题 4",
       description: "四级章节标题",
       aliases: ["h4", "biaoti4"],
+      shortcut: "####",
       icon: <HandHeading level={4} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -173,6 +178,7 @@ export function getInsertActions({
       label: "标题 5",
       description: "五级章节标题",
       aliases: ["h5", "biaoti5"],
+      shortcut: "#####",
       icon: <HandHeading level={5} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -185,6 +191,7 @@ export function getInsertActions({
       label: "标题 6",
       description: "六级章节标题",
       aliases: ["h6", "biaoti6"],
+      shortcut: "######",
       icon: <HandHeading level={6} className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -209,6 +216,7 @@ export function getInsertActions({
       label: "无序列表",
       description: "圆点列表",
       aliases: ["wuxu", "ul"],
+      shortcut: "-",
       icon: <HandList className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -221,6 +229,7 @@ export function getInsertActions({
       label: "有序列表",
       description: "数字列表",
       aliases: ["youxu", "ol"],
+      shortcut: "1.",
       icon: <HandListOrdered className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -233,6 +242,7 @@ export function getInsertActions({
       label: "任务列表",
       description: "待办勾选列表",
       aliases: ["renwu", "todo"],
+      shortcut: "[]",
       icon: <HandTaskList className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -245,6 +255,7 @@ export function getInsertActions({
       label: "代码块",
       description: "插入代码块",
       aliases: ["code", "daima"],
+      shortcut: "```",
       icon: <HandCodeBlock className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -257,6 +268,7 @@ export function getInsertActions({
       label: "引用",
       description: "突出一段引用",
       aliases: ["quote", "yinyong"],
+      shortcut: ">",
       icon: <HandQuote className="h-4 w-4" />,
       run: () => {
         prepareInsert();
@@ -269,6 +281,7 @@ export function getInsertActions({
       label: "分割线",
       description: "分隔文档段落",
       aliases: ["hr", "line", "fengexian"],
+      shortcut: "---",
       icon: <HandMinus className="h-4 w-4" />,
       run: () => {
         prepareInsert();

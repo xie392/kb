@@ -60,15 +60,19 @@ function isBlockDom(el: Element | null): boolean {
 function findBlockEl(start: EventTarget | null, root: HTMLElement): HTMLElement | null {
   let el = start as HTMLElement | null;
   while (el && el !== root) {
-    if (isBlockDom(el)) {
-      // 对 LI：若其父列表只有 1 项则不显示（与 demo 一致，避免整列表拖拽）
-      if (el.tagName === "LI") {
-        const list = el.parentElement;
+    const cur = el;
+    if (cur.hasAttribute("data-node-view-wrapper")) {
+      if (SKIP_CLASS.some((c) => cur.classList.contains(c))) return null;
+      return cur;
+    }
+    if (isBlockDom(cur)) {
+      if (cur.tagName === "LI") {
+        const list = cur.parentElement;
         if (list && list.childElementCount <= 1) return null;
       }
-      return el;
+      return cur;
     }
-    el = el.parentElement;
+    el = cur.parentElement;
   }
   return null;
 }
@@ -182,13 +186,30 @@ export const BlockHandles = Extension.create({
       if (!wrap || !view) return;
       const rect = blockEl.getBoundingClientRect();
       const wrapW = wrap.offsetWidth || 40;
+      const wrapH = wrap.offsetHeight || 24;
       const isLi = blockEl.tagName === "LI";
-      // 用 fixed + 视口坐标，显示在编辑区左侧留白（Notion 风格）
       const left = rect.left - wrapW - 8 - (isLi ? 24 : 0);
-      const top = rect.top + 4;
+      const cs = getComputedStyle(blockEl);
+      const padTop = parseFloat(cs.paddingTop) || 0;
+      const lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.6 || 24;
+      const firstLineCenter = padTop + lineH / 2;
+      const top = rect.top + firstLineCenter - wrapH / 2;
       wrap.style.left = `${Math.max(8, left)}px`;
       wrap.style.top = `${top}px`;
       wrap.classList.remove("is-hidden");
+    };
+
+    const positionAtSelection = (v: EditorView) => {
+      const { selection } = v.state;
+      if (!(selection instanceof NodeSelection)) return;
+      const dom = v.nodeDOM(selection.from);
+      if (dom instanceof HTMLElement) {
+        const blockEl = findBlockEl(dom, v.dom as HTMLElement);
+        if (blockEl) {
+          activeEl = blockEl;
+          positionUI(blockEl);
+        }
+      }
     };
 
     const createUI = () => {
@@ -201,7 +222,8 @@ export const BlockHandles = Extension.create({
       addBtn.className = "kb-block-handle kb-block-handle-add";
       addBtn.setAttribute("aria-label", "在上方插入");
       addBtn.title = "在上方插入（/）";
-      addBtn.textContent = "+";
+      addBtn.innerHTML =
+        '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
 
       dragBtn = document.createElement("button");
       dragBtn.type = "button";
@@ -210,7 +232,7 @@ export const BlockHandles = Extension.create({
       dragBtn.setAttribute("aria-label", "拖拽移动");
       dragBtn.title = "拖拽移动";
       dragBtn.innerHTML =
-        '<svg viewBox="0 0 10 16" width="10" height="16" aria-hidden="true"><circle cx="2" cy="3" r="1.2"/><circle cx="8" cy="3" r="1.2"/><circle cx="2" cy="8" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="2" cy="13" r="1.2"/><circle cx="8" cy="13" r="1.2"/></svg>';
+        '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="4" cy="3.5" r="1.3"/><circle cx="12" cy="3.5" r="1.3"/><circle cx="4" cy="8" r="1.3"/><circle cx="12" cy="8" r="1.3"/><circle cx="4" cy="12.5" r="1.3"/><circle cx="12" cy="12.5" r="1.3"/></svg>';
 
       wrap.appendChild(addBtn);
       wrap.appendChild(dragBtn);
@@ -263,6 +285,9 @@ export const BlockHandles = Extension.create({
           return {
             update: (updatedView) => {
               view = updatedView;
+              if (updatedView.editable && wrap) {
+                positionAtSelection(updatedView);
+              }
             },
             destroy: () => destroyUI(),
           };
@@ -287,9 +312,15 @@ export const BlockHandles = Extension.create({
             },
             mousedown: () => {
               wrap?.classList.add("is-hidden");
+              requestAnimationFrame(() => {
+                if (view) positionAtSelection(view);
+              });
               return false;
             },
-            keydown: () => {
+            keydown: (_v, event) => {
+              if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+                return false;
+              }
               wrap?.classList.add("is-hidden");
               return false;
             },

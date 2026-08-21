@@ -130,8 +130,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       // 编辑器体验
       Placeholder.configure({
         placeholder: placeholder ?? "开始写作…",
+        showOnlyCurrent: true,
         includeChildren: true,
-        showOnlyCurrent: false,
       }),
       TrailingNode,
       Selection,
