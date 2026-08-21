@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { formatDate } from "@/lib/format";
 import HandChart from "@/components/hand-chart";
 import HomeArticleFeed from "@/components/home-article-feed";
+import HomeHero from "@/components/home-hero";
+import HomeFeatured from "@/components/home-featured";
 import { createServerCaller } from "@/trpc/server";
 import { SITE_NAME } from "@/lib/config";
 
@@ -32,56 +32,7 @@ export default async function HomePage() {
 
   return (
     <div className="graph-paper min-h-screen font-hand-body text-ink-secondary">
-      {/* ─── 手绘 Hero ─── */}
-      <section className="max-w-250 mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-10 text-center">
-        <h1 className="font-hand-display text-[44px] sm:text-[64px] md:text-[80px] font-bold leading-none text-secondary rotate-[-2deg] inline-block">
-          {SITE_NAME}
-          <span
-            className="block w-full h-[6px] mt-2 rotate-[-1deg]"
-            style={{
-              background:
-                "repeating-linear-gradient(90deg, rgba(0,117,222,0.55) 0 8px, transparent 8px 14px)",
-              borderRadius: "3px",
-            }}
-          />
-        </h1>
-
-        <p className="mt-6 font-hand-body text-[20px] text-ink-muted max-w-md mx-auto">
-          记录碎片化的想法，<span className="marker-highlight">沉淀系统化的知识</span>
-        </p>
-
-        {/* 统计便签 */}
-        <div className="mt-10 flex items-center justify-center gap-6 flex-wrap">
-          {stats.map((s, i) => (
-            <div
-              key={s.l}
-              className="sticky-note sketch-border px-5 py-3 fade-up"
-              style={{ transform: `rotate(${[-2, 1, -1, 2][i]}deg)`, animationDelay: `${i * 100}ms` }}
-            >
-              <div className="font-hand-display text-[28px] sm:text-[34px] font-bold text-sticker-brown leading-none">
-                {s.v}
-              </div>
-              <div className="mt-1 font-hand-body text-[14px] text-sticker-orange-deep">{s.l}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* 分类胶囊 */}
-        <div className="mt-10 flex items-center justify-center gap-3 flex-wrap fade-up" style={{ animationDelay: "200ms" }}>
-          {cats.map((c, i) => (
-            <Link
-              key={c.id}
-              href={`/categories?cat=${c.id}`}
-              className={`font-hand-display text-[16px] sm:text-[18px] px-4 py-1.5 bg-white sketch-border sketch-shadow hover:-translate-y-0.5 transition-transform ${
-                i % 2 ? "rotate-[1deg]" : "rotate-[-1deg]"
-              }`}
-            >
-              <span style={{ color: ["#0075de", "#ff64c8", "#2a9d99"][i % 3] }}>●</span> {c.name}
-              <span className="text-ink-faint text-[14px]"> ({c.count})</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <HomeHero siteName={SITE_NAME} stats={stats} cats={cats} />
 
       {/* 便签注释 + 增长图表 */}
       <div className="relative max-w-250 mx-auto px-4 sm:px-6">
@@ -116,44 +67,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* 精选 */}
-      <section className="max-w-250 mx-auto px-4 sm:px-6 pb-14">
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="font-hand-display text-[24px] font-bold text-secondary marker-underline inline-block">
-            精选笔记
-          </h2>
-          <span className="flex-1 pencil-line h-[2px]" />
-        </div>
-
-        <div className="bg-white sketch-border sketch-shadow p-5 grid grid-cols-1 md:grid-cols-3 gap-5">
-          {featured.map((article, i) => (
-            <Link
-              key={article.id}
-              href={`/article/${article.id}`}
-              className="group sketch-dashed p-4 hover:bg-canvas-soft transition-colors fade-up flex flex-col"
-              style={{ animationDelay: `${i * 90}ms` }}
-            >
-              <span className="font-hand-body text-[13px] text-sticker-pink">
-                【{article.categoryName ?? "未分类"}】
-              </span>
-              <h3 className="mt-1.5 font-hand-display text-[20px] font-bold leading-snug text-ink-secondary group-hover:text-primary transition-colors">
-                {article.title}
-              </h3>
-              {article.summary && (
-                <p className="mt-1.5 font-hand-body text-[14px] text-ink-muted leading-relaxed line-clamp-2 flex-1">
-                  {article.summary}
-                </p>
-              )}
-              <div className="mt-2 flex items-center justify-between">
-                <span className="font-hand-body text-[13px] text-ink-faint">
-                  {formatDate(article.updatedAt.toISOString())}
-                </span>
-                <span className="font-hand-display text-[14px] text-primary">→</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <HomeFeatured articles={featured} />
 
       {/* 全部文章（触底加载） */}
       <HomeArticleFeed featuredIds={featuredIds} />
