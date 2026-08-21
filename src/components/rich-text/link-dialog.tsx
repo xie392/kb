@@ -281,7 +281,7 @@ export function LinkDialog({ editor, open, onOpenChange, initialCard }: LinkDial
             </>
           )}
         </div>
-        <DialogFooter className="-mx-5 -mb-5 gap-2 border-t border-hairline bg-white p-4 sm:flex-row sm:justify-end">
+        <DialogFooter className="mx-0 mb-0 mt-1 gap-2 rounded-none border-t border-hairline/60 bg-transparent p-0 pt-4 sm:flex-row sm:justify-end">
           <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
             取消
           </Button>
