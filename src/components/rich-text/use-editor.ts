@@ -163,6 +163,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       attributes: {
         class: "prose-kb focus:outline-hidden",
       },
+      scrollThreshold: { top: 8, right: 8, bottom: 44, left: 8 },
+      scrollMargin: { top: 8, right: 8, bottom: 44, left: 8 },
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();

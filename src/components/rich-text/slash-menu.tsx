@@ -68,17 +68,18 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
     let top = coords.bottom + OFFSET;
     let left = coords.left;
 
-    if (menuRef.current) {
-      const menuH = menuRef.current.offsetHeight || MENU_MAX_HEIGHT;
-      const menuW = menuRef.current.offsetWidth || MENU_WIDTH;
-      if (top + menuH > vh - 12) {
-        top = coords.top - menuH - OFFSET;
-      }
-      if (left + menuW > vw - 12) {
-        left = vw - menuW - 12;
-      }
-      if (left < 12) left = 12;
+    const menuH = menuRef.current?.offsetHeight || MENU_MAX_HEIGHT;
+    const menuW = menuRef.current?.offsetWidth || MENU_WIDTH;
+    if (top + menuH > vh - 12) {
+      top = coords.top - menuH - OFFSET;
     }
+    if (top < 8) {
+      top = Math.max(8, vh - menuH - 12);
+    }
+    if (left + menuW > vw - 12) {
+      left = vw - menuW - 12;
+    }
+    if (left < 12) left = 12;
 
     setPos({ top, left });
   }, [editor, hiddenKey]);
@@ -119,6 +120,18 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [previewPos, setPreviewPos] = useState<{ top: number } | null>(null);
   const isVisible = slash.active && hiddenKey !== slash.key && pos !== null;
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => updatePosition());
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [isVisible, slash.key, updatePosition]);
 
   useEffect(() => {
     if (!listRef.current || !isVisible) return;
