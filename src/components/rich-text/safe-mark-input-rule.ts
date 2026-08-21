@@ -3,6 +3,7 @@ import {
   callOrReturn,
   getMarksBetween,
 } from "@tiptap/core";
+import { TextSelection } from "@tiptap/pm/state";
 
 /* 安全版 markInputRule：
  * Tiptap 3.x 内置 markInputRule 在 delete + addMark 组合时因
@@ -70,6 +71,11 @@ export function safeMarkInputRule(config: SafeMarkRuleConfig) {
         deleteFrom + captureGroup.length,
         config.type.create(attributes || {})
       );
+      // 将光标移到 mark 结束位置之后，否则后续输入仍在 mark 内。
+      // 必须在 removeStoredMark 之前 setSelection：setSelection 会按位置推断 storedMarks，
+      // 之后再 removeStoredMark 才能保证光标脱离该 mark。
+      const afterPos = deleteFrom + captureGroup.length;
+      tr.setSelection(TextSelection.create(tr.doc, afterPos));
       tr.removeStoredMark(config.type);
     },
   });

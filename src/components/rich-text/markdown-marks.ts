@@ -7,13 +7,17 @@ import { safeMarkInputRule } from "./safe-mark-input-rule";
 /* Tiptap 3.x 内置 markInputRule 在空段落场景下 tr.addMark 会因
  * 位置映射崩溃（"Cannot read properties of undefined (reading 'nodeSize')"），
  * 导致所有行内 markdown 输入规则失效。这里用 safeMarkInputRule 覆盖。
- * 正则与官方保持一致。 */
+ * 正则去掉官方的前导空白要求（(?:^|\s)）：中文/英文无空格语境下
+ * （如"中文**加粗**"、"hello**world**"）输入闭合符号即可转换。
+ * 匹配仍以 $ 锚定行尾，避免误触发。 */
 
-const boldStarRegex = /(?:^|\s)(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))$/;
-const boldUnderscoreRegex = /(?:^|\s)(__(?!\s+__)((?:[^_]+))__(?!\s+__))$/;
-const italicStarRegex = /(?:^|\s)(\*(?!\s+\*)((?:[^*]+))\*(?!\s+\*))$/;
-const italicUnderscoreRegex = /(?:^|\s)(_(?!\s+)((?:[^_]+))_(?!\s+_))$/;
-const strikeRegex = /(?:^|\s)(~~(?!\s+~~)((?:[^~]+))~~(?!\s+~~))$/;
+const boldStarRegex = /(\*\*(?!\s+\*\*)((?:[^*]+))\*\*(?!\s+\*\*))$/;
+const boldUnderscoreRegex = /(__(?!\s+__)((?:[^_]+))__(?!\s+__))$/;
+// 斜体开头加 (?<!\*)/(?<!_) 守卫：避免在输入 **加粗** 的第一个闭合 * 时，
+// 斜体规则抢先匹配 "*加粗*"，把加粗误转成斜体。
+const italicStarRegex = /(?<!\*)(\*(?!\s+\*)((?:[^*]+))\*(?!\s+\*))$/;
+const italicUnderscoreRegex = /(?<!_)(_(?!\s+)((?:[^_]+))_(?!\s+_))$/;
+const strikeRegex = /(~~(?!\s+~~)((?:[^~]+))~~(?!\s+~~))$/;
 
 const codeInputMatch = (text: string) => {
   const match = /`([^`]+)`(?!`)$/.exec(text);

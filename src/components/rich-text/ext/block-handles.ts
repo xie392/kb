@@ -73,6 +73,26 @@ function findBlockEl(start: EventTarget | null, root: HTMLElement): HTMLElement 
   return null;
 }
 
+/* 归一化块的文档 node 边界位置（node pos）：
+ * view.posAtDOM(el, 0) 对普通块（段落/标题/列表项等）返回“内容开始”（node pos + 1），
+ * 对 NodeView / 原子块（imageBlock 等）返回 node pos 本身。
+ * 这里统一处理：
+ *  - 若该位置本身是块节点边界（parentOffset === 0 且 nodeAfter 是块）→ 直接用；
+ *  - 否则取该位置所在块的起点（$pos.before()）。
+ * 有了正确的 node pos，NodeSelection.create / tr.insert 才能落在块边界上，
+ * 否则会插到块内部、或使 view.nodeDOM 返回 undefined 导致 BubbleMenu 崩溃。
+ */
+function getBlockNodePos(view: EditorView, el: HTMLElement): number | null {
+  const pos = view.posAtDOM(el, 0);
+  if (pos == null || pos <= 0) return null;
+  const $pos = view.state.doc.resolve(pos);
+  if ($pos.parentOffset === 0 && $pos.nodeAfter && $pos.nodeAfter.isBlock) {
+    return pos;
+  }
+  const start = $pos.before();
+  return start < 0 ? null : start;
+}
+
 export const BlockHandles = Extension.create({
   name: "blockHandles",
 
@@ -105,14 +125,16 @@ export const BlockHandles = Extension.create({
       e.preventDefault();
       e.stopPropagation();
       if (!activeEl || !view) return;
-      const blockPos = view.posAtDOM(activeEl, 0);
-      if (blockPos == null) return;
-      // 在块前插入空段落，并键入 "/" 唤起 SlashMenu
+      // 用块节点边界位置（而非内容位置），避免在块内部插入导致段落被拆分
+      const nodePos = getBlockNodePos(view, activeEl);
+      if (nodePos == null) return;
       const { paragraph } = view.state.schema.nodes;
       const tr = view.state.tr;
-      tr.insert(blockPos, paragraph.create());
-      tr.setSelection(TextSelection.near(tr.doc.resolve(blockPos + 1)));
-      tr.insertText("/", blockPos + 1, blockPos + 1);
+      // 在块前插入空段落，并键入 "/" 唤起 SlashMenu
+      tr.insert(nodePos, paragraph.create());
+      tr.insertText("/", nodePos + 1, nodePos + 1);
+      // 光标落在 "/" 之后（新段落内容起点 nodePos+1 + "/" 占 1）
+      tr.setSelection(TextSelection.create(tr.doc, nodePos + 2));
       view.dispatch(tr.scrollIntoView());
       view.focus();
       wrap?.classList.add("is-hidden");
@@ -125,11 +147,13 @@ export const BlockHandles = Extension.create({
 
     const onDragMouseDown = (e: Event) => {
       if (!activeEl || !view) return;
-      const blockPos = view.posAtDOM(activeEl, 0);
-      if (blockPos == null) return;
+      // 必须用块节点边界位置创建 NodeSelection；
+      // 用内容位置会让 view.nodeDOM 返回 undefined，导致 BubbleMenu 崩
+      const nodePos = getBlockNodePos(view, activeEl);
+      if (nodePos == null) return;
       // 不 preventDefault：需要让浏览器原生 dragstart 触发（按钮 draggable=true）。
       try {
-        const sel = NodeSelection.create(view.state.doc, blockPos);
+        const sel = NodeSelection.create(view.state.doc, nodePos);
         view.dispatch(view.state.tr.setSelection(sel));
         view.focus();
         activeSelection = sel;

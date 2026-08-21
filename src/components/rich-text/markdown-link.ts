@@ -1,35 +1,51 @@
+import { InputRule } from "@tiptap/core";
+import { TextSelection } from "@tiptap/pm/state";
 import { Link as BuiltInLink } from "@tiptap/extension-link";
 import { safeMarkInputRule } from "./safe-mark-input-rule";
 
-/* Markdown 链接输入规则（用 safeMarkInputRule 规避 addMark 崩溃）：
- *   [文字](https://...) → 链接
+/* Markdown 链接输入规则：
+ *   [文字](https://...) → 链接（显示文字，href 指向 url）
  *   https://xxx / www.xxx → 裸 URL 自动加链接（行尾空格触发）
  * 中文友好：链接文字允许中文、字母、数字、空格、-、_、/。
+ * [文字](url) 用自定义 handler（delete → insertText → addMark），
+ * 不能用 safeMarkInputRule——它会把最后一个捕获组(url)当作显示文本。
  */
 
-// [文字](url) → 捕获组 1=文字、2=url
-const markdownLinkRegex =
-  /(?:^|\s)\[([\w\u4e00-\u9fa5\s\-_/|]+)\]\((https?:\/\/\S+?)\)$/gm;
+// [文字](url) → group1=文字、group2=url；不使用 g/m 标志，避免 lastIndex 问题
+const markdownLinkRegex = /\[([\w\u4e00-\u9fa5\s\-_/|]+)\]\((https?:\/\/\S+?)\)$/;
 
-// 裸 URL：捕获组 1=url
-const urlRegex = /(?:^|\s)((?:https?:\/\/|www\.)[^\s]+)(?:\s|\n)$/gim;
+// 裸 URL：捕获组 1=url（行尾空格触发）
+const urlRegex = /((?:https?:\/\/|www\.)[^\s]+)(?:\s|\n)$/;
 
-const getMarkdownLinkAttrs = (match: RegExpMatchArray) => {
-  const href = match[2];
-  match.pop();
-  return { href };
-};
+const markdownLinkInputRule = new InputRule({
+  find: markdownLinkRegex,
+  handler: ({ state, range, match }) => {
+    const label = match[1];
+    const href = match[2];
+    if (!label || !href) return null;
+
+    const linkType = state.schema.marks.link;
+    if (!linkType) return null;
+
+    const tr = state.tr;
+    tr.delete(range.from, range.to);
+    tr.insertText(label, range.from);
+    tr.addMark(range.from, range.from + label.length, linkType.create({ href }));
+    // 光标移到链接文字之后，脱离 link mark
+    const afterPos = range.from + label.length;
+    tr.setSelection(TextSelection.create(tr.doc, afterPos));
+    tr.removeStoredMark(linkType);
+    // 阻止 autolink 插件在本次事务后重复处理
+    tr.setMeta("preventAutolink", true);
+  },
+});
 
 const getUrlAttrs = (match: RegExpMatchArray) => ({ href: match[1] });
 
 export const MarkdownLink = BuiltInLink.extend({
   addInputRules() {
     return [
-      safeMarkInputRule({
-        find: markdownLinkRegex,
-        type: this.type,
-        getAttributes: getMarkdownLinkAttrs as never,
-      }),
+      markdownLinkInputRule,
       safeMarkInputRule({
         find: urlRegex,
         type: this.type,

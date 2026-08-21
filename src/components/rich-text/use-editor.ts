@@ -32,6 +32,8 @@ import { CustomCodeBlock } from "./code-block-node";
 import { CustomImage } from "./image-node";
 import { LinkCard } from "./link-card";
 import { ImageBlock } from "./ext/image-block";
+import { CodeBackfillConvert } from "./ext/code-backfill-convert";
+import { LinkBackfillConvert } from "./ext/link-backfill-convert";
 
 import { FontSize } from "./ext/font-size";
 import { TrailingNode } from "./ext/trailing-node";
@@ -83,6 +85,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       CustomItalic,
       CustomStrike,
       CustomCode,
+      // 回填式代码标记：先打 `` 再回填内容，方向键离开时自动转 code
+      CodeBackfillConvert,
       // 代码块（lowlight 语法高亮）
       CustomCodeBlock,
       // 行内/块级基础
@@ -109,6 +113,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       ImageBlock,
       LinkCard,
       MarkdownLink,
+      // 回填式链接：IME/某些场景 input rule 未触发时，空格/回车兜底转换
+      LinkBackfillConvert,
       // 高级结构
       Columns,
       Column,
