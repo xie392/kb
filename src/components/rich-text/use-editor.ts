@@ -10,6 +10,11 @@ import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
+import FontFamily from "@tiptap/extension-font-family";
+import Typography from "@tiptap/extension-typography";
+import CharacterCount from "@tiptap/extension-character-count";
+import { Dropcursor } from "@tiptap/extension-dropcursor";
+import Focus from "@tiptap/extension-focus";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import { Table } from "@tiptap/extension-table";
@@ -19,10 +24,28 @@ import TableHeader from "@tiptap/extension-table-header";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
+
 import { MarkdownPaste } from "./markdown-paste";
+import { CustomBold, CustomItalic, CustomStrike, CustomCode } from "./markdown-marks";
+import { MarkdownLink } from "./markdown-link";
 import { CustomCodeBlock } from "./code-block-node";
 import { CustomImage } from "./image-node";
 import { LinkCard } from "./link-card";
+import { ImageBlock } from "./ext/image-block";
+
+import { FontSize } from "./ext/font-size";
+import { TrailingNode } from "./ext/trailing-node";
+import { Selection } from "./ext/selection";
+import { Columns, Column } from "./ext/columns";
+import { Details, DetailsSummary, DetailsContent } from "./ext/details";
+import { TableOfContentsNode } from "./ext/toc-node";
+import { FileHandler } from "./ext/file-handler";
+import { BlockHandles } from "./ext/block-handles";
+import { Callout } from "./ext/callout";
+import { Iframe } from "./ext/iframe";
+import { Katex } from "./ext/katex";
+import { Attachment } from "./ext/attachment";
+
 import type { OutlineItem } from "./types";
 
 export interface UseArticleEditorOptions {
@@ -30,41 +53,100 @@ export interface UseArticleEditorOptions {
   onChange: (html: string) => void;
   onOutline?: (items: OutlineItem[]) => void;
   placeholder?: string;
+  /** 拖拽/粘贴图片时的上传回调（不传则退化为 base64 嵌入） */
+  onUploadImage?: (file: File) => Promise<string>;
 }
 
 /** 创建编辑器实例：编排全部扩展，并把 HTML / 大纲变化回传给外部 */
 export function useArticleEditor(options: UseArticleEditorOptions) {
-  const { value, onChange, onOutline, placeholder } = options;
+  const { value, onChange, onOutline, placeholder, onUploadImage } = options;
 
   const editor = useEditor({
-    // 显式关闭 Tiptap 的 SSR 默认提示；编辑器在服务端不渲染、客户端挂载后再创建
     immediatelyRender: false,
     extensions: [
-      // StarterKit 新版本内置了 link/underline，这里关闭，避免与下方显式扩展重复注册
+      // StarterKit：禁用内置 Bold/Italic/Strike/Code（用下方自定义版，
+      // 规避 Tiptap 3.x markInputRule 的 addMark 崩溃 bug）。
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4, 5, 6] },
         codeBlock: false,
+        bold: false,
+        italic: false,
+        strike: false,
+        code: false,
         link: false,
         underline: false,
+        trailingNode: false,
+        dropcursor: false,
       }),
+      // 行内 markdown 输入规则（safeMarkInputRule 规避崩溃）
+      CustomBold,
+      CustomItalic,
+      CustomStrike,
+      CustomCode,
+      // 代码块（lowlight 语法高亮）
       CustomCodeBlock,
+      // 行内/块级基础
       Underline,
       Highlight.configure({ multicolor: true }),
       Subscript,
       Superscript,
       TextStyle,
       Color,
+      FontFamily,
+      FontSize,
+      Typography,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      // 列表 / 任务
       TaskList,
       TaskItem.configure({ nested: true }),
+      // 表格
       Table.configure({ resizable: true, lastColumnResizable: false }),
       TableRow,
       TableHeader,
       TableCell,
+      // 媒体：CustomImage 处理旧 inline 数据兼容；新插入图片走 ImageBlock（块级，照搬 demo）
       CustomImage,
+      ImageBlock,
       LinkCard,
-      Link.configure({ openOnClick: false }),
-      Placeholder.configure({ placeholder: placeholder ?? "开始写作…" }),
+      MarkdownLink,
+      // 高级结构
+      Columns,
+      Column,
+      Details,
+      DetailsSummary,
+      DetailsContent,
+      TableOfContentsNode,
+      // 块级富内容（借鉴 demo/knloop-frontend-main，改造为手绘风格）
+      Callout,
+      Iframe,
+      Katex,
+      Attachment,
+      // 编辑器体验
+      Placeholder.configure({
+        placeholder: placeholder ?? "开始写作…",
+        includeChildren: true,
+        showOnlyCurrent: false,
+      }),
+      TrailingNode,
+      Selection,
+      CharacterCount.configure({ limit: 100000 }),
+      Dropcursor.configure({ width: 2, class: "kb-dropcursor" }),
+      Focus.configure({ mode: "all" }),
+      // Notion 风格块级双柄（+ 插入 / ⋮⋮ 拖拽）
+      BlockHandles,
+      // 拖拽/粘贴图片自动上传 → 走 ImageBlock 命令（块级模式）
+      FileHandler.configure({
+        allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
+        onUpload: onUploadImage,
+        onInsertImage: (ed, src, pos) => {
+          if (typeof pos === "number") {
+            ed.chain().focus().setImageBlockAt({ src, pos }).run();
+          } else {
+            ed.chain().focus().setImageBlock({ src }).run();
+          }
+        },
+      }),
+      // markdown 粘贴 / 序列化
       Markdown,
       MarkdownPaste,
     ],
@@ -99,7 +181,6 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     onOutline(items);
   }
 
-  // 外部 value 变化时同步
   useEffect(() => {
     if (editor && value && editor.getHTML() !== value) {
       editor.commands.setContent(value, { emitUpdate: false });

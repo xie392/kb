@@ -29,16 +29,37 @@ importers:
       '@tiptap/core':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/pm@3.30.1)
+      '@tiptap/extension-bold':
+        specifier: ^3.30.1
+        version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
+      '@tiptap/extension-character-count':
+        specifier: ^3.30.2
+        version: 3.30.2(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))
+      '@tiptap/extension-code':
+        specifier: ^3.30.1
+        version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
       '@tiptap/extension-code-block-lowlight':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/extension-code-block@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)(highlight.js@11.12.0)(lowlight@3.3.0)
       '@tiptap/extension-color':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/extension-text-style@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1)))
+      '@tiptap/extension-dropcursor':
+        specifier: ^3.30.1
+        version: 3.30.1(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))
+      '@tiptap/extension-focus':
+        specifier: ^3.30.2
+        version: 3.30.2(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))
+      '@tiptap/extension-font-family':
+        specifier: ^3.30.2
+        version: 3.30.2(@tiptap/extension-text-style@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1)))
       '@tiptap/extension-highlight':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
       '@tiptap/extension-image':
+        specifier: ^3.30.1
+        version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
+      '@tiptap/extension-italic':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
       '@tiptap/extension-link':
@@ -47,6 +68,9 @@ importers:
       '@tiptap/extension-placeholder':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))
+      '@tiptap/extension-strike':
+        specifier: ^3.30.1
+        version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
       '@tiptap/extension-subscript':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
@@ -77,6 +101,9 @@ importers:
       '@tiptap/extension-text-style':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
+      '@tiptap/extension-typography':
+        specifier: ^3.30.2
+        version: 3.30.2(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
       '@tiptap/extension-underline':
         specifier: ^3.30.1
         version: 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
@@ -92,6 +119,9 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^3.30.1
         version: 3.30.1
+      '@tiptap/suggestion':
+        specifier: ^3.30.2
+        version: 3.30.2(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
       '@trpc/client':
         specifier: ^11.18.0
         version: 11.18.0(@trpc/server@11.18.0(typescript@7.0.2))(typescript@7.0.2)
@@ -128,6 +158,9 @@ importers:
       highlight.js:
         specifier: ^11.12.0
         version: 11.12.0
+      katex:
+        specifier: ^0.16.47
+        version: 0.16.47
       lowlight:
         specifier: ^3.3.0
         version: 3.3.0
@@ -177,6 +210,9 @@ importers:
       '@types/bcryptjs':
         specifier: ^2.4.6
         version: 2.4.6
+      '@types/katex':
+        specifier: ^0.16.8
+        version: 0.16.8
       '@types/markdown-it':
         specifier: ^14.2.0
         version: 14.2.0
@@ -1343,6 +1379,11 @@ packages:
     peerDependencies:
       '@tiptap/extension-list': 3.30.1
 
+  '@tiptap/extension-character-count@3.30.2':
+    resolution: {integrity: sha512-9Mnej4qOLf2/kFPAmGxkxwdpFNRq8+D9nQVnyFF50x32myaKl/BXcCftsm+EiKpnH9JNT5mhZA0nh4JoH7OwrA==}
+    peerDependencies:
+      '@tiptap/extensions': 3.30.2
+
   '@tiptap/extension-code-block-lowlight@3.30.1':
     resolution: {integrity: sha512-Qu+owe3DPHUxeKWD+hSUq4/AF6ZfAcTbvlv5ua1/R7gad4/404dDCXUdwwAr7lxqh3kzjdzYF8IDZsuy7CBIhA==}
     peerDependencies:
@@ -1384,6 +1425,16 @@ packages:
       '@floating-ui/dom': ^1.0.0
       '@tiptap/core': 3.30.1
       '@tiptap/pm': 3.30.1
+
+  '@tiptap/extension-focus@3.30.2':
+    resolution: {integrity: sha512-Ywy/TI+IM6dfWX7BwMZa32D/KUVuUHwMjyEeXYxVpeV9rFFO6B+Gzl/0weA4+kddeKGySo0YzIH50nVoo/s9iA==}
+    peerDependencies:
+      '@tiptap/extensions': 3.30.2
+
+  '@tiptap/extension-font-family@3.30.2':
+    resolution: {integrity: sha512-syg9Gfo+TN3rhxPxACgHSKRjcpl08enBHNinjCQI2pg8BMGDLG7DTrSAlIK/uEhTxxzSqBUOBaGrue+Q0oJQmg==}
+    peerDependencies:
+      '@tiptap/extension-text-style': 3.30.2
 
   '@tiptap/extension-gapcursor@3.30.1':
     resolution: {integrity: sha512-dp13WaPNj32SkDN9tun0OtwtfdO/y52BJWigwXPgpUFLEyr8hQ84TxXL3rDshGHE4Eyjdd+erdBHisjBEV9vwQ==}
@@ -1521,6 +1572,11 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.30.1
 
+  '@tiptap/extension-typography@3.30.2':
+    resolution: {integrity: sha512-kQ+6Vxo+WVLtb6e1kiE59STSUExd8gTW9vuD1S3sBhUaYKRLfGYhiO7tiwvvA1SGlv+CphOKrwOoJg6d+5BU3g==}
+    peerDependencies:
+      '@tiptap/core': 3.30.2
+
   '@tiptap/extension-underline@3.30.1':
     resolution: {integrity: sha512-Xro/EzEgWW+46ztrw5f4epDWQvcGpD+HUykzigj30bpIS8Vv4XDXFt+89dAcyDC7zRUMQULlWZV0UCyRLFEKBw==}
     peerDependencies:
@@ -1553,6 +1609,13 @@ packages:
 
   '@tiptap/starter-kit@3.30.1':
     resolution: {integrity: sha512-6P2WEp2ZHsx8LV6hQ3K/MB3n39oiVhKESlzh0v+KhK8RR/iKSKGxvTFbi1D/1fo4j3fZf+43PGHjyKXskn9ZmQ==}
+
+  '@tiptap/suggestion@3.30.2':
+    resolution: {integrity: sha512-qsQv+rlh5ik9G1n+SGLak69JoLQAFwdtQRjGpABYxx5USc14J7hrR1K8sj9tnWymX1fKXfJOlz+Dimcb1kDhWA==}
+    peerDependencies:
+      '@floating-ui/dom': ^1.0.0
+      '@tiptap/core': 3.30.2
+      '@tiptap/pm': 3.30.2
 
   '@trpc/client@11.18.0':
     resolution: {integrity: sha512-wOqeg3Fvl25V1ZisQhUD3K8G60ZJDlSGJNSyeXrLH24xAo5w6GSR2Kzb1cSNY9Y+IQ2YZvYGZstBU+V/ulo/ow==}
@@ -1638,6 +1701,9 @@ packages:
 
   '@types/hast@3.0.5':
     resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
+
+  '@types/katex@0.16.8':
+    resolution: {integrity: sha512-trgaNyfU+Xh2Tc+ABIb44a5AYUpicB3uwirOioeOkNPPbmgRNtcWyDeeFRzjPZENO9Vq8gvVqfhaaXWLlevVwg==}
 
   '@types/linkify-it@5.0.0':
     resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
@@ -2018,6 +2084,10 @@ packages:
   commander@14.0.3:
     resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
     engines: {node: '>=20'}
+
+  commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
 
   conf@10.2.0:
     resolution: {integrity: sha512-8fLl9F04EJqjSqH+QjITQfJF8BrOVaYr1jewVgSRAEWePfxT0sku4w2hrGQ60BC/TNLGQ2pgxNlTbWQmMPFvXg==}
@@ -2715,6 +2785,10 @@ packages:
 
   jsonfile@6.2.1:
     resolution: {integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==}
+
+  katex@0.16.47:
+    resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
+    hasBin: true
 
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
@@ -4791,6 +4865,10 @@ snapshots:
     dependencies:
       '@tiptap/extension-list': 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
 
+  '@tiptap/extension-character-count@3.30.2(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))':
+    dependencies:
+      '@tiptap/extensions': 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
+
   '@tiptap/extension-code-block-lowlight@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/extension-code-block@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)(highlight.js@11.12.0)(lowlight@3.3.0)':
     dependencies:
       '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
@@ -4826,6 +4904,14 @@ snapshots:
       '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
       '@tiptap/pm': 3.30.1
     optional: true
+
+  '@tiptap/extension-focus@3.30.2(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))':
+    dependencies:
+      '@tiptap/extensions': 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
+
+  '@tiptap/extension-font-family@3.30.2(@tiptap/extension-text-style@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1)))':
+    dependencies:
+      '@tiptap/extension-text-style': 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))
 
   '@tiptap/extension-gapcursor@3.30.1(@tiptap/extensions@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1))':
     dependencies:
@@ -4938,6 +5024,10 @@ snapshots:
     dependencies:
       '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
 
+  '@tiptap/extension-typography@3.30.2(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))':
+    dependencies:
+      '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
+
   '@tiptap/extension-underline@3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))':
     dependencies:
       '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
@@ -5013,6 +5103,12 @@ snapshots:
       '@tiptap/extensions': 3.30.1(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)
       '@tiptap/pm': 3.30.1
 
+  '@tiptap/suggestion@3.30.2(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.1(@tiptap/pm@3.30.1))(@tiptap/pm@3.30.1)':
+    dependencies:
+      '@floating-ui/dom': 1.8.0
+      '@tiptap/core': 3.30.1(@tiptap/pm@3.30.1)
+      '@tiptap/pm': 3.30.1
+
   '@trpc/client@11.18.0(@trpc/server@11.18.0(typescript@7.0.2))(typescript@7.0.2)':
     dependencies:
       '@trpc/server': 11.18.0(typescript@7.0.2)
@@ -5085,6 +5181,8 @@ snapshots:
   '@types/hast@3.0.5':
     dependencies:
       '@types/unist': 3.0.3
+
+  '@types/katex@0.16.8': {}
 
   '@types/linkify-it@5.0.0': {}
 
@@ -5438,6 +5536,8 @@ snapshots:
   commander@11.1.0: {}
 
   commander@14.0.3: {}
+
+  commander@8.3.0: {}
 
   conf@10.2.0:
     dependencies:
@@ -6089,6 +6189,10 @@ snapshots:
       universalify: 2.0.1
     optionalDependencies:
       graceful-fs: 4.2.11
+
+  katex@0.16.47:
+    dependencies:
+      commander: 8.3.0
 
   kleur@3.0.3: {}
 

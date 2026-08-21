@@ -24,6 +24,17 @@ import { TablePicker } from "./table-controls";
 import { ColorMenu } from "./color-menu";
 import { InsertMenu } from "./insert-menu";
 import { BlockStyleMenu } from "./block-style-menu";
+import { FontFamilyPicker, FontSizePicker, CharCount } from "./font-menu";
+import { EmojiPicker } from "./ext/emoji-picker";
+import {
+  HandColumnsTwo,
+  HandDetails,
+  HandToc,
+  HandCallout,
+  HandIframe,
+  HandMath,
+  HandAttachment,
+} from "./hand-icons-extra";
 import {
   HandBold,
   HandCode,
@@ -150,7 +161,7 @@ export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): Too
           return;
         }
         const url = window.prompt("图片 URL（或 base64 数据）");
-        if (url) editor.chain().focus().setImage({ src: url }).run();
+        if (url) editor.chain().focus().setImageBlock({ src: url }).run();
       }, icon: opts?.uploading ? <LoaderIcon /> : <HandImage className="h-4 w-4" /> },
       { title: "链接", onClick: () => openLinkDialog(), active: editor.isActive("link"), icon: <HandLink className="h-4 w-4" /> },
     ],
@@ -205,7 +216,7 @@ export function EditorToolbar({
     setUploading(true);
     try {
       const url = await onUploadImage(file);
-      if (url) editor.chain().focus().setImage({ src: url }).run();
+      if (url) editor.chain().focus().setImageBlock({ src: url }).run();
     } catch (err) {
       setErrMsg(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
     } finally {
@@ -240,6 +251,8 @@ export function EditorToolbar({
         {renderGroup(groups[0])}
         <ToolbarDivider />
         <BlockStyleMenu editor={editor} />
+        <FontFamilyPicker editor={editor} />
+        <FontSizePicker editor={editor} />
         <ToolbarDivider />
         {renderGroup(groups[1])}
         <ToolbarDivider />
@@ -252,6 +265,63 @@ export function EditorToolbar({
         {renderGroup(groups[5])}
         <ToolbarDivider />
         <TablePicker editor={editor} />
+        <ToolbarBtn
+          title="多栏布局"
+          active={editor.isActive("columns")}
+          onClick={() => {
+            if (editor.isActive("columns")) {
+              editor.chain().focus().deleteNode("columns").run();
+            } else {
+              editor.chain().focus().setColumns().focus(editor.state.selection.head - 1).run();
+            }
+          }}
+        >
+          <HandColumnsTwo className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="折叠块"
+          active={editor.isActive("details")}
+          onClick={() => editor.chain().focus().setDetails().run()}
+        >
+          <HandDetails className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="插入目录"
+          onClick={() => editor.chain().focus().insertTableOfContents().run()}
+        >
+          <HandToc className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="提示框"
+          active={editor.isActive("callout")}
+          onClick={() => editor.chain().focus().setCallout().run()}
+        >
+          <HandCallout className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="嵌入网页"
+          active={editor.isActive("iframe")}
+          onClick={() => editor.chain().focus().setIframe({ url: null }).run()}
+        >
+          <HandIframe className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="数学公式"
+          active={editor.isActive("katex")}
+          onClick={() => editor.chain().focus().setKatex({ text: "" }).run()}
+        >
+          <HandMath className="h-4 w-4" />
+        </ToolbarBtn>
+        <ToolbarBtn
+          title="附件"
+          active={editor.isActive("attachment")}
+          onClick={() => editor.chain().focus().setAttachment().run()}
+        >
+          <HandAttachment className="h-4 w-4" />
+        </ToolbarBtn>
+        <EmojiPicker editor={editor} />
+        <ToolbarDivider />
+        <CharCount editor={editor} />
 
         {/* 错误提示弹窗 */}
         <AlertDialog

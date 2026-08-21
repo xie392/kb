@@ -8,6 +8,7 @@ import {
   EditorToolbar,
   EditorArea,
 } from "@/components/rich-text";
+import { TocPanel } from "@/components/rich-text/toc-panel";
 import TagSelect from "@/components/tag-select";
 import CategorySelect from "@/components/category-select";
 import { Button } from "@/components/ui/button";
@@ -50,12 +51,27 @@ export default function ArticleEditor({ article }: Props) {
   const { data: cats } = api.category.tree.useQuery();
   const { data: tags } = api.tag.list.useQuery();
 
+  // 图片上传统一走附件管理（会写入 Attachment 记录，可在附件管理中查看/管理）
+  const uploadImage = api.attachment.create.useMutation();
+
+  const handleUploadImage = async (file: File): Promise<string> => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("读取文件失败"));
+      reader.readAsDataURL(file);
+    });
+    const res = await uploadImage.mutateAsync({ name: file.name, data: dataUrl });
+    return res.url;
+  };
+
   // 编辑器实例（提升到父级，工具栏和编辑区共享）
   const editor = useArticleEditor({
     value: content,
     onChange: (html) => setContent(html),
     onOutline: setOutline,
     placeholder: "开始写作…",
+    onUploadImage: handleUploadImage,
   });
 
   const create = api.article.create.useMutation({
@@ -72,19 +88,6 @@ export default function ArticleEditor({ article }: Props) {
   const createCategory = api.category.create.useMutation({
     onError: (e) => toast.error(`创建分类失败：${e.message}`),
   });
-  // 图片上传统一走附件管理（会写入 Attachment 记录，可在附件管理中查看/管理）
-  const uploadImage = api.attachment.create.useMutation();
-
-  const handleUploadImage = async (file: File): Promise<string> => {
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(new Error("读取文件失败"));
-      reader.readAsDataURL(file);
-    });
-    const res = await uploadImage.mutateAsync({ name: file.name, data: dataUrl });
-    return res.url;
-  };
 
   const onSave = () => {
     if (!title.trim()) return toast.error("请输入标题");
@@ -235,33 +238,11 @@ export default function ArticleEditor({ article }: Props) {
         </div>
       </div>
 
-      {/* ═══ 右侧大纲悬浮面板 ═══ */}
-      {outline.length > 0 && (
-        <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
-          <div className="text-[12px] font-semibold text-ink-faint uppercase tracking-wider mb-3">大纲</div>
-          <nav className="space-y-0.5">
-            {outline.map((item) => (
-              <button
-                key={item.id}
-                onClick={() =>
-                  document
-                    .querySelectorAll(".ProseMirror h1, .ProseMirror h2, .ProseMirror h3")
-                    [outline.indexOf(item)]?.scrollIntoView({ behavior: "smooth", block: "center" })
-                }
-                className={`block w-full text-left text-[13px] py-1.5 px-2 rounded-md hover:bg-canvas-soft transition-colors truncate ${
-                  item.level === 1
-                    ? "text-ink-secondary font-semibold"
-                    : item.level === 2
-                    ? "text-ink-muted pl-3"
-                    : "text-ink-faint pl-5"
-                }`}
-              >
-                {item.text}
-              </button>
-            ))}
-          </nav>
-        </div>
-      )}
+      {/* ═══ 右侧大纲悬浮面板（TocPanel 自取 headings + IntersectionObserver 高亮） ═══ */}
+      <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
+        <div className="text-[12px] font-semibold text-ink-faint uppercase tracking-wider mb-3">大纲</div>
+        <TocPanel editor={editor} emptyText="添加标题后会自动生成目录" />
+      </div>
 
       {/* ═══ 底部状态栏（固定在视口底部） ═══ */}
       <div className="fixed bottom-0 left-55 right-0 bg-canvas-soft/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">

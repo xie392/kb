@@ -7,6 +7,9 @@ function looksLikeMarkdown(text: string): boolean {
   return (
     /(^|\n)\s{0,3}(#{1,6}\s|>\s|[-*+]\s|\d+\.\s|```|~~~)/.test(text) ||
     /\*\*[^*\n]+\*\*|__[^_\n]+__/.test(text) ||
+    /\*[^\s*](?:[^*\n]*[^\s*])?\*|_[^\s_](?:[^_\n]*[^\s_])?_/.test(text) ||
+    /~~[^~\n]+~~/.test(text) ||
+    /`[^`\n]+`/.test(text) ||
     /\[[^\]]+\]\([^)\s]+\)/.test(text) ||
     /(^|\n)\s{0,3}(-{3,}|\*{3,}|_{3,})\s*(\n|$)/.test(text)
   );

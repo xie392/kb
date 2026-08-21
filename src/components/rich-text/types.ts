@@ -11,11 +11,17 @@ export interface ImageAttrs {
   src?: string;
   alt?: string;
   title?: string;
+  /** 原始像素宽度（用于旋转包围盒计算） */
   width?: number | null;
+  /** 原始像素高度（用于旋转包围盒计算） */
   height?: number | null;
   align?: ImageAlign;
   rotation?: number;
   imgStyle?: ImageStyle;
+  /** 显示宽度百分比 0-100，null 表示撑满容器（默认 100） */
+  displayWidth?: number | null;
+  /** 图片说明文字（caption） */
+  caption?: string | null;
 }
 
 /** 标题大纲项（供外部渲染目录） */

@@ -4,8 +4,12 @@ import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
 import { BlockMenu } from "./block-menu";
 import { SlashMenu } from "./slash-menu";
+import { TextMenu } from "./text-menu";
 import { LinkBubble } from "./link-bubble";
 import { LinkDialogHost } from "./link-dialog";
+import { ColumnsMenu } from "./ext/columns-menu";
+import { EmojiSuggestion } from "./ext/emoji-suggestion";
+import { ImageBlockMenu } from "./ext/image-block";
 
 interface EditorAreaProps {
   editor: Editor | null;
@@ -29,7 +33,11 @@ export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
     <div className="px-6 py-4">
       <EditorContent editor={editor} />
       <BlockMenu editor={editor} />
+      <ImageBlockMenu editor={editor} />
+      <TextMenu editor={editor} />
+      <ColumnsMenu editor={editor} />
       <SlashMenu editor={editor} onUploadImage={onUploadImage} />
+      <EmojiSuggestion editor={editor} />
       <LinkBubble editor={editor} />
       <LinkDialogHost editor={editor} />
     </div>

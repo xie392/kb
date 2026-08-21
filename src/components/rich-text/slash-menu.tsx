@@ -109,7 +109,7 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
     }
     try {
       const url = await onUploadImage(file);
-      if (url) editor.chain().focus().setImage({ src: url }).run();
+      if (url) editor.chain().focus().setImageBlock({ src: url }).run();
     } catch (err) {
       window.alert(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
     }
@@ -121,38 +121,78 @@ export function SlashMenu({ editor, onUploadImage }: SlashMenuProps) {
       <FloatingMenu
         editor={editor}
         options={{ placement: "bottom-start", offset: 8 }}
-        className="z-50 w-60 rounded-lg border border-hairline bg-white sketch-border sketch-shadow p-1.5"
+        className="z-50 w-72 rounded-lg border border-hairline bg-white sketch-border sketch-shadow p-1.5"
         shouldShow={({ editor: currentEditor }) => {
           const currentSlash = getSlashCommandState(currentEditor);
           return currentSlash.active && hiddenKey !== currentSlash.key;
         }}
       >
         {actions.length === 0 ? (
-          <div className="px-2 py-3 text-center text-xs text-ink-muted">
-            没有找到命令
+          <div className="px-3 py-6 text-center">
+            <div className="text-[13px] text-ink-muted">没有找到命令</div>
+            <div className="mt-0.5 text-[11px] text-ink-faint">试试输入 {slash.query ? `"/${slash.query}"` : "其他关键词"} 或按 ESC 退出</div>
           </div>
         ) : (
-          <div ref={listRef} className="scrollbar-wide flex max-h-[380px] flex-col gap-0.5 overflow-y-auto overscroll-contain pr-1">
-            {actions.map((item, index) => (
-              <div key={item.id}>
-                {index > 0 && item.group !== actions[index - 1]?.group && (
-                  <div className="my-1 h-px bg-hairline" />
-                )}
-                <button
-                  type="button"
-                  onClick={() => item.run()}
-                  className={cn(
-                    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-ink-secondary transition-colors hover:bg-canvas-soft",
-                    activeIndex === index && "bg-canvas-soft"
-                  )}
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-canvas-soft text-ink-muted">
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </button>
-              </div>
-            ))}
+          <div ref={listRef} className="scrollbar-wide flex max-h-[400px] flex-col gap-0.5 overflow-y-auto overscroll-contain pr-1">
+            {(() => {
+              const groups: { name: string; items: typeof actions }[] = [];
+              for (const a of actions) {
+                const last = groups[groups.length - 1];
+                if (last && last.name === a.group) last.items.push(a);
+                else groups.push({ name: a.group, items: [a] });
+              }
+              let flatIndex = 0;
+              return groups.map((g) => (
+                <div key={g.name}>
+                  <div className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-ink-faint font-hand-display">
+                    {g.name}
+                  </div>
+                  {g.items.map((item) => {
+                    const idx = flatIndex++;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => item.run()}
+                        onMouseEnter={() => setActiveIndex(idx)}
+                        className={cn(
+                          "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors",
+                          activeIndex === idx
+                            ? "bg-primary/8 ring-1 ring-primary/30"
+                            : "hover:bg-canvas-soft"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
+                            activeIndex === idx
+                              ? "bg-primary/15 text-primary"
+                              : "bg-canvas-soft text-ink-muted"
+                          )}
+                        >
+                          {item.icon}
+                        </span>
+                        <span className="flex flex-1 flex-col">
+                          <span
+                            className={cn(
+                              "text-[13px] font-medium",
+                              activeIndex === idx ? "text-primary" : "text-ink-secondary"
+                            )}
+                          >
+                            {item.label}
+                          </span>
+                          {item.description && (
+                            <span className="text-[11px] text-ink-faint truncate">
+                              {item.description}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ));
+            })()}
           </div>
         )}
       </FloatingMenu>

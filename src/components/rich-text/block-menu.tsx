@@ -110,6 +110,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
                 align: (node.attrs.align as ImageAlign) ?? "center",
                 rotation: (node.attrs.rotation as number) ?? 0,
                 imgStyle: (node.attrs.imgStyle as ImageStyle) ?? "none",
+                displayWidth: (node.attrs.displayWidth as number | null) ?? null,
               }
             : null,
       };
@@ -122,17 +123,23 @@ function BlockMenu({ editor }: { editor: Editor }) {
   );
 
   const shouldShow = useCallback(
-    ({ state }: { state: EditorState }) =>
-      state.selection instanceof NodeSelection &&
-      state.selection.node.type.name !== "table",
+    ({ state }: { state: EditorState }) => {
+      if (!(state.selection instanceof NodeSelection)) return false;
+      const name = state.selection.node.type.name;
+      // imageBlock 由 ImageBlockMenu 接管，table 由 TableGlobalToolbar 接管
+      return name !== "table" && name !== "imageBlock";
+    },
     []
   );
 
-  const setImageAttr = (patch: Partial<{ align: ImageAlign; rotation: number; imgStyle: ImageStyle }>) =>
+  const setImageAttr = (patch: Partial<{ align: ImageAlign; rotation: number; imgStyle: ImageStyle; displayWidth: number | null }>) =>
     editor.chain().focus().updateAttributes("image", patch).run();
 
   const isDefault =
-    imgAttrs?.align === "center" && imgAttrs?.rotation === 0 && imgAttrs?.imgStyle === "none";
+    imgAttrs?.align === "center" &&
+    imgAttrs?.rotation === 0 &&
+    imgAttrs?.imgStyle === "none" &&
+    (imgAttrs?.displayWidth === null || imgAttrs?.displayWidth === 100);
 
   const styleLabels: Record<ImageStyle, string> = { none: "无样式", border: "描边", shadow: "阴影" };
 
@@ -207,7 +214,7 @@ function BlockMenu({ editor }: { editor: Editor }) {
             </div>
             <MenuBtn title="复原"
               disabled={isDefault}
-              onClick={() => setImageAttr({ align: "center", rotation: 0, imgStyle: "none" })}
+              onClick={() => setImageAttr({ align: "center", rotation: 0, imgStyle: "none", displayWidth: null })}
             >
               <IconReset />
             </MenuBtn>

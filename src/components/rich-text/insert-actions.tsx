@@ -13,6 +13,16 @@ import {
   HandTable,
   HandTaskList,
 } from "./hand-icons";
+import {
+  HandColumnsTwo,
+  HandDetails,
+  HandToc,
+  HandEmoji,
+  HandCallout,
+  HandIframe,
+  HandMath,
+  HandAttachment,
+} from "./hand-icons-extra";
 import { openLinkDialog } from "./link-dialog";
 
 export interface InsertAction {
@@ -291,7 +301,7 @@ export function getInsertActions({
           return;
         }
         const url = window.prompt("图片 URL（或 base64 数据）");
-        if (url) editor.chain().focus().setImage({ src: url }).run();
+        if (url) editor.chain().focus().setImageBlock({ src: url }).run();
       },
     },
     {
@@ -304,6 +314,108 @@ export function getInsertActions({
       run: () => {
         prepareInsert();
         openLinkDialog();
+      },
+    },
+    {
+      id: "columns",
+      group: "媒体",
+      label: "多栏布局",
+      description: "两栏 / 侧栏布局",
+      aliases: ["lan", "column", "cols"],
+      icon: <HandColumnsTwo className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor
+          .chain()
+          .focus()
+          .setColumns()
+          .focus(editor.state.selection.head - 1)
+          .run();
+      },
+    },
+    {
+      id: "details",
+      group: "媒体",
+      label: "折叠块",
+      description: "可展开/收起的容器",
+      aliases: ["zhedie", "toggle", "fold"],
+      icon: <HandDetails className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().setDetails().run();
+      },
+    },
+    {
+      id: "toc",
+      group: "媒体",
+      label: "页面目录",
+      description: "自动扫描标题生成目录",
+      aliases: ["mulu", "outline", "catalog"],
+      icon: <HandToc className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().insertTableOfContents().run();
+      },
+    },
+    {
+      id: "callout",
+      group: "媒体",
+      label: "提示框",
+      description: "高亮信息 / 警告 / 备注（5 种风格）",
+      aliases: ["tishi", "callout", "banner", "alert"],
+      icon: <HandCallout className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().setCallout().run();
+      },
+    },
+    {
+      id: "iframe",
+      group: "媒体",
+      label: "嵌入网页",
+      description: "B 站 / YouTube / 外部网页",
+      aliases: ["qianru", "embed", "video", "shipin"],
+      icon: <HandIframe className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().setIframe({ url: null }).run();
+      },
+    },
+    {
+      id: "katex",
+      group: "媒体",
+      label: "数学公式",
+      description: "LaTeX 公式（块级）",
+      aliases: ["gongshi", "math", "latex", "gongshi"],
+      icon: <HandMath className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().setKatex({ text: "" }).run();
+      },
+    },
+    {
+      id: "attachment",
+      group: "媒体",
+      label: "附件",
+      description: "上传文件并预览（PDF / Office / 压缩包等）",
+      aliases: ["fujian", "file", "upload", "wenjian"],
+      icon: <HandAttachment className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        editor.chain().focus().setAttachment().run();
+      },
+    },
+    {
+      id: "emoji",
+      group: "媒体",
+      label: "插入 emoji",
+      description: "输入 : 触发或点此浏览",
+      aliases: ["biaoqing", "face", "smile"],
+      icon: <HandEmoji className="h-4 w-4" />,
+      run: () => {
+        prepareInsert();
+        // 在光标处插入 :smile: 占位触发 emoji 建议
+        editor.chain().focus().insertContent(":").run();
       },
     },
   ];
