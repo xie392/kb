@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -62,6 +62,8 @@ export interface UseArticleEditorOptions {
 /** 创建编辑器实例：编排全部扩展，并把 HTML / 大纲变化回传给外部 */
 export function useArticleEditor(options: UseArticleEditorOptions) {
   const { value, onChange, onOutline, placeholder, onUploadImage } = options;
+
+  const lastInternalHTML = useRef<string>("");
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -163,7 +165,9 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       },
     },
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      lastInternalHTML.current = html;
+      onChange(html);
       emitOutline(editor);
     },
     onCreate: ({ editor }) => {
@@ -188,7 +192,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
   }
 
   useEffect(() => {
-    if (editor && value && editor.getHTML() !== value) {
+    if (editor && value && value !== lastInternalHTML.current) {
       editor.commands.setContent(value, { emitUpdate: false });
       emitOutline(editor);
     }

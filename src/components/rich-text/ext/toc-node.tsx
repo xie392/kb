@@ -122,8 +122,15 @@ export const TableOfContentsNode = Node.create({
     return {
       insertTableOfContents:
         () =>
-        ({ commands }) =>
-          commands.insertContent({ type: this.name }),
+        ({ commands, state }) => {
+          const { schema } = state;
+          const paragraph = schema.nodes.paragraph?.create() ?? null;
+          if (!paragraph) return commands.insertContent({ type: this.name });
+          return commands.insertContent([
+            { type: this.name },
+            paragraph.toJSON(),
+          ]);
+        },
     };
   },
 });
