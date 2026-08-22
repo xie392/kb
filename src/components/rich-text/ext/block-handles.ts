@@ -36,9 +36,7 @@ const BLOCK_SELECTOR = new Set([
 ]);
 
 const SKIP_CLASS = [
-  "kb-columns",
   "kb-column",
-  "kb-details",
   "kb-details-content",
 ];
 
@@ -60,7 +58,47 @@ function isBlockDom(el: Element | null): boolean {
   return true;
 }
 
+/**
+ * 找容器块内承载"首行文字"的元素，用于精确计算垂直中线。
+ * - details：取内部的 <summary>（标题行）
+ * - columns：取第一个非空 column 内的首个块（段落/标题等）
+ * - blockquote：取首个段落
+ * - 其他：如果自身有可见文字，直接用自身
+ */
+function findFirstLineEl(blockEl: HTMLElement): HTMLElement | null {
+  // details：summary 是首行标题
+  const summary = blockEl.querySelector(":scope > summary");
+  if (summary instanceof HTMLElement) return summary;
+
+  // columns：第一个非空 column 的第一个块子元素
+  const firstColumn = blockEl.querySelector(
+    ":scope > .kb-column"
+  ) as HTMLElement | null;
+  if (firstColumn) {
+    const firstChild = firstColumn.querySelector(
+      ":scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6"
+    );
+    if (firstChild instanceof HTMLElement) return firstChild;
+    return firstColumn;
+  }
+
+  // blockquote 等其他容器：取第一个段落/标题
+  const firstInner = blockEl.querySelector(
+    ":scope > p, :scope > h1, :scope > h2, :scope > h3, :scope > h4, :scope > h5, :scope > h6"
+  );
+  if (firstInner instanceof HTMLElement) return firstInner;
+
+  return null;
+}
+
 function findBlockEl(start: EventTarget | null, root: HTMLElement): HTMLElement | null {
+  // 自内向外收集所有命中的块级元素。
+  // 主流编辑器规则：
+  //  - blockquote 这类“块容器”包裹段落时，手柄锚定最外层容器（整段引用），
+  //    而不是内部的 <p>，否则手柄会落在 padding/边框内侧、位置错乱。
+  //  - 列表/任务列表中，每个 <li> 才是独立可拖拽单元，取最内层 <li>（当前行），
+  //    内层 <p>/<hN> 等只是内容。
+  const candidates: HTMLElement[] = [];
   let el = start as HTMLElement | null;
   while (el && el !== root) {
     const cur = el;
@@ -69,15 +107,26 @@ function findBlockEl(start: EventTarget | null, root: HTMLElement): HTMLElement 
       return cur;
     }
     if (isBlockDom(cur)) {
-      if (cur.tagName === "LI") {
-        const list = cur.parentElement;
-        if (list && list.childElementCount <= 1) return null;
+      if (cur.tagName !== "LI" && cur.closest("li")) {
+        el = cur.parentElement;
+        continue;
       }
-      return cur;
+      candidates.push(cur);
     }
     el = cur.parentElement;
   }
-  return null;
+  if (candidates.length === 0) return null;
+
+  // 列表项：取最内层（第一个）<li>，即当前悬停行
+  const innermostLi = candidates.find((c) => c.tagName === "LI");
+  if (innermostLi) {
+    const list = innermostLi.parentElement;
+    if (list && list.childElementCount <= 1) return null;
+    return innermostLi;
+  }
+
+  // 其他块：取最外层容器（最后一个），如 blockquote 包裹段落时锚定 blockquote
+  return candidates[candidates.length - 1];
 }
 
 /* 归一化块的文档 node 边界位置（node pos）：
@@ -192,11 +241,28 @@ export const BlockHandles = Extension.create({
       const wrapH = wrap.offsetHeight || 24;
       const isLi = blockEl.tagName === "LI";
       const left = rect.left - wrapW - 8 - (isLi ? 24 : 0);
-      const cs = getComputedStyle(blockEl);
-      const padTop = parseFloat(cs.paddingTop) || 0;
-      const lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.6 || 24;
-      const firstLineCenter = padTop + lineH / 2;
-      const top = rect.top + firstLineCenter - wrapH / 2;
+
+      // 垂直位置：锚定"首行文字"的中线，而非容器 padding。
+      // 对 details / columns / blockquote 这类容器，padding 在子元素上，
+      // 直接用容器自身的 paddingTop+lineHeight 会把手柄算到边框上。
+      // 这里找第一个真正承载首行文字的子元素（summary / 首个段落等），
+      // 用它的矩形来算中线；找不到再回退到容器自身的 CSS 计算。
+      let top: number;
+      const firstLineEl = findFirstLineEl(blockEl);
+      if (firstLineEl) {
+        const r = firstLineEl.getBoundingClientRect();
+        const cs = getComputedStyle(firstLineEl);
+        const padTop = parseFloat(cs.paddingTop) || 0;
+        const lineH =
+          parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.6 || 24;
+        top = r.top + padTop + lineH / 2 - wrapH / 2;
+      } else {
+        const cs = getComputedStyle(blockEl);
+        const padTop = parseFloat(cs.paddingTop) || 0;
+        const lineH =
+          parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.6 || 24;
+        top = rect.top + padTop + lineH / 2 - wrapH / 2;
+      }
       wrap.style.left = `${Math.max(8, left)}px`;
       wrap.style.top = `${top}px`;
       wrap.classList.remove("is-hidden");

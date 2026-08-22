@@ -1469,6 +1469,16 @@
 .prose-kb .kb-details[open] > summary {
   border-bottom-color: var(--color-hairline);
 }
+/* 编辑态：summary 文字区域显示文本光标（箭头伪元素区域仍为指针） */
+.ProseMirror.prose-kb .kb-details > summary {
+  cursor: text;
+}
+.ProseMirror.prose-kb .kb-details > summary::before {
+  cursor: pointer;
+}
+.ProseMirror.prose-kb .kb-details > summary:focus {
+  outline: none;
+}
 .prose-kb .kb-details-content {
   padding: 8px 12px 12px;
 }
