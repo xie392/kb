@@ -28,12 +28,10 @@ const BLOCK_SELECTOR = new Set([
   "H5",
   "H6",
   "BLOCKQUOTE",
-  "PRE",
   "UL",
   "OL",
   "TABLE",
   "HR",
-  "DIV",
   "LI",
 ]);
 
@@ -44,15 +42,20 @@ const SKIP_CLASS = [
   "kb-details-content",
 ];
 
+function isNodeViewWrapper(el: Element): boolean {
+  return (
+    el.hasAttribute("data-node-view-wrapper") &&
+    !el.hasAttribute("data-node-view-content-react")
+  );
+}
+
 function isBlockDom(el: Element | null): boolean {
   if (!el || el.nodeType !== 1) return false;
   if (el.classList.contains("ProseMirror")) return false;
   if (SKIP_CLASS.some((c) => el.classList.contains(c))) return false;
-  // NodeView wrapper（如 image-block / callout / iframe）
-  if (el.hasAttribute("data-node-view-wrapper")) return true;
+  if (isNodeViewWrapper(el)) return true;
   if (el.hasAttribute("data-type")) return true;
   if (!BLOCK_SELECTOR.has(el.tagName)) return false;
-  // 列表内部项：LI 作为块；UL/OL 整体不作为手柄目标（避免选中整个列表）
   if (el.tagName === "UL" || el.tagName === "OL") return false;
   return true;
 }
@@ -61,7 +64,7 @@ function findBlockEl(start: EventTarget | null, root: HTMLElement): HTMLElement 
   let el = start as HTMLElement | null;
   while (el && el !== root) {
     const cur = el;
-    if (cur.hasAttribute("data-node-view-wrapper")) {
+    if (isNodeViewWrapper(cur)) {
       if (SKIP_CLASS.some((c) => cur.classList.contains(c))) return null;
       return cur;
     }
