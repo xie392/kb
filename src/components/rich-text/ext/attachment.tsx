@@ -96,15 +96,48 @@ export const Attachment = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     const attrs = HTMLAttributes as Record<string, unknown>;
+    const fileName = (attrs["data-filename"] as string) || "";
+    const fileSize = Number(attrs["data-filesize"]) || null;
+    const fileExt = (attrs["data-fileext"] as string) || null;
+    const url = (attrs["data-url"] as string) || "";
+    const baseAttrs = mergeAttributes(this.options.HTMLAttributes, {
+      "data-filename": fileName,
+      "data-filesize": attrs["data-filesize"] ?? "",
+      "data-filetype": attrs["data-filetype"] ?? "",
+      "data-fileext": fileExt ?? "",
+      "data-url": url,
+    });
+    if (!url) {
+      return ["div", baseAttrs];
+    }
+    const displayName = fileName && fileExt ? `${fileName}.${fileExt}` : fileName || "未命名文件";
+    const iconClass = fileIconClass(fileExt);
+    const sizeText = normalizeFileSize(fileSize);
     return [
       "div",
-      mergeAttributes(this.options.HTMLAttributes, {
-        "data-filename": attrs["data-filename"] ?? "",
-        "data-filesize": attrs["data-filesize"] ?? "",
-        "data-filetype": attrs["data-filetype"] ?? "",
-        "data-fileext": attrs["data-fileext"] ?? "",
-        "data-url": attrs["data-url"] ?? "",
-      }),
+      baseAttrs,
+      [
+        "a",
+        {
+          class: "kb-att-card",
+          href: url,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          download: displayName,
+        },
+        ["span", { class: `kb-att-icon ${iconClass}`, "aria-hidden": "true" }],
+        [
+          "div",
+          { class: "kb-att-meta" },
+          ["div", { class: "kb-att-name", title: displayName }, displayName],
+          ["div", { class: "kb-att-size" }, sizeText],
+        ],
+        [
+          "div",
+          { class: "kb-att-actions" },
+          ["span", { class: "kb-att-btn" }, "下载"],
+        ],
+      ],
     ];
   },
 

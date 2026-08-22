@@ -82,7 +82,7 @@ export function ImageBlockView(props: NodeViewProps) {
     <NodeViewWrapper className="kb-ib" data-align={align} data-selected={selected ? "true" : undefined}>
       <div
         ref={wrapRef}
-        className={cn("relative inline-block", wrapperAlign)}
+        className={cn("relative block", wrapperAlign)}
         style={{ width: `${effectiveWidth}%`, maxWidth: "100%" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -93,16 +93,16 @@ export function ImageBlockView(props: NodeViewProps) {
           draggable={false}
         />
         {selected && editor.isEditable && (
-          <>
-            <span
-              role="button"
-              aria-label="拖拽调整宽度"
-              title="拖拽调整宽度"
-              onMouseDown={onHandleDown}
-              className="kb-ib-handle"
-            />
-            <span className="kb-ib-width-tag">{Math.round(effectiveWidth)}%</span>
-          </>
+          <span
+            role="button"
+            aria-label="拖拽调整宽度"
+            title="拖拽调整宽度"
+            onMouseDown={onHandleDown}
+            className="kb-ib-handle"
+          />
+        )}
+        {dragWidth !== null && (
+          <span className="kb-ib-width-tag">{Math.round(effectiveWidth)}%</span>
         )}
       </div>
 

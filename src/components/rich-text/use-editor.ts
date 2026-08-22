@@ -38,6 +38,7 @@ import { LinkBackfillConvert } from "./ext/link-backfill-convert";
 import { FontSize } from "./ext/font-size";
 import { TrailingNode } from "./ext/trailing-node";
 import { Selection } from "./ext/selection";
+import { ListInputRules } from "./ext/list-input-rules";
 import { Columns, Column } from "./ext/columns";
 import { Details, DetailsSummary, DetailsContent } from "./ext/details";
 import { TableOfContentsNode } from "./ext/toc-node";
@@ -84,6 +85,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
 
   const editor = useEditor({
     immediatelyRender: false,
+    autofocus: false,
     extensions: [
       // StarterKit：禁用内置 Bold/Italic/Strike/Code（用下方自定义版，
       // 规避 Tiptap 3.x markInputRule 的 addMark 崩溃 bug）。
@@ -161,6 +163,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       }),
       TrailingNode,
       Selection,
+      ListInputRules,
       CharacterCount.configure({ limit: 100000 }),
       Dropcursor.configure({ width: 2, class: "kb-dropcursor" }),
       Focus.configure({ mode: "all" }),

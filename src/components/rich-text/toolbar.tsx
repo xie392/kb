@@ -171,10 +171,18 @@ export function EditorToolbar({
 
   useEffect(() => {
     if (!editor) return;
-    const update = () => forceUpdate((n) => n + 1);
+    let rafId: number | null = null;
+    const update = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        forceUpdate((n) => n + 1);
+      });
+    };
     editor.on("selectionUpdate", update);
     editor.on("transaction", update);
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       editor.off("selectionUpdate", update);
       editor.off("transaction", update);
     };

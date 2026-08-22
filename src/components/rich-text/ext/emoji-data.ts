@@ -253,7 +253,7 @@ export const emojisToName: { name: string; emoji: string }[] = [
   { name: "keyboard", emoji: "⌨️" },
   { name: "desktop", emoji: "🖥️" },
   { name: "printer", emoji: "🖨️" },
-  { name: "mouse", emoji: "🖱️" },
+  { name: "computer_mouse", emoji: "🖱️" },
   { name: "camera", emoji: "📷" },
   { name: "video_camera", emoji: "📹" },
   { name: "tv", emoji: "📺" },

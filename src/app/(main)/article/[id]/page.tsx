@@ -7,6 +7,8 @@ import { createServerCaller } from "@/trpc/server";
 import { SITE_URL } from "@/lib/config";
 import { extractToc } from "@/lib/toc";
 import { highlightCodeBlocks } from "@/lib/code-highlight";
+import { renderKatexBlocks } from "@/lib/katex-server";
+import { renderStaticNodes } from "@/lib/static-node-renderer";
 import ArticleToc from "@/components/article-toc";
 import ArticleCodeCopy from "@/components/article-code-copy";
 import ArticleViewTracker from "@/components/article-view-tracker";
@@ -105,7 +107,7 @@ export default async function ArticlePage({
   const { prev, next } = await caller.article.adjacent({ id });
 
   const { items: tocItems, html: contentWithIds } = extractToc(
-    highlightCodeBlocks(article.content),
+    renderStaticNodes(renderKatexBlocks(highlightCodeBlocks(article.content))),
   );
 
   return (
@@ -179,7 +181,7 @@ export default async function ArticlePage({
               </div>
             </header>
 
-            <div className="border-t-2 border-dashed border-hairline pt-4">
+            <div className="border-t-2 border-dashed border-hairline pt-8">
               <div
                 className="prose-kb"
                 dangerouslySetInnerHTML={{ __html: contentWithIds }}

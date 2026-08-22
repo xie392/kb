@@ -115,7 +115,7 @@ export const Callout = TiptapNode.create({
         "data-emoji": emoji,
         style: `color:${style.textColor};border-color:${style.borderColor};background:${style.backgroundColor}`,
       }),
-      0,
+      ["div", { class: "kb-callout-content" }, 0],
     ];
   },
 

@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FloatingMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/react";
-import { emojiSearch } from "./emoji-data";
-import { cn } from "@/lib/utils";
+import { EmojiGrid } from "./emoji-grid";
+import { emojisToName } from "./emoji-data";
 
 interface EmojiSuggestionState {
   active: boolean;
   query: string;
   from: number;
   to: number;
-  key: string;
 }
 
 const INACTIVE: EmojiSuggestionState = {
@@ -19,10 +18,10 @@ const INACTIVE: EmojiSuggestionState = {
   query: "",
   from: 0,
   to: 0,
-  key: "",
 };
 
-/** 检测光标前是否为 ":name" 模式（段落内任意位置） */
+const COLS = 8;
+
 export function getEmojiSuggestionState(editor: Editor): EmojiSuggestionState {
   const { state } = editor;
   const { $anchor, empty } = state.selection;
@@ -36,24 +35,18 @@ export function getEmojiSuggestionState(editor: Editor): EmojiSuggestionState {
   if (!match) return INACTIVE;
 
   const query = match[2];
-  // 已经插入空格/换行则不触发
-  if (textBefore.endsWith(" :\n")) return INACTIVE;
-
-  const from = $anchor.start() + match.index! + match[1].length + 1;
+  const colonOffset = match.index! + match[1].length;
+  const from = $anchor.start() + colonOffset;
   const to = $anchor.pos;
 
-  return { active: true, query, from, to, key: `${from}:${to}:${query}` };
+  return { active: true, query, from, to };
 }
 
 export function EmojiSuggestion({ editor }: { editor: Editor | null }) {
   const [state, setState] = useState<EmojiSuggestionState>(INACTIVE);
   const [activeIndex, setActiveIndex] = useState(0);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const items = useMemo(
-    () => (state.active ? emojiSearch(state.query, 12) : []),
-    [state]
-  );
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     if (!editor) return;
@@ -70,26 +63,48 @@ export function EmojiSuggestion({ editor }: { editor: Editor | null }) {
     };
   }, [editor]);
 
-  useEffect(() => {
-    if (!listRef.current) return;
-    const el = listRef.current.children[activeIndex] as HTMLElement | undefined;
-    if (el) el.scrollIntoView({ block: "nearest" });
-  }, [activeIndex]);
+  const insert = useCallback(
+    (emoji: string) => {
+      if (!editor) return;
+      const current = stateRef.current;
+      if (!current.active) return;
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: current.from, to: current.to })
+        .insertContent(emoji + " ")
+        .run();
+    },
+    [editor],
+  );
+
+  const filteredCount = state.query
+    ? emojisToName.filter((e) => e.name.includes(state.query)).length
+    : emojisToName.length;
 
   useEffect(() => {
     if (!editor) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      const current = getEmojiSuggestionState(editor);
-      if (!current.active || items.length === 0) return;
+      const current = stateRef.current;
+      if (!current.active || filteredCount === 0) return;
 
-      if (event.key === "ArrowDown") {
+      if (event.key === "ArrowRight") {
         event.preventDefault();
-        setActiveIndex((i) => (i + 1) % items.length);
+        setActiveIndex((i) => (i + 1) % filteredCount);
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveIndex((i) => (i - 1 + filteredCount) % filteredCount);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setActiveIndex((i) => Math.min(i + COLS, filteredCount - 1));
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
-        setActiveIndex((i) => (i - 1 + items.length) % items.length);
-      } else if (event.key === "Enter") {
+        setActiveIndex((i) => Math.max(i - COLS, 0));
+      } else if (event.key === "Enter" || event.key === "Tab") {
         event.preventDefault();
+        const items = state.query
+          ? emojisToName.filter((e) => e.name.includes(state.query))
+          : emojisToName;
         insert(items[Math.min(activeIndex, items.length - 1)].emoji);
       } else if (event.key === "Escape") {
         event.preventDefault();
@@ -98,45 +113,23 @@ export function EmojiSuggestion({ editor }: { editor: Editor | null }) {
     };
     editor.view.dom.addEventListener("keydown", handleKeyDown, true);
     return () => editor.view.dom.removeEventListener("keydown", handleKeyDown, true);
-  }, [activeIndex, items, editor]);
+  }, [activeIndex, filteredCount, editor, insert, state.query]);
 
   if (!editor) return null;
-
-  const insert = (emoji: string) => {
-    const current = getEmojiSuggestionState(editor);
-    if (!current.active) return;
-    editor.chain().focus().deleteRange({ from: current.from, to: current.to }).insertContent(emoji + " ").run();
-  };
 
   return (
     <FloatingMenu
       editor={editor}
       options={{ placement: "bottom-start", offset: 4 }}
-      className="z-50 w-56 rounded-lg border border-hairline bg-white sketch-border sketch-shadow p-1"
+      className="z-50 w-72 rounded-lg border border-hairline bg-white p-2 sketch-border sketch-shadow"
       shouldShow={({ editor: ed }) => getEmojiSuggestionState(ed).active}
     >
-      {items.length === 0 ? (
-        <div className="px-2 py-3 text-center text-xs text-ink-muted">
-          没有匹配的 emoji
-        </div>
-      ) : (
-        <div ref={listRef} className="scrollbar-wide max-h-[260px] overflow-y-auto">
-          {items.map((item, index) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={() => insert(item.emoji)}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-[13px] transition-colors hover:bg-canvas-soft",
-                activeIndex === index && "bg-canvas-soft"
-              )}
-            >
-              <span className="text-base">{item.emoji}</span>
-              <span className="text-ink-muted">:{item.name}:</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <EmojiGrid
+        query={state.query}
+        onSelect={insert}
+        activeIndex={activeIndex}
+        onActiveIndexChange={setActiveIndex}
+      />
     </FloatingMenu>
   );
 }

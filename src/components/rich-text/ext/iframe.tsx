@@ -72,13 +72,44 @@ export const Iframe = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     const attrs = HTMLAttributes as Record<string, unknown>;
+    const url = (attrs["data-url"] as string) || "";
+    const width = (attrs["data-width"] as string) || "100%";
+    const height = Number(attrs["data-height"]) || 360;
+    if (!url) {
+      return [
+        "div",
+        mergeAttributes(this.options.HTMLAttributes, {
+          "data-url": "",
+          "data-width": width,
+          "data-height": height,
+        }),
+      ];
+    }
     return [
       "div",
       mergeAttributes(this.options.HTMLAttributes, {
-        "data-url": attrs["data-url"] ?? "",
-        "data-width": attrs["data-width"] ?? "100%",
-        "data-height": attrs["data-height"] ?? 360,
+        "data-url": url,
+        "data-width": width,
+        "data-height": height,
       }),
+      [
+        "div",
+        {
+          class: "kb-iframe-inner",
+          style: `width:${width};height:${height}px`,
+        },
+        [
+          "iframe",
+          {
+            src: url,
+            class: "kb-iframe-frame",
+            title: "iframe 嵌入",
+            loading: "lazy",
+            sandbox: "allow-scripts allow-same-origin allow-popups allow-forms allow-presentation",
+            allow: "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture",
+          },
+        ],
+      ],
     ];
   },
 
