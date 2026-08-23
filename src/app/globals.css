@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "@tipkit/themes/base.css";
+@import "@tipkit/themes/sketch.css";
+
+/* @tipkit/themes sketch 主题的手写字体变量（字体由 layout.tsx 的 next/font 自托管） */
+:root {
+  --tk-font-hand-display: var(--font-hand-display), "Caveat", cursive;
+  --tk-font-hand-body: var(--font-hand-body), "Patrick Hand", cursive;
+}
 
 @custom-variant dark (&:is(.dark *));
 

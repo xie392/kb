@@ -1,5 +1,21 @@
 /* Editor + Reader styles (TipTap / prose-kb) — only loaded on article and editor pages */
 
+/* 移除工具栏边框和阴影，背景设为白色 */
+.tk-theme-sketch .tk-toolbar {
+  border: none;
+  box-shadow: none;
+  background: #fff;
+}
+
+/* 编辑器内容区收窄时防止代码块等元素溢出 */
+.tk-theme-sketch .tk-editor .tk-prosemirror {
+  max-width: 100%;
+}
+
+.tk-theme-sketch .tk-editor .tk-code-block {
+  max-width: 100%;
+}
+
 /* 富文本阅读样式 */
 .prose-kb {
   font-size: 16px;
@@ -11,6 +27,20 @@
 /* 编辑器内：更紧凑的行距，Notion 风格 */
 .ProseMirror.prose-kb {
   line-height: 1.6;
+}
+
+/* 详情页只读渲染：复用编辑器手绘排版（tk-prosemirror），
+   覆盖 .tk-editor 的编辑态内边距/背景/最小高度（只读无块手柄留白） */
+.tk-readonly.tk-theme-sketch .tk-editor {
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+}
+
+/* 编辑态：.tk-editor 默认 72px 左右内边距（sketch.css），收窄为 24px 与标题 px-6 对齐 */
+.tk-theme-sketch .tk-editor {
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 /* TipTap 编辑器占位提示（仅空编辑器首段） */

@@ -56,7 +56,7 @@ export default function RootLayout({
     <html
       lang="zh-CN"
       suppressHydrationWarning
-      className={cn("font-sans", geist.variable, caveat.variable, patrick.variable)}
+      className={cn("tk-theme-sketch font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
       <body className="min-h-screen antialiased">
         <a

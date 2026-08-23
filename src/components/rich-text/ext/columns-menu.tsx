@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import type { Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
-import { ColumnLayout } from "./columns";
+import { ColumnLayout } from "@tipkit/extensions";
 import { ToolbarDivider } from "../toolbar";
 import {
   HandPanelLeft,

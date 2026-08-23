@@ -19,11 +19,10 @@
  */
 export { useArticleEditor } from "./use-editor";
 export type { UseArticleEditorOptions } from "./use-editor";
-export { EditorToolbar, buildToolbarGroups, ToolbarBtn, ToolbarDivider } from "./toolbar";
+export { EditorToolbar, ToolbarBtn, ToolbarDivider } from "./toolbar";
 export { EditorArea } from "./editor-area";
 export { CustomImage } from "./image-node";
-export { CustomCodeBlock } from "./code-block-node";
-export { MarkdownPaste } from "./markdown-paste";
+export { CustomCodeBlock, MarkdownPaste } from "@tipkit/extensions";
 export type {
   ImageAlign,
   ImageStyle,

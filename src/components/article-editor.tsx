@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ADMIN_HOME } from "@/lib/config";
+import { EditorProvider } from "@tipkit/core";
+import type { Editor } from "@tiptap/react";
 
 interface Props {
   article?: {
@@ -63,6 +65,22 @@ export default function ArticleEditor({ article }: Props) {
     });
     const res = await uploadImage.mutateAsync({ name: file.name, data: dataUrl });
     return res.url;
+  };
+
+  const handleUploadAttachment = async (file: File, _editor: Editor) => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("读取文件失败"));
+      reader.readAsDataURL(file);
+    });
+    const res = await uploadImage.mutateAsync({ name: file.name, data: dataUrl });
+    return {
+      url: res.url,
+      name: res.name,
+      size: res.size,
+      mimeType: res.mimeType,
+    };
   };
 
   // 编辑器实例（提升到父级，工具栏和编辑区共享）
@@ -117,7 +135,8 @@ export default function ArticleEditor({ article }: Props) {
   }, [title, content, categoryId, visibility, tagIds]);
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <EditorProvider deps={{ uploadAttachment: handleUploadAttachment }}>
+      <div className="tk-theme-sketch h-full flex flex-col bg-white">
       {/* ═══ 固定顶部操作栏 ═══ */}
       <div className="sticky top-0 z-30 shrink-0 bg-canvas-soft/95 backdrop-blur-sm border-b border-hairline">
         <div className="px-6 h-14 flex items-center justify-between">
@@ -179,14 +198,14 @@ export default function ArticleEditor({ article }: Props) {
       </div>
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
-      <div className="shrink-0 bg-white border-b border-hairline">
+      <div className="shrink-0 bg-white px-4 py-2 border-b border-hairline/50">
         <EditorToolbar editor={editor} onUploadImage={handleUploadImage} />
       </div>
 
       {/* ═══ 主体内容（剩余空间内部滚动，编辑器不会撑高页面） ═══ */}
-      <div data-editor-scroll className="relative flex-1 min-h-0 overflow-y-auto pb-12">
+      <div data-editor-scroll className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden pb-12">
         {/* 标题、标签、正文收窄居中，其余（工具栏/顶栏/大纲/状态栏）保持全宽 */}
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-205 mx-auto">
           {/* 标题输入 */}
           <div className="px-6 pt-3 pb-1">
             <Input
@@ -257,5 +276,6 @@ export default function ArticleEditor({ article }: Props) {
         <span className="hidden sm:inline">⌘S 保存</span>
       </div>
     </div>
+    </EditorProvider>
   );
 }

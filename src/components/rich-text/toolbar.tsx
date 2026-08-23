@@ -1,162 +1,105 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+/**
+ * 工具栏 —— 直接使用 @tipkit/ui + @tipkit/components 组装（移植自 tipkit demo）。
+ * 图片上传走 blog 的 onUploadImage（返回线上 URL 后插入 ImageBlock）。
+ */
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import type { Editor } from "@tiptap/react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  AlignMenu,
+  BlockStyleMenu,
+  ColorMenu,
+  FontFamilyPicker,
+  FontSizePicker,
+  TablePicker,
+  openLinkDialog,
+} from "@tipkit/ui";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { ToolbarAction } from "./types";
-import { TablePicker } from "./table-controls";
-import { ColorMenu } from "./color-menu";
-import { InsertMenu } from "./insert-menu";
-import { BlockStyleMenu } from "./block-style-menu";
-import { EmojiPicker } from "./ext/emoji-picker";
-import { AlignMenu } from "./align-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@tipkit/components";
+import { getInsertActions, type InsertAction } from "@tipkit/extensions";
 import {
-  HandBold,
-  HandCode,
-  HandEraser,
-  HandImage,
-  HandIndentDecrease,
-  HandIndentIncrease,
-  HandItalic,
-  HandLink,
-  HandList,
-  HandListOrdered,
-  HandMinus,
-  HandQuote,
-  HandRedo,
-  HandCodeBlock,
-  HandStrike,
-  HandSubscript,
-  HandSuperscript,
-  HandTaskList,
-  HandUnderline as HandUnderlineIcon,
-  HandUndo,
-} from "./hand-icons";
-import { openLinkDialog } from "./link-dialog";
-import { IconAlignLeft, IconAlignCenter, IconAlignRight } from "./icons";
+  Bold,
+  Check,
+  ChevronDown,
+  ChevronDownSquare,
+  Code,
+  Code2,
+  Columns2,
+  Eraser,
+  Frame,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Image as ImageIcon,
+  Italic,
+  Link,
+  List,
+  ListChecks,
+  ListOrdered,
+  ListTree,
+  Minus,
+  Paperclip,
+  Plus,
+  Quote,
+  Redo2,
+  Search,
+  Sigma,
+  Smile,
+  Strikethrough,
+  Subscript,
+  Superscript,
+  Table2,
+  Text,
+  TriangleAlert,
+  Underline,
+  Undo2,
+  type LucideIcon,
+} from "lucide-react";
 
-export function ToolbarBtn({
-  active,
-  disabled,
-  onClick,
-  title,
-  children,
-  className,
-}: {
-  active?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  title: string;
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={title}
-            disabled={disabled}
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={onClick}
-            className={cn(
-              "rounded-[6px] transition-colors duration-150",
-              active && "bg-primary/10 text-primary",
-              disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer",
-              className
-            )}
-          />
-        }
-      >
-        {children}
-      </TooltipTrigger>
-      <TooltipContent side="bottom">{title}</TooltipContent>
-    </Tooltip>
-  );
-}
+const INSERT_ICONS: Record<string, LucideIcon> = {
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Text,
+  List,
+  ListOrdered,
+  ListChecks,
+  Quote,
+  Code2,
+  Table2,
+  Minus,
+  Image: ImageIcon,
+  Link,
+  Columns2,
+  ChevronDownSquare,
+  ListTree,
+  TriangleAlert,
+  Sigma,
+  Frame,
+  Paperclip,
+  Smile,
+};
 
-export function ToolbarDivider() {
-  return <div className="w-px h-5 bg-hairline mx-1 shrink-0" />;
-}
-
-interface ToolbarImageOpts {
-  openImagePicker?: () => void;
-  uploading?: boolean;
-}
-
-export function buildToolbarGroups(editor: Editor, opts?: ToolbarImageOpts): ToolbarAction[][] {
-  const listItemType = editor.isActive("taskItem") ? "taskItem" : "listItem";
-  const canLift = editor.can().chain().focus().liftListItem(listItemType).run();
-  const canSink = editor.can().chain().focus().sinkListItem(listItemType).run();
-  return [
-    [
-      { title: "撤销", onClick: () => editor.chain().focus().undo().run(), icon: <HandUndo className="h-4 w-4" /> },
-      { title: "重做", onClick: () => editor.chain().focus().redo().run(), icon: <HandRedo className="h-4 w-4" /> },
-    ],
-    [
-      { title: "加粗", active: editor.isActive("bold"), onClick: () => editor.chain().focus().toggleBold().run(), icon: <HandBold className="h-4 w-4" /> },
-      { title: "斜体", active: editor.isActive("italic"), onClick: () => editor.chain().focus().toggleItalic().run(), icon: <HandItalic className="h-4 w-4" /> },
-      { title: "下划线", active: editor.isActive("underline"), onClick: () => editor.chain().focus().toggleUnderline().run(), icon: <HandUnderlineIcon className="h-4 w-4" /> },
-      { title: "删除线", active: editor.isActive("strike"), onClick: () => editor.chain().focus().toggleStrike().run(), icon: <HandStrike className="h-4 w-4" /> },
-      { title: "行内代码", active: editor.isActive("code"), onClick: () => editor.chain().focus().toggleCode().run(), icon: <HandCode className="h-4 w-4" /> },
-      { title: "上标", active: editor.isActive("superscript"), onClick: () => editor.chain().focus().toggleSuperscript().run(), icon: <HandSuperscript className="h-4 w-4" /> },
-      { title: "下标", active: editor.isActive("subscript"), onClick: () => editor.chain().focus().toggleSubscript().run(), icon: <HandSubscript className="h-4 w-4" /> },
-    ],
-    [
-      { title: "无序列表", active: editor.isActive("bulletList"), onClick: () => editor.chain().focus().toggleBulletList().run(), icon: <HandList className="h-4 w-4" /> },
-      { title: "有序列表", active: editor.isActive("orderedList"), onClick: () => editor.chain().focus().toggleOrderedList().run(), icon: <HandListOrdered className="h-4 w-4" /> },
-      { title: "任务列表", active: editor.isActive("taskList"), onClick: () => editor.chain().focus().toggleTaskList().run(), icon: <HandTaskList className="h-4 w-4" /> },
-      { title: "减少缩进", disabled: !canLift, onClick: () => editor.chain().focus().liftListItem(listItemType).run(), icon: <HandIndentDecrease className="h-4 w-4" /> },
-      { title: "增加缩进", disabled: !canSink, onClick: () => editor.chain().focus().sinkListItem(listItemType).run(), icon: <HandIndentIncrease className="h-4 w-4" /> },
-    ],
-    [
-      { title: "左对齐", active: editor.isActive({ textAlign: "left" }), onClick: () => editor.chain().focus().setTextAlign("left").run(), icon: <IconAlignLeft /> },
-      { title: "居中", active: editor.isActive({ textAlign: "center" }), onClick: () => editor.chain().focus().setTextAlign("center").run(), icon: <IconAlignCenter /> },
-      { title: "右对齐", active: editor.isActive({ textAlign: "right" }), onClick: () => editor.chain().focus().setTextAlign("right").run(), icon: <IconAlignRight /> },
-    ],
-    [
-      { title: "引用", active: editor.isActive("blockquote"), onClick: () => editor.chain().focus().toggleBlockquote().run(), icon: <HandQuote className="h-4 w-4" /> },
-      { title: "分割线", onClick: () => editor.chain().focus().setHorizontalRule().run(), icon: <HandMinus className="h-4 w-4" /> },
-      { title: "代码块", active: editor.isActive("codeBlock"), onClick: () => editor.chain().focus().toggleCodeBlock().run(), icon: <HandCodeBlock className="h-4 w-4" /> },
-      { title: "清除格式", onClick: () => editor.chain().focus().clearNodes().unsetAllMarks().run(), icon: <HandEraser className="h-4 w-4" /> },
-    ],
-    [
-      { title: opts?.uploading ? "上传中…" : "图片", onClick: () => {
-        if (opts?.openImagePicker) {
-          opts.openImagePicker();
-          return;
-        }
-        const url = window.prompt("图片 URL（或 base64 数据）");
-        if (url) editor.chain().focus().setImageBlock({ src: url }).run();
-      }, icon: opts?.uploading ? <LoaderIcon /> : <HandImage className="h-4 w-4" /> },
-      { title: "链接", onClick: () => openLinkDialog(), active: editor.isActive("link"), icon: <HandLink className="h-4 w-4" /> },
-    ],
-  ];
-}
-
-function LoaderIcon() {
-  return <span className="animate-spin h-4 w-4 rounded-full border-2 border-ink-muted border-t-transparent" />;
-}
-
+/** 顶部通栏工具栏（单行），顺序参考语雀：
+ * + 撤销 重做 | 正文 字号 B I S U [T更多] 文字色 高亮 | 对齐 | 有序 无序 |
+ * 任务 链接 引用 分隔线 | 图片 表格 代码块
+ */
 export function EditorToolbar({
   editor,
   onUploadImage,
@@ -164,177 +107,319 @@ export function EditorToolbar({
   editor: Editor | null;
   onUploadImage?: (file: File) => Promise<string>;
 }) {
+  const [, force] = useState(0);
+  const [textOpen, setTextOpen] = useState(false);
+  const [insertOpen, setInsertOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [errMsg, setErrMsg] = useState<string | null>(null);
-  const [, forceUpdate] = useState(0);
-
   useEffect(() => {
     if (!editor) return;
-    let rafId: number | null = null;
-    const update = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        forceUpdate((n) => n + 1);
-      });
-    };
-    editor.on("selectionUpdate", update);
-    editor.on("transaction", update);
+    const refresh = () => force((n) => n + 1);
+    editor.on("selectionUpdate", refresh);
+    editor.on("update", refresh);
     return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      editor.off("selectionUpdate", update);
-      editor.off("transaction", update);
+      editor.off("selectionUpdate", refresh);
+      editor.off("update", refresh);
     };
   }, [editor]);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file || !onUploadImage || !editor) return;
-    if (!file.type.startsWith("image/")) {
-      setErrMsg("请选择图片文件（JPG/PNG/GIF/WebP）");
-      return;
-    }
-    setUploading(true);
-    try {
-      const url = await onUploadImage(file);
-      if (url) editor.chain().focus().setImageBlock({ src: url }).run();
-    } catch (err) {
-      setErrMsg(`上传失败：${err instanceof Error ? err.message : "未知错误"}`);
-    } finally {
-      setUploading(false);
-    }
-  };
+  const insertActions = useMemo(
+    () =>
+      editor
+        ? getInsertActions({
+            editor,
+            openImagePicker: () => fileRef.current?.click(),
+            openLinkDialog,
+          })
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [editor, insertOpen],
+  );
 
   if (!editor) return null;
 
-  const listItemType = editor.isActive("taskItem") ? "taskItem" : "listItem";
-  const canLift = editor.can().chain().focus().liftListItem(listItemType).run();
-  const canSink = editor.can().chain().focus().sinkListItem(listItemType).run();
+  const chain = () => editor.chain().focus();
 
   return (
-    <TooltipProvider delay={100}>
-      <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-hairline bg-white flex-wrap">
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-
-        <InsertMenu editor={editor} openImagePicker={onUploadImage ? () => fileRef.current?.click() : undefined} />
-
-        <ToolbarDivider />
-
-        <ToolbarBtn title="撤销" onClick={() => editor.chain().focus().undo().run()}>
-          <HandUndo className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="重做" onClick={() => editor.chain().focus().redo().run()}>
-          <HandRedo className="h-4 w-4" />
-        </ToolbarBtn>
+    <TooltipProvider delayDuration={300}>
+      <div className="tk-toolbar flex flex-nowrap items-center gap-0.5 overflow-x-auto whitespace-nowrap">
+        {/* 插入：+ 打开可搜索分组面板 */}
+        <Popover open={insertOpen} onOpenChange={setInsertOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="插入"
+              data-active={insertOpen || undefined}
+              className="tk-toolbar-add inline-flex items-center justify-center w-7 h-7 rounded-md bg-foreground text-background hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" sideOffset={8} className="w-80 p-0">
+            <InsertPanel
+              actions={insertActions}
+              onSelect={() => setInsertOpen(false)}
+            />
+          </PopoverContent>
+        </Popover>
+        <Tip label="撤销 ⌘Z">
+          <ToolbarBtn icon={Undo2} label="撤销" onClick={() => chain().undo().run()} />
+        </Tip>
+        <Tip label="重做 ⌘⇧Z">
+          <ToolbarBtn icon={Redo2} label="重做" onClick={() => chain().redo().run()} />
+        </Tip>
 
         <ToolbarDivider />
 
         <BlockStyleMenu editor={editor} />
+        <FontFamilyPicker editor={editor} />
+        <FontSizePicker editor={editor} />
 
-        <ToolbarBtn title="加粗 ⌘B" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
-          <HandBold className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="斜体 ⌘I" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}>
-          <HandItalic className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="下划线 ⌘U" active={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}>
-          <HandUnderlineIcon className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="删除线" active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()}>
-          <HandStrike className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="行内代码" active={editor.isActive("code")} onClick={() => editor.chain().focus().toggleCode().run()}>
-          <HandCode className="h-4 w-4" />
-        </ToolbarBtn>
+        <Tip label="加粗 ⌘B">
+          <ToolbarBtn icon={Bold} label="加粗" active={editor.isActive("bold")} onClick={() => chain().toggleBold().run()} />
+        </Tip>
+        <Tip label="斜体 ⌘I">
+          <ToolbarBtn icon={Italic} label="斜体" active={editor.isActive("italic")} onClick={() => chain().toggleItalic().run()} />
+        </Tip>
+        <Tip label="删除线 ⌘⇧X">
+          <ToolbarBtn icon={Strikethrough} label="删除线" active={editor.isActive("strike")} onClick={() => chain().toggleStrike().run()} />
+        </Tip>
+        <Tip label="下划线 ⌘U">
+          <ToolbarBtn icon={Underline} label="下划线" active={editor.isActive("underline")} onClick={() => chain().toggleUnderline().run()} />
+        </Tip>
+
+        {/* 文本更多：上标 / 下标 / 行内代码 / 清除格式 */}
+        <DropdownMenu open={textOpen} onOpenChange={setTextOpen}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="更多文本格式"
+              data-active={textOpen || editor.isActive("superscript") || editor.isActive("subscript") || editor.isActive("code") || undefined}
+              className="tk-toolbar-btn inline-flex items-center justify-center h-8 gap-0.5 px-1.5 rounded text-sm font-medium"
+            >
+              T<ChevronDown className="w-3 h-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-44">
+            <MoreItem icon={Superscript} label="上标" active={editor.isActive("superscript")} onClick={() => chain().toggleSuperscript().run()} />
+            <MoreItem icon={Subscript} label="下标" active={editor.isActive("subscript")} onClick={() => chain().toggleSubscript().run()} />
+            <MoreItem icon={Code} label="行内代码" active={editor.isActive("code")} onClick={() => chain().toggleCode().run()} />
+            <DropdownMenuSeparator />
+            <MoreItem icon={Eraser} label="清除格式" onClick={() => chain().unsetAllMarks().clearNodes().run()} />
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <ColorMenu editor={editor} mode="text" />
         <ColorMenu editor={editor} mode="highlight" />
 
         <ToolbarDivider />
 
-        <ToolbarBtn title="无序列表" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
-          <HandList className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="有序列表" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-          <HandListOrdered className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="任务列表" active={editor.isActive("taskList")} onClick={() => editor.chain().focus().toggleTaskList().run()}>
-          <HandTaskList className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="减少缩进" disabled={!canLift} onClick={() => editor.chain().focus().liftListItem(listItemType).run()}>
-          <HandIndentDecrease className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="增加缩进" disabled={!canSink} onClick={() => editor.chain().focus().sinkListItem(listItemType).run()}>
-          <HandIndentIncrease className="h-4 w-4" />
-        </ToolbarBtn>
-
         <AlignMenu editor={editor} />
 
         <ToolbarDivider />
 
-        <ToolbarBtn title="引用" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-          <HandQuote className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="代码块" active={editor.isActive("codeBlock")} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
-          <HandCodeBlock className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="分割线" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-          <HandMinus className="h-4 w-4" />
-        </ToolbarBtn>
+        <Tip label="有序列表">
+          <ToolbarBtn icon={ListOrdered} label="有序列表" active={editor.isActive("orderedList")} onClick={() => chain().toggleOrderedList().run()} />
+        </Tip>
+        <Tip label="无序列表">
+          <ToolbarBtn icon={List} label="无序列表" active={editor.isActive("bulletList")} onClick={() => chain().toggleBulletList().run()} />
+        </Tip>
 
         <ToolbarDivider />
 
-        <ToolbarBtn title={uploading ? "上传中…" : "图片"} onClick={() => {
-          if (onUploadImage) fileRef.current?.click();
-          else {
-            const url = window.prompt("图片 URL（或 base64 数据）");
-            if (url) editor.chain().focus().setImageBlock({ src: url }).run();
-          }
-        }}>
-          {uploading ? <LoaderIcon /> : <HandImage className="h-4 w-4" />}
-        </ToolbarBtn>
-        <ToolbarBtn title="链接 ⌘K" active={editor.isActive("link")} onClick={() => openLinkDialog()}>
-          <HandLink className="h-4 w-4" />
-        </ToolbarBtn>
+        <Tip label="任务列表">
+          <ToolbarBtn icon={ListChecks} label="任务列表" active={editor.isActive("taskList")} onClick={() => chain().toggleTaskList().run()} />
+        </Tip>
+        <Tip label="插入链接 ⌘K">
+          <ToolbarBtn
+            icon={Link}
+            label="插入链接"
+            active={editor.isActive("link")}
+            onClick={() => openLinkDialog()}
+          />
+        </Tip>
+        <Tip label="引用块">
+          <ToolbarBtn icon={Quote} label="引用" active={editor.isActive("blockquote")} onClick={() => chain().toggleBlockquote().run()} />
+        </Tip>
+        <Tip label="分隔线">
+          <ToolbarBtn icon={Minus} label="分隔线" onClick={() => chain().setHorizontalRule().run()} />
+        </Tip>
+
+        <ToolbarDivider />
+
+        <Tip label="图片">
+          <ToolbarBtn icon={ImageIcon} label="图片" onClick={() => fileRef.current?.click()} />
+        </Tip>
         <TablePicker editor={editor} />
-        <EmojiPicker editor={editor} />
+        <Tip label="代码块">
+          <ToolbarBtn icon={Code2} label="代码块" active={editor.isActive("codeBlock")} onClick={() => chain().toggleCodeBlock().run()} />
+        </Tip>
 
-        <ToolbarBtn title="上标" active={editor.isActive("superscript")} onClick={() => editor.chain().focus().toggleSuperscript().run()}>
-          <HandSuperscript className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="下标" active={editor.isActive("subscript")} onClick={() => editor.chain().focus().toggleSubscript().run()}>
-          <HandSubscript className="h-4 w-4" />
-        </ToolbarBtn>
-        <ToolbarBtn title="清除格式" onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}>
-          <HandEraser className="h-4 w-4" />
-        </ToolbarBtn>
-
-        <AlertDialog
-          open={!!errMsg}
-          onOpenChange={(open) => {
-            if (!open) setErrMsg(null);
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (!file) return;
+            const insert = (src: string) => editor.chain().focus().setImageBlock({ src }).run();
+            if (onUploadImage) {
+              onUploadImage(file)
+                .then(insert)
+                .catch(() => insert(URL.createObjectURL(file)));
+            } else {
+              insert(URL.createObjectURL(file));
+            }
           }}
-        >
-          <AlertDialogContent className="rounded-xl border border-hairline bg-white shadow-lg">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="font-hand-display text-[18px] font-bold text-ink-secondary">
-                提示
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-[13px] text-ink-muted">{errMsg}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction
-                className="bg-primary text-white hover:bg-primary-active"
-                onClick={() => setErrMsg(null)}
-              >
-                知道了
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        />
       </div>
     </TooltipProvider>
+  );
+}
+
+function Tip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" sideOffset={6}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+export const ToolbarBtn = forwardRef<
+  HTMLButtonElement,
+  {
+    icon: LucideIcon;
+    label: string;
+    active?: boolean;
+    disabled?: boolean;
+    onClick?: () => void;
+  } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick">
+>(function ToolbarBtn({ icon: Icon, label, active, disabled, onClick, ...rest }, ref) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      data-active={active || undefined}
+      className="tk-toolbar-btn inline-flex items-center justify-center w-8 h-8 rounded"
+      {...rest}
+    >
+      <Icon className="w-4 h-4" />
+    </button>
+  );
+});
+
+function MoreItem({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <DropdownMenuItem onClick={onClick} data-active={active || undefined}>
+      <Icon className="w-4 h-4" />
+      {label}
+      {active && <Check className="w-3.5 h-3.5 ml-auto opacity-70" />}
+    </DropdownMenuItem>
+  );
+}
+
+export function ToolbarDivider() {
+  return <span className="tk-toolbar-divider w-px h-5 bg-border mx-1" />;
+}
+
+const INSERT_GROUP_ORDER: InsertAction["group"][] = ["基础", "结构", "媒体"];
+
+function InsertPanel({
+  actions,
+  onSelect,
+}: {
+  actions: InsertAction[];
+  onSelect: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+
+  const filtered = q
+    ? actions.filter(
+        (a) =>
+          a.label.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          a.aliases?.some((al) => al.toLowerCase().includes(q)),
+      )
+    : actions;
+
+  const groups = INSERT_GROUP_ORDER.map((g) => ({
+    group: g,
+    items: filtered.filter((a) => a.group === g),
+  })).filter((g) => g.items.length > 0);
+
+  return (
+    <div className="tk-insert-panel">
+      <div className="tk-insert-search">
+        <Search className="w-4 h-4 opacity-50" />
+        <input
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="搜索要插入的内容"
+          className="tk-insert-search-input"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              const first = groups[0]?.items[0];
+              if (first && first.available) {
+                first.run();
+                onSelect();
+              }
+            }
+          }}
+        />
+      </div>
+      <div className="tk-insert-body">
+        {groups.length === 0 && (
+          <div className="tk-insert-empty">没有匹配的内容</div>
+        )}
+        {groups.map(({ group, items }) => (
+          <div key={group} className="tk-insert-group">
+            <div className="tk-insert-group-title">{group}</div>
+            <div className="tk-insert-grid">
+              {items.map((item) => {
+                const Icon = INSERT_ICONS[item.icon];
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    disabled={!item.available}
+                    title={item.description}
+                    className="tk-insert-card"
+                    onClick={() => {
+                      if (!item.available) return;
+                      item.run();
+                      onSelect();
+                    }}
+                  >
+                    <span className="tk-insert-card-icon">
+                      {Icon ? <Icon className="w-4 h-4" /> : item.icon}
+                    </span>
+                    <span className="tk-insert-card-label">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

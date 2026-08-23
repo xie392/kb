@@ -12,6 +12,10 @@ import { renderStaticNodes } from "@/lib/static-node-renderer";
 import ArticleToc from "@/components/article-toc";
 import ArticleCodeCopy from "@/components/article-code-copy";
 import ArticleViewTracker from "@/components/article-view-tracker";
+import "@tipkit/themes/base.css";
+import "@tipkit/themes/default.css";
+import "@tipkit/themes/sketch.css";
+import "@tipkit/themes/dark.css";
 import "@/app/editor.css";
 
 // generateMetadata 与页面组件共用，同一请求内只查询一次数据库
@@ -182,11 +186,15 @@ export default async function ArticlePage({
             </header>
 
             <div className="border-t-2 border-dashed border-hairline pt-8">
-              <div
-                className="prose-kb"
-                dangerouslySetInnerHTML={{ __html: contentWithIds }}
-              />
-              <ArticleCodeCopy />
+              <div className="tk-theme-sketch tk-readonly">
+                <div className="tk-editor">
+                  <div
+                    className="tk-prosemirror prose-kb"
+                    dangerouslySetInnerHTML={{ __html: contentWithIds }}
+                  />
+                  <ArticleCodeCopy />
+                </div>
+              </div>
             </div>
 
             <div className="mt-10 pt-6 border-t-2 border-dashed border-hairline flex items-center gap-3 font-hand-display">

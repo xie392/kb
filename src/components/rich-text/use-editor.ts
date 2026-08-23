@@ -25,29 +25,36 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
 
-import { MarkdownPaste } from "./markdown-paste";
-import { CustomBold, CustomItalic, CustomStrike, CustomCode } from "./markdown-marks";
-import { MarkdownLink } from "./markdown-link";
-import { CustomCodeBlock } from "./code-block-node";
+import {
+  MarkdownPaste,
+  CustomBold,
+  CustomItalic,
+  CustomStrike,
+  CustomCode,
+  MarkdownLink,
+  CodeBackfillConvert,
+  LinkBackfillConvert,
+  FontSize,
+  TrailingNode,
+  Selection,
+  ListInputRules,
+  CustomCodeBlock,
+  ImageBlock,
+  Columns,
+  Column,
+  Details,
+  DetailsSummary,
+  DetailsContent,
+  TableOfContentsNode,
+  FileHandler,
+  BlockHandles,
+  Callout,
+  Iframe,
+  Katex,
+  Attachment,
+} from "@tipkit/extensions";
 import { CustomImage } from "./image-node";
 import { LinkCard } from "./link-card";
-import { ImageBlock } from "./ext/image-block";
-import { CodeBackfillConvert } from "./ext/code-backfill-convert";
-import { LinkBackfillConvert } from "./ext/link-backfill-convert";
-
-import { FontSize } from "./ext/font-size";
-import { TrailingNode } from "./ext/trailing-node";
-import { Selection } from "./ext/selection";
-import { ListInputRules } from "./ext/list-input-rules";
-import { Columns, Column } from "./ext/columns";
-import { Details, DetailsSummary, DetailsContent } from "./ext/details";
-import { TableOfContentsNode } from "./ext/toc-node";
-import { FileHandler } from "./ext/file-handler";
-import { BlockHandles } from "./ext/block-handles";
-import { Callout } from "./ext/callout";
-import { Iframe } from "./ext/iframe";
-import { Katex } from "./ext/katex";
-import { Attachment } from "./ext/attachment";
 
 import type { OutlineItem } from "./types";
 
@@ -188,7 +195,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     content: value || "",
     editorProps: {
       attributes: {
-        class: "prose-kb focus:outline-hidden",
+        class: "tk-prosemirror focus:outline-hidden",
       },
       scrollThreshold: { top: 8, right: 8, bottom: 44, left: 8 },
       scrollMargin: { top: 8, right: 8, bottom: 44, left: 8 },

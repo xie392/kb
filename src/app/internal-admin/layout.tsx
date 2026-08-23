@@ -3,6 +3,10 @@ import Link from "next/link";
 import AdminHeader from "./admin-header";
 import AdminNav from "@/components/admin-nav";
 import { ADMIN_HOME } from "@/lib/config";
+import "@tipkit/themes/base.css";
+import "@tipkit/themes/default.css";
+import "@tipkit/themes/sketch.css";
+import "@tipkit/themes/dark.css";
 import "@/app/editor.css";
 
 // 后台页面不参与索引：用页面级 noindex 而非 robots.txt Disallow，

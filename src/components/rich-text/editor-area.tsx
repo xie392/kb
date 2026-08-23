@@ -2,14 +2,73 @@
 
 import { EditorContent } from "@tiptap/react";
 import type { Editor } from "@tiptap/react";
-import { BlockMenu } from "./block-menu";
-import { SlashMenu } from "./slash-menu";
-import { TextMenu } from "./text-menu";
-import { LinkBubble } from "./link-bubble";
-import { LinkDialogHost } from "./link-dialog";
-import { ColumnsMenu } from "./ext/columns-menu";
-import { EmojiSuggestion } from "./ext/emoji-suggestion";
-import { ImageBlockMenu } from "./ext/image-block";
+import {
+  SlashMenu,
+  EmojiSuggestion,
+  TextMenu,
+  LinkBubble,
+  LinkDialogHost,
+  BlockBubbleMenu,
+  BlockHandleMenu,
+  TableControls,
+} from "@tipkit/ui";
+import { TooltipProvider } from "@tipkit/components";
+import {
+  Bold,
+  ChevronDownSquare,
+  Code2,
+  Columns2,
+  Frame,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Image as ImageIcon,
+  Link,
+  List,
+  ListChecks,
+  ListOrdered,
+  ListTree,
+  Minus,
+  Paperclip,
+  Quote,
+  Sigma,
+  Smile,
+  Table2,
+  Text,
+  TriangleAlert,
+  type LucideIcon,
+} from "lucide-react";
+
+const SLASH_ICONS: Record<string, LucideIcon> = {
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Text,
+  List,
+  ListOrdered,
+  ListChecks,
+  Quote,
+  Code2,
+  Table2,
+  Minus,
+  Image: ImageIcon,
+  Link,
+  Columns2,
+  ChevronDownSquare,
+  ListTree,
+  TriangleAlert,
+  Sigma,
+  Frame,
+  Paperclip,
+  Smile,
+};
+
+function renderSlashIcon(icon: string) {
+  const Icon = SLASH_ICONS[icon];
+  return Icon ? <Icon className="w-4 h-4" /> : null;
+}
 
 interface EditorAreaProps {
   editor: Editor | null;
@@ -17,7 +76,7 @@ interface EditorAreaProps {
   onUploadImage?: (file: File) => Promise<string>;
 }
 
-/* 纯编辑区组件（不含工具栏） */
+/* 纯编辑区组件（不含工具栏）—— 浮层菜单全部使用 @tipkit/ui */
 export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
   if (!editor) {
     return (
@@ -30,16 +89,18 @@ export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
   }
 
   return (
-    <div className="px-6 py-4">
-      <EditorContent editor={editor} />
-      <BlockMenu editor={editor} />
-      <ImageBlockMenu editor={editor} />
-      <TextMenu editor={editor} />
-      <ColumnsMenu editor={editor} />
-      <SlashMenu editor={editor} onUploadImage={onUploadImage} />
-      <EmojiSuggestion editor={editor} />
-      <LinkBubble editor={editor} />
-      <LinkDialogHost editor={editor} />
+    <div className="tk-editor">
+      <TooltipProvider delayDuration={300}>
+        <EditorContent editor={editor} />
+        <SlashMenu editor={editor} onUploadImage={onUploadImage} iconRenderer={renderSlashIcon} />
+        <EmojiSuggestion editor={editor} />
+        <TextMenu editor={editor} />
+        <LinkBubble editor={editor} />
+        <LinkDialogHost editor={editor} />
+        <BlockBubbleMenu editor={editor} />
+        <BlockHandleMenu editor={editor} />
+        <TableControls editor={editor} />
+      </TooltipProvider>
     </div>
   );
 }

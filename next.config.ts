@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
 const nextConfig: NextConfig = {
+  // @tipkit/* 以 TS 源码形式发布，需要显式编译
+  transpilePackages: [
+    "@tipkit/core",
+    "@tipkit/extensions",
+    "@tipkit/themes",
+    "@tipkit/ui",
+    "@tipkit/components",
+  ],
   // better-sqlite3 为原生模块，webpack 打包后 __dirname 错位无法加载 .node 绑定，
   // 必须外部化让运行时直接从 node_modules 加载
   serverExternalPackages: [
