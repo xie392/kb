@@ -39,7 +39,6 @@ import {
   Selection,
   ListInputRules,
   CustomCodeBlock,
-  ImageBlock,
   Columns,
   Column,
   Details,
@@ -53,7 +52,7 @@ import {
   Katex,
   Attachment,
 } from "@tipkit/extensions";
-import { CustomImage } from "./image-node";
+import { CustomImage, ImageBlockCompat } from "./image-node";
 import { LinkCard } from "./link-card";
 
 import type { OutlineItem } from "./types";
@@ -75,123 +74,135 @@ function pickPlaceholder(): string {
 
 export interface UseArticleEditorOptions {
   value: string;
-  onChange: (html: string) => void;
+  onChange?: (html: string) => void;
   onOutline?: (items: OutlineItem[]) => void;
   placeholder?: string;
   /** 拖拽/粘贴图片时的上传回调（不传则退化为 base64 嵌入） */
   onUploadImage?: (file: File) => Promise<string>;
+  /** 是否可编辑，默认 true；false 时渲染只读内容（剔除块手柄/占位/输入规则等编辑态扩展） */
+  editable?: boolean;
 }
 
 /** 创建编辑器实例：编排全部扩展，并把 HTML / 大纲变化回传给外部 */
 export function useArticleEditor(options: UseArticleEditorOptions) {
-  const { value, onChange, onOutline, placeholder, onUploadImage } = options;
+  const { value, onChange, onOutline, placeholder, onUploadImage, editable = true } = options;
 
   const lastInternalHTML = useRef<string>("");
   const randomTextRef = useRef<string>(pickPlaceholder());
   const lastPlaceholderPos = useRef<number>(-1);
 
+  // 内容扩展（节点/标记）：编辑态与只读态共用，保证渲染结构一致
+  const contentExtensions = [
+    // StarterKit：禁用内置 Bold/Italic/Strike/Code（用下方自定义版，
+    // 规避 Tiptap 3.x markInputRule 的 addMark 崩溃 bug）。
+    StarterKit.configure({
+      heading: { levels: [1, 2, 3, 4, 5, 6] },
+      codeBlock: false,
+      bold: false,
+      italic: false,
+      strike: false,
+      code: false,
+      link: false,
+      underline: false,
+      trailingNode: false,
+      dropcursor: false,
+    }),
+    // 行内 markdown 标记（safeMarkInputRule 规避崩溃）
+    CustomBold,
+    CustomItalic,
+    CustomStrike,
+    CustomCode,
+    // 代码块（lowlight 语法高亮，NodeView 自带复制/主题切换工具栏）
+    CustomCodeBlock,
+    // 行内/块级基础
+    Underline,
+    Highlight.configure({ multicolor: true }),
+    Subscript,
+    Superscript,
+    TextStyle,
+    Color,
+    FontFamily,
+    FontSize,
+    Typography,
+    TextAlign.configure({ types: ["heading", "paragraph"] }),
+    // 列表 / 任务
+    TaskList,
+    TaskItem.configure({ nested: true }),
+    // 表格（只读时 resizable 仍注册列宽，但不可拖拽）
+    Table.configure({ resizable: editable, lastColumnResizable: false }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    // 媒体：CustomImage 处理最老 span.kb-img-wrap 遗留；ImageBlockCompat 接管普通 img/旧 div.kb-img-wrap
+    CustomImage,
+    ImageBlockCompat,
+    LinkCard,
+    MarkdownLink,
+    // 高级结构
+    Columns,
+    Column,
+    Details,
+    DetailsSummary,
+    DetailsContent,
+    TableOfContentsNode,
+    // 块级富内容（借鉴 demo/knloop-frontend-main，改造为手绘风格）
+    Callout,
+    Iframe,
+    Katex,
+    Attachment,
+  ];
+
+  // 纯编辑态扩展：只读时全部剔除，避免不必要的 JS 与交互
+  const editingExtensions = editable
+    ? [
+        // 回填式代码标记：先打 `` 再回填内容，方向键离开时自动转 code
+        CodeBackfillConvert,
+        // 回填式链接：IME/某些场景 input rule 未触发时，空格/回车兜底转换
+        LinkBackfillConvert,
+        // 编辑器体验
+        Placeholder.configure({
+          placeholder: ({ pos }) => {
+            if (placeholder) return placeholder;
+            if (pos !== lastPlaceholderPos.current) {
+              lastPlaceholderPos.current = pos;
+              randomTextRef.current = pickPlaceholder();
+            }
+            return randomTextRef.current;
+          },
+          showOnlyCurrent: true,
+          includeChildren: false,
+        }),
+        TrailingNode,
+        Selection,
+        ListInputRules,
+        CharacterCount.configure({ limit: 100000 }),
+        Dropcursor.configure({ width: 2, class: "kb-dropcursor" }),
+        Focus.configure({ mode: "all" }),
+        // Notion 风格块级双柄（+ 插入 / ⋮⋮ 拖拽）
+        BlockHandles,
+        // 拖拽/粘贴图片自动上传 → 走 ImageBlock 命令（块级模式）
+        FileHandler.configure({
+          allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
+          onUpload: onUploadImage,
+          onInsertImage: (ed, src, pos) => {
+            if (typeof pos === "number") {
+              ed.chain().focus().setImageBlockAt({ src, pos }).run();
+            } else {
+              ed.chain().focus().setImageBlock({ src }).run();
+            }
+          },
+        }),
+        // markdown 粘贴 / 序列化
+        Markdown,
+        MarkdownPaste,
+      ]
+    : [];
+
   const editor = useEditor({
     immediatelyRender: false,
     autofocus: false,
-    extensions: [
-      // StarterKit：禁用内置 Bold/Italic/Strike/Code（用下方自定义版，
-      // 规避 Tiptap 3.x markInputRule 的 addMark 崩溃 bug）。
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3, 4, 5, 6] },
-        codeBlock: false,
-        bold: false,
-        italic: false,
-        strike: false,
-        code: false,
-        link: false,
-        underline: false,
-        trailingNode: false,
-        dropcursor: false,
-      }),
-      // 行内 markdown 输入规则（safeMarkInputRule 规避崩溃）
-      CustomBold,
-      CustomItalic,
-      CustomStrike,
-      CustomCode,
-      // 回填式代码标记：先打 `` 再回填内容，方向键离开时自动转 code
-      CodeBackfillConvert,
-      // 代码块（lowlight 语法高亮）
-      CustomCodeBlock,
-      // 行内/块级基础
-      Underline,
-      Highlight.configure({ multicolor: true }),
-      Subscript,
-      Superscript,
-      TextStyle,
-      Color,
-      FontFamily,
-      FontSize,
-      Typography,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      // 列表 / 任务
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      // 表格
-      Table.configure({ resizable: true, lastColumnResizable: false }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      // 媒体：CustomImage 处理旧 inline 数据兼容；新插入图片走 ImageBlock（块级，照搬 demo）
-      CustomImage,
-      ImageBlock,
-      LinkCard,
-      MarkdownLink,
-      // 回填式链接：IME/某些场景 input rule 未触发时，空格/回车兜底转换
-      LinkBackfillConvert,
-      // 高级结构
-      Columns,
-      Column,
-      Details,
-      DetailsSummary,
-      DetailsContent,
-      TableOfContentsNode,
-      // 块级富内容（借鉴 demo/knloop-frontend-main，改造为手绘风格）
-      Callout,
-      Iframe,
-      Katex,
-      Attachment,
-      // 编辑器体验
-      Placeholder.configure({
-        placeholder: ({ pos }) => {
-          if (placeholder) return placeholder;
-          if (pos !== lastPlaceholderPos.current) {
-            lastPlaceholderPos.current = pos;
-            randomTextRef.current = pickPlaceholder();
-          }
-          return randomTextRef.current;
-        },
-        showOnlyCurrent: true,
-        includeChildren: false,
-      }),
-      TrailingNode,
-      Selection,
-      ListInputRules,
-      CharacterCount.configure({ limit: 100000 }),
-      Dropcursor.configure({ width: 2, class: "kb-dropcursor" }),
-      Focus.configure({ mode: "all" }),
-      // Notion 风格块级双柄（+ 插入 / ⋮⋮ 拖拽）
-      BlockHandles,
-      // 拖拽/粘贴图片自动上传 → 走 ImageBlock 命令（块级模式）
-      FileHandler.configure({
-        allowedMimeTypes: ["image/png", "image/jpeg", "image/gif", "image/webp"],
-        onUpload: onUploadImage,
-        onInsertImage: (ed, src, pos) => {
-          if (typeof pos === "number") {
-            ed.chain().focus().setImageBlockAt({ src, pos }).run();
-          } else {
-            ed.chain().focus().setImageBlock({ src }).run();
-          }
-        },
-      }),
-      // markdown 粘贴 / 序列化
-      Markdown,
-      MarkdownPaste,
-    ],
+    editable,
+    extensions: [...contentExtensions, ...editingExtensions],
     content: value || "",
     editorProps: {
       attributes: {
@@ -203,7 +214,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       lastInternalHTML.current = html;
-      onChange(html);
+      onChange?.(html);
       emitOutline(editor);
     },
     onCreate: ({ editor }) => {

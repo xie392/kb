@@ -339,7 +339,12 @@ export function ToolbarDivider() {
   return <span className="tk-toolbar-divider w-px h-5 bg-border mx-1" />;
 }
 
-const INSERT_GROUP_ORDER: InsertAction["group"][] = ["基础", "结构", "媒体"];
+const INSERT_GROUP_ORDER: InsertAction["group"][] = ["basic", "structure", "media"];
+const INSERT_GROUP_LABELS: Record<InsertAction["group"], string> = {
+  basic: "基础",
+  structure: "结构",
+  media: "媒体",
+};
 
 function InsertPanel({
   actions,
@@ -392,7 +397,7 @@ function InsertPanel({
         )}
         {groups.map(({ group, items }) => (
           <div key={group} className="tk-insert-group">
-            <div className="tk-insert-group-title">{group}</div>
+            <div className="tk-insert-group-title">{INSERT_GROUP_LABELS[group]}</div>
             <div className="tk-insert-grid">
               {items.map((item) => {
                 const Icon = INSERT_ICONS[item.icon];

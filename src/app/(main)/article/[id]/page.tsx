@@ -5,13 +5,12 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { createServerCaller } from "@/trpc/server";
 import { SITE_URL } from "@/lib/config";
-import { extractToc } from "@/lib/toc";
-import { highlightCodeBlocks } from "@/lib/code-highlight";
-import { renderKatexBlocks } from "@/lib/katex-server";
-import { renderStaticNodes } from "@/lib/static-node-renderer";
-import ArticleToc from "@/components/article-toc";
-import ArticleCodeCopy from "@/components/article-code-copy";
 import ArticleViewTracker from "@/components/article-view-tracker";
+import {
+  ReadonlyArticleProvider,
+  ReadonlyArticleContent,
+  ReadonlyArticleToc,
+} from "@/components/readonly-article";
 import "@tipkit/themes/base.css";
 import "@tipkit/themes/default.css";
 import "@tipkit/themes/sketch.css";
@@ -110,12 +109,8 @@ export default async function ArticlePage({
   // 定向查询上一篇/下一篇，避免每篇都全量拉取列表
   const { prev, next } = await caller.article.adjacent({ id });
 
-  const { items: tocItems, html: contentWithIds } = extractToc(
-    renderStaticNodes(renderKatexBlocks(highlightCodeBlocks(article.content))),
-  );
-
   return (
-    <>
+    <ReadonlyArticleProvider content={article.content}>
       <ArticleViewTracker articleId={id} />
       <script
         type="application/ld+json"
@@ -186,15 +181,7 @@ export default async function ArticlePage({
             </header>
 
             <div className="border-t-2 border-dashed border-hairline pt-8">
-              <div className="tk-theme-sketch tk-readonly">
-                <div className="tk-editor">
-                  <div
-                    className="tk-prosemirror prose-kb"
-                    dangerouslySetInnerHTML={{ __html: contentWithIds }}
-                  />
-                  <ArticleCodeCopy />
-                </div>
-              </div>
+              <ReadonlyArticleContent />
             </div>
 
             <div className="mt-10 pt-6 border-t-2 border-dashed border-hairline flex items-center gap-3 font-hand-display">
@@ -242,7 +229,7 @@ export default async function ArticlePage({
         </div>
       </div>
 
-      <ArticleToc items={tocItems} />
-    </>
+      <ReadonlyArticleToc />
+    </ReadonlyArticleProvider>
   );
 }

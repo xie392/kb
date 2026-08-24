@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "@tiptap/extension-image";
 import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
+import { ImageBlock as TipKitImageBlock } from "@tipkit/extensions";
 import type { ImageAlign, ImageStyle } from "./types";
 
 /* ─── 图片节点（支持对齐、旋转、描边、阴影、宽度拖拽、说明文字） ───
@@ -53,7 +54,7 @@ function parseDisplayWidth(el: HTMLElement): number | null {
 
 export const CustomImage = Image.configure({ allowBase64: true }).extend({
   parseHTML() {
-    return [{ tag: "span.kb-img-wrap" }, { tag: "img[src]" }];
+    return [{ tag: "span.kb-img-wrap" }];
   },
   addAttributes() {
     return {
@@ -403,3 +404,55 @@ function ImageView(props: ImageViewProps) {
     </NodeViewWrapper>
   );
 }
+
+export const ImageBlockCompat = TipKitImageBlock.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: "100%",
+        parseHTML: (el) => {
+          const root = el as HTMLElement;
+          const img = root.querySelector("img") ?? (root.tagName === "IMG" ? root : null);
+          const displayWidth = img?.getAttribute("data-display-width");
+          if (displayWidth) return `${displayWidth}%`;
+          const w = root.getAttribute("data-width");
+          return w ?? "100%";
+        },
+        renderHTML: (a) => ({ "data-width": a.width }),
+      },
+      align: {
+        default: "center",
+        parseHTML: (el) => {
+          const root = el as HTMLElement;
+          const img = root.querySelector("img") ?? (root.tagName === "IMG" ? root : null);
+          return (
+            root.getAttribute("data-align") ??
+            img?.getAttribute("data-align") ??
+            "center"
+          ) as "left" | "center" | "right";
+        },
+        renderHTML: (a) => ({ "data-align": a.align }),
+      },
+      caption: {
+        default: null,
+        parseHTML: (el) => {
+          const root = el as HTMLElement;
+          const cap =
+            root.querySelector(".tk-image-block-caption") ??
+            root.querySelector(".kb-img-caption");
+          return cap ? (cap.textContent ?? null) : null;
+        },
+        renderHTML: () => ({}),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      { tag: "div[data-type='image-block']" },
+      { tag: "div.kb-img-wrap" },
+      { tag: "img[src]" },
+    ];
+  },
+});
