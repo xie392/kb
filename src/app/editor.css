@@ -1334,7 +1334,7 @@
   margin: 0;
 }
 
-/* 左上角全选手柄（九宫格图标） */
+/* 左上角全选手柄（九宫格图标）—— inline zIndex:40 同样会穿透固定 UI 栏，覆盖到 15 */
 .kb-table-grip {
   width: 14px;
   height: 14px;
@@ -1347,6 +1347,7 @@
   cursor: pointer;
   border-radius: 3px;
   transition: color 0.15s ease, background-color 0.15s ease;
+  z-index: 15 !important;
 }
 .kb-table-grip:hover {
   color: var(--color-primary);
@@ -1533,6 +1534,13 @@
 }
 
 /* ─── BlockHandles：Notion 风格块级双柄（+ 插入 / ⋮⋮ 拖拽） ─── */
+/* @tipkit/extensions 将手柄以 position:fixed 直接挂到 body 上，inline z-index:50，
+   会穿透后台 sticky 顶栏(z-20/z-30)、工具栏、底部状态栏(z-30)和右侧大纲(z-20)。
+   用 !important 覆盖到所有固定骨架 UI 之下，但高于编辑器正文内容。
+   弹出菜单(.tk-block-popover z-60、slash-menu z-9999)不受影响，仍然置顶。 */
+.tk-block-handles {
+  z-index: 15 !important;
+}
 .kb-block-handles {
   position: absolute;
   z-index: 30;

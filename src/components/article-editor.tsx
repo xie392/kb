@@ -140,9 +140,9 @@ export default function ArticleEditor({ article }: Props) {
   return (
     <EditorProvider deps={{ uploadAttachment: handleUploadAttachment }}>
       <TooltipProvider delay={150}>
-      <div className="tk-theme-sketch h-full flex flex-col bg-canvas-soft">
+      <div className="tk-theme-sketch h-full flex flex-col bg-canvas">
       {/* ═══ 固定顶部操作栏 ═══ */}
-      <div className="sticky top-0 z-30 shrink-0 bg-canvas-soft/95 backdrop-blur-sm border-b border-hairline">
+      <div className="sticky top-0 z-30 shrink-0 bg-canvas/95 backdrop-blur-sm border-b border-hairline">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Tooltip>
@@ -239,7 +239,7 @@ export default function ArticleEditor({ article }: Props) {
       </div>
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
-      <div className="shrink-0 bg-card px-4 py-2 border-b border-hairline/50">
+      <div className="shrink-0 relative z-30 bg-card px-4 py-2 border-b border-hairline/50">
         <EditorToolbar editor={editor} onUploadImage={handleUploadImage} />
       </div>
 
@@ -304,7 +304,7 @@ export default function ArticleEditor({ article }: Props) {
 
       {/* ═══ 右侧大纲悬浮面板（TocPanel 自取 headings + IntersectionObserver 高亮） ═══ */}
       {showToc && (
-        <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
+        <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-[70]">
           <TocPanel
             editor={editor}
             emptyText="添加标题后会自动生成目录"
@@ -329,7 +329,7 @@ export default function ArticleEditor({ article }: Props) {
       )}
 
       {/* ═══ 底部状态栏（固定在视口底部） ═══ */}
-      <div className="fixed bottom-0 left-55 right-0 bg-canvas-soft/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
+      <div className="fixed bottom-0 left-55 right-0 bg-canvas/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
         <span>{wordCount > 0 ? `${wordCount} 字` : "空文档"}</span>
         <span className="w-px h-3 bg-hairline" />
         <span>{isEdit ? "编辑模式" : "新建模式"}</span>
