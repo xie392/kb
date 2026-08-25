@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/trpc/client";
 
 interface CatNode {
@@ -16,11 +16,6 @@ interface ArticleLite {
   id: string;
   title: string;
   categoryId: string | null;
-}
-
-interface CategorySidebarProps {
-  tree: CatNode[];
-  articles: ArticleLite[];
 }
 
 function ArticleItem({
@@ -136,31 +131,83 @@ function CategoryNode({
   );
 }
 
-export default function CategorySidebar({ tree, articles }: CategorySidebarProps) {
+function SidebarSkeleton() {
+  return (
+    <div>
+      <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
+        <span className="w-5 h-5 grid place-items-center sketch-border bg-white text-[12px] rotate-[-3deg]">
+          ☰
+        </span>
+        目录
+      </div>
+      <div className="sketch-dashed p-1.5 bg-white/50 space-y-0.5">
+        <div className="flex items-center gap-1.5 py-0.5 px-1.5">
+          <div className="w-[20px] h-[14px] bg-hairline/40 rounded-sm animate-pulse rotate-[-1deg]" />
+          <div className="w-[40px] h-[12px] bg-hairline/40 rounded-sm animate-pulse" />
+        </div>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="py-0.5 px-1" style={{ paddingLeft: 2 }}>
+            <div className="flex items-center gap-1">
+              <span className="w-3.5 h-3.5 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-hairline/60 shrink-0 rotate-12" />
+              <div
+                className="h-[12px] bg-hairline/40 rounded-sm animate-pulse rotate-[0.5deg]"
+                style={{ width: `${60 + (i % 3) * 10}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function CategorySidebar() {
   const pathname = usePathname();
   const match = pathname.match(/^\/article\/([^/]+)/);
   const activeArticleId = match ? match[1]! : null;
 
-  const activeArticle = articles.find((a) => a.id === activeArticleId) ?? null;
-
-  // 当前文章不在前 100 篇列表里时，用精确查询兜底，保证能定位到它所属的分类
+  const treeQuery = api.category.tree.useQuery();
+  const listQuery = api.article.list.useQuery({
+    status: "normal",
+    page: 1,
+    pageSize: 100,
+  });
   const activeArticleQuery = api.article.get.useQuery(
     { id: activeArticleId ?? "" },
     { enabled: !!activeArticleId }
   );
+
+  const loading = treeQuery.isLoading || listQuery.isLoading;
+
+  const tree = treeQuery.data ?? [];
+  const articles = useMemo(
+    () =>
+      listQuery.data?.items.map((a) => ({
+        id: a.id,
+        title: a.title,
+        categoryId: a.category?.id ?? null,
+      })) ?? [],
+    [listQuery.data]
+  );
+
+  const activeArticle = articles.find((a) => a.id === activeArticleId) ?? null;
   const activeCategoryId =
     activeArticleQuery.data?.category?.id ?? activeArticle?.categoryId ?? null;
 
   const treeRef = useRef(tree);
   treeRef.current = tree;
 
-  const articlesByCat = new Map<string, ArticleLite[]>();
-  for (const a of articles) {
-    if (!a.categoryId) continue;
-    const arr = articlesByCat.get(a.categoryId) ?? [];
-    arr.push(a);
-    articlesByCat.set(a.categoryId, arr);
-  }
+  const articlesByCat = useMemo(() => {
+    const map = new Map<string, ArticleLite[]>();
+    for (const a of articles) {
+      if (!a.categoryId) continue;
+      const arr = map.get(a.categoryId) ?? [];
+      arr.push(a);
+      map.set(a.categoryId, arr);
+    }
+    return map;
+  }, [articles]);
 
   function collectPath(nodes: CatNode[], targetId: string, acc: Set<string>): boolean {
     for (const node of nodes) {
@@ -184,23 +231,27 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
     return null;
   }
 
+  const pruneTree = (nodes: CatNode[]): CatNode[] =>
+    nodes
+      .map((n) => ({ ...n, children: pruneTree(n.children) }))
+      .filter((n) => n.count > 0 || n.children.length > 0);
+
+  const prunedTree = useMemo(() => pruneTree(tree), [tree]);
+
   const displayTree = activeCategoryId
     ? (() => {
-        const root = findRootNode(tree, activeCategoryId);
-        return root ? [root] : tree;
+        const root = findRootNode(prunedTree, activeCategoryId);
+        return root ? [root] : prunedTree;
       })()
-    : tree;
+    : prunedTree;
 
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
-    const initial = new Set<string>();
-    if (activeCategoryId) {
-      collectPath(tree, activeCategoryId, initial);
-    }
-    return initial;
-  });
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
-    if (!activeCategoryId) return;
+    if (!activeCategoryId) {
+      setExpandedIds(new Set());
+      return;
+    }
     const pathIds = new Set<string>();
     collectPath(treeRef.current, activeCategoryId, pathIds);
     setExpandedIds(pathIds);
@@ -219,58 +270,62 @@ export default function CategorySidebar({ tree, articles }: CategorySidebarProps
 
   return (
     <aside className="hidden xl:block w-55 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
-      <div>
-        <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
-          <span className="w-5 h-5 grid place-items-center sketch-border bg-white text-[12px] rotate-[-3deg]">
-            ☰
-          </span>
-          目录
-        </div>
-        <div className="sketch-dashed p-1.5 bg-white/50 space-y-0.5">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 py-0.5 px-1.5 font-hand-body text-[13px] text-ink-muted hover:text-primary hover:bg-white/60 rounded-xs transition-colors"
-          >
-            <span aria-hidden="true">🏠</span> 首页
-          </Link>
-          {displayTree.map((node) => (
-            <CategoryNode
-              key={node.id}
-              node={node}
-              articlesByCat={articlesByCat}
-              activeArticleId={activeArticleId}
-              expandedIds={expandedIds}
-              onToggle={handleToggle}
-              depth={0}
-            />
-          ))}
-          {!activeCategoryId && uncategorized.length > 0 && (
-            <div>
-              <div
-                className="flex items-center gap-1 py-0.5 px-1"
-                style={{ paddingLeft: 2 }}
-              >
-                <span className="w-3.5 h-3.5 shrink-0" />
-                <span className="w-1.5 h-1.5 rounded-full shrink-0 rotate-12 bg-ink-faint" />
-                <span className="flex-1 font-hand-display text-[14px] font-bold text-ink-secondary">
-                  未分类
-                </span>
-                <span className="text-[11px] font-hand-body text-ink-faint">
-                  {uncategorized.length}
-                </span>
+      {loading ? (
+        <SidebarSkeleton />
+      ) : (
+        <div>
+          <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
+            <span className="w-5 h-5 grid place-items-center sketch-border bg-white text-[12px] rotate-[-3deg]">
+              ☰
+            </span>
+            目录
+          </div>
+          <div className="sketch-dashed p-1.5 bg-white/50 space-y-0.5">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 py-0.5 px-1.5 font-hand-body text-[13px] text-ink-muted hover:text-primary hover:bg-white/60 rounded-xs transition-colors"
+            >
+              <span aria-hidden="true">🏠</span> 首页
+            </Link>
+            {displayTree.map((node) => (
+              <CategoryNode
+                key={node.id}
+                node={node}
+                articlesByCat={articlesByCat}
+                activeArticleId={activeArticleId}
+                expandedIds={expandedIds}
+                onToggle={handleToggle}
+                depth={0}
+              />
+            ))}
+            {!activeCategoryId && uncategorized.length > 0 && (
+              <div>
+                <div
+                  className="flex items-center gap-1 py-0.5 px-1"
+                  style={{ paddingLeft: 2 }}
+                >
+                  <span className="w-3.5 h-3.5 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0 rotate-12 bg-ink-faint" />
+                  <span className="flex-1 font-hand-display text-[14px] font-bold text-ink-secondary">
+                    未分类
+                  </span>
+                  <span className="text-[11px] font-hand-body text-ink-faint">
+                    {uncategorized.length}
+                  </span>
+                </div>
+                {uncategorized.map((a) => (
+                  <ArticleItem
+                    key={a.id}
+                    article={a}
+                    isActive={a.id === activeArticleId}
+                    depth={0}
+                  />
+                ))}
               </div>
-              {uncategorized.map((a) => (
-                <ArticleItem
-                  key={a.id}
-                  article={a}
-                  isActive={a.id === activeArticleId}
-                  depth={0}
-                />
-              ))}
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }

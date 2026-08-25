@@ -70,12 +70,48 @@ export function ReadonlyArticleContent() {
   );
 }
 
+function TocSkeleton() {
+  return (
+    <aside className="hidden xl:block w-50 shrink-0 sticky top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
+      <div>
+        <div className="font-hand-display text-[17px] font-bold text-secondary mb-2 flex items-center gap-2">
+          <span className="w-5 h-5 grid place-items-center sketch-border-2 bg-white text-[12px] rotate-[2deg]">
+            ¶
+          </span>
+          <div className="w-16 h-[14px] bg-hairline/40 rounded-sm animate-pulse rotate-[-1deg]" />
+        </div>
+        <nav className="sketch-dashed p-1.5 bg-white/50">
+          <ul className="space-y-0">
+            {[...Array(5)].map((_, i) => (
+              <li key={i}>
+                <div
+                  className="block py-0.5 px-1.5 rounded-xs"
+                  style={{ paddingLeft: `${Math.min(i, 2) * 8 + 6}px` }}
+                >
+                  <div
+                    className="h-[12px] bg-hairline/40 rounded-sm animate-pulse"
+                    style={{ width: `${85 - i * 8}%`, transform: `rotate(${(i % 2 ? 0.3 : -0.2)}deg)` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </aside>
+  );
+}
+
 /** 目录：放在 article 卡片外，保持 sticky 定位 */
 export function ReadonlyArticleToc() {
-  const { outline } = useContext(Ctx);
+  const { editor, outline } = useContext(Ctx);
   const items = useMemo<TocItem[]>(
     () => outline.map((it) => ({ id: it.id, text: it.text, level: it.level })),
     [outline],
   );
+
+  // 编辑器未初始化时显示骨架占位，避免布局偏移
+  if (!editor) return <TocSkeleton />;
+
   return <ArticleToc items={items} />;
 }
