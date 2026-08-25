@@ -7,6 +7,7 @@
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import type { Editor } from "@tiptap/react";
+import { useT } from "@tipkit/core";
 import {
   AlignMenu,
   BlockStyleMenu,
@@ -107,6 +108,7 @@ export function EditorToolbar({
   editor: Editor | null;
   onUploadImage?: (file: File) => Promise<string>;
 }) {
+  const t = useT();
   const [, force] = useState(0);
   const [textOpen, setTextOpen] = useState(false);
   const [insertOpen, setInsertOpen] = useState(false);
@@ -129,10 +131,11 @@ export function EditorToolbar({
             editor,
             openImagePicker: () => fileRef.current?.click(),
             openLinkDialog,
+            t,
           })
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [editor, insertOpen],
+    [editor, insertOpen, t],
   );
 
   if (!editor) return null;
@@ -158,6 +161,7 @@ export function EditorToolbar({
             <InsertPanel
               actions={insertActions}
               onSelect={() => setInsertOpen(false)}
+              t={t}
             />
           </PopoverContent>
         </Popover>
@@ -340,18 +344,20 @@ export function ToolbarDivider() {
 }
 
 const INSERT_GROUP_ORDER: InsertAction["group"][] = ["basic", "structure", "media"];
-const INSERT_GROUP_LABELS: Record<InsertAction["group"], string> = {
-  basic: "基础",
-  structure: "结构",
-  media: "媒体",
+const INSERT_GROUP_I18N_KEYS: Record<InsertAction["group"], string> = {
+  basic: "slash.group.basic",
+  structure: "slash.group.structure",
+  media: "slash.group.media",
 };
 
 function InsertPanel({
   actions,
   onSelect,
+  t,
 }: {
   actions: InsertAction[];
   onSelect: () => void;
+  t: (key: string) => string;
 }) {
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
@@ -378,7 +384,7 @@ function InsertPanel({
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="搜索要插入的内容"
+          placeholder={t("slash.searchPlaceholder")}
           className="tk-insert-search-input"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -393,11 +399,11 @@ function InsertPanel({
       </div>
       <div className="tk-insert-body">
         {groups.length === 0 && (
-          <div className="tk-insert-empty">没有匹配的内容</div>
+          <div className="tk-insert-empty">{t("slash.insertEmpty")}</div>
         )}
         {groups.map(({ group, items }) => (
           <div key={group} className="tk-insert-group">
-            <div className="tk-insert-group-title">{INSERT_GROUP_LABELS[group]}</div>
+            <div className="tk-insert-group-title">{t(INSERT_GROUP_I18N_KEYS[group])}</div>
             <div className="tk-insert-grid">
               {items.map((item) => {
                 const Icon = INSERT_ICONS[item.icon];

@@ -1,10 +1,10 @@
 /* Editor + Reader styles (TipTap / prose-kb) — only loaded on article and editor pages */
 
-/* 移除工具栏边框和阴影，背景设为白色 */
+/* 移除工具栏边框和阴影，背景跟随外层容器 */
 .tk-theme-sketch .tk-toolbar {
   border: none;
   box-shadow: none;
-  background: #fff;
+  background: transparent;
 }
 
 /* 编辑器内容区收窄时防止代码块等元素溢出 */
@@ -91,46 +91,24 @@
   margin: 1.2em 0 0.3em;
 }
 
-/* 阅读页标题样式（保持原有） */
-.prose-kb h1 {
+/* 阅读页标题样式调整（只读态） */
+.tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror h1 {
   font-size: 26px;
-  font-weight: 700;
-  line-height: 1.23;
-  letter-spacing: -0.625px;
-  color: var(--color-ink);
   margin: 2em 0 0.75em;
 }
-.prose-kb h2 {
+.tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror h2 {
   font-size: 22px;
-  font-weight: 700;
-  line-height: 1.27;
-  letter-spacing: -0.25px;
-  color: var(--color-ink);
   margin: 1.75em 0 0.6em;
+  padding-bottom: 0;
+  border-bottom: none;
 }
-.prose-kb h3 {
+.tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror h3 {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--color-ink);
   margin: 1.5em 0 0.5em;
 }
-.prose-kb h4 {
+.tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror h4 {
   font-size: 16px;
-  font-weight: 600;
-  color: var(--color-ink);
   margin: 1.25em 0 0.5em;
-}
-.prose-kb h5 {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-ink);
-  margin: 1.1em 0 0.4em;
-}
-.prose-kb h6 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-ink);
-  margin: 1em 0 0.4em;
 }
 
 /* 编辑器内段落：更紧凑 */

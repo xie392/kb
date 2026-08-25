@@ -13,10 +13,12 @@ import TagSelect from "@/components/tag-select";
 import CategorySelect from "@/components/category-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { ADMIN_HOME } from "@/lib/config";
 import { EditorProvider } from "@tipkit/core";
 import type { Editor } from "@tiptap/react";
+import { List, X } from "lucide-react";
 
 interface Props {
   article?: {
@@ -49,6 +51,7 @@ export default function ArticleEditor({ article }: Props) {
   const [tagIds, setTagIds] = useState<string[]>(article?.tagIds ?? []);
   const [outline, setOutline] = useState<OutlineItem[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showToc, setShowToc] = useState(true);
 
   const { data: cats } = api.category.tree.useQuery();
   const { data: tags } = api.tag.list.useQuery();
@@ -136,44 +139,75 @@ export default function ArticleEditor({ article }: Props) {
 
   return (
     <EditorProvider deps={{ uploadAttachment: handleUploadAttachment }}>
-      <div className="tk-theme-sketch h-full flex flex-col bg-white">
+      <TooltipProvider delay={150}>
+      <div className="tk-theme-sketch h-full flex flex-col bg-canvas-soft">
       {/* ═══ 固定顶部操作栏 ═══ */}
       <div className="sticky top-0 z-30 shrink-0 bg-canvas-soft/95 backdrop-blur-sm border-b border-hairline">
         <div className="px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.back()}
-              title="返回"
-              aria-label="返回"
-              className="hover:text-ink-secondary"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 3L5 8l5 5" />
-              </svg>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => router.back()}
+                    aria-label="返回"
+                    className="hover:text-ink-secondary"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 3L5 8l5 5" />
+                    </svg>
+                  </Button>
+                }
+              />
+              <TooltipContent>返回</TooltipContent>
+            </Tooltip>
             <span className="text-[14px] text-ink-faint">{isEdit ? "编辑文章" : "写笔记"}</span>
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 大纲开关 */}
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowToc(!showToc)}
+                    className={showToc ? "text-primary" : "text-ink-muted hover:text-ink-secondary"}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                }
+              />
+              <TooltipContent>{showToc ? "隐藏大纲" : "显示大纲"}</TooltipContent>
+            </Tooltip>
+
             {/* 权限切换 */}
-            <div className="flex items-center gap-0 p-0.5 bg-canvas-soft rounded-full border border-hairline">
-              {(["private", "public"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setVisibility(v)}
-                  className={`px-3 h-7 text-[13px] font-medium rounded-full transition-all ${
-                    visibility === v
-                      ? "bg-white text-primary shadow-xs border border-hairline"
-                      : "text-ink-muted hover:text-ink-secondary"
-                  }`}
-                >
-                  {v === "private" ? "私有" : "公开"}
-                </button>
-              ))}
-            </div>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <div className="flex items-center gap-0 p-0.5 bg-canvas-soft rounded-full border border-hairline">
+                    {(["private", "public"] as const).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setVisibility(v)}
+                        className={`px-3 h-7 text-[13px] font-medium rounded-full transition-all ${
+                          visibility === v
+                            ? "bg-white text-primary shadow-xs border border-hairline"
+                            : "text-ink-muted hover:text-ink-secondary"
+                        }`}
+                      >
+                        {v === "private" ? "私有" : "公开"}
+                      </button>
+                    ))}
+                  </div>
+                }
+              />
+              <TooltipContent>文章可见性：私有仅自己可见，公开可被搜索引擎收录</TooltipContent>
+            </Tooltip>
 
             {/* 保存按钮 */}
             {saving ? (
@@ -184,21 +218,28 @@ export default function ArticleEditor({ article }: Props) {
                 保存中…
               </span>
             ) : (
-              <Button
-                type="button"
-                onClick={onSave}
-                disabled={!title.trim()}
-                className="px-4 disabled:bg-hairline disabled:text-ink-faint disabled:opacity-100"
-              >
-                保存
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      onClick={onSave}
+                      disabled={!title.trim()}
+                      className="px-4 disabled:bg-hairline disabled:text-ink-faint disabled:opacity-100"
+                    >
+                      保存
+                    </Button>
+                  }
+                />
+                <TooltipContent>保存文章 (⌘S)</TooltipContent>
+              </Tooltip>
             )}
           </div>
         </div>
       </div>
 
       {/* ═══ 工具栏（紧贴小操作栏下方，固定不随内容滚动） ═══ */}
-      <div className="shrink-0 bg-white px-4 py-2 border-b border-hairline/50">
+      <div className="shrink-0 bg-card px-4 py-2 border-b border-hairline/50">
         <EditorToolbar editor={editor} onUploadImage={handleUploadImage} />
       </div>
 
@@ -262,10 +303,30 @@ export default function ArticleEditor({ article }: Props) {
       </div>
 
       {/* ═══ 右侧大纲悬浮面板（TocPanel 自取 headings + IntersectionObserver 高亮） ═══ */}
-      <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
-        <div className="text-[12px] font-semibold text-ink-faint uppercase tracking-wider mb-3">大纲</div>
-        <TocPanel editor={editor} emptyText="添加标题后会自动生成目录" />
-      </div>
+      {showToc && (
+        <div className="hidden xl:block fixed right-6 top-30 w-56 bg-white rounded-lg sketch-border sketch-shadow p-4 max-h-[calc(100vh-136px)] overflow-y-auto z-20">
+          <TocPanel
+            editor={editor}
+            emptyText="添加标题后会自动生成目录"
+            headerExtra={
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => setShowToc(false)}
+                      className="text-ink-faint hover:text-ink-secondary transition-colors p-1 -m-1 rounded"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  }
+                />
+                <TooltipContent side="left">隐藏大纲</TooltipContent>
+              </Tooltip>
+            }
+          />
+        </div>
+      )}
 
       {/* ═══ 底部状态栏（固定在视口底部） ═══ */}
       <div className="fixed bottom-0 left-55 right-0 bg-canvas-soft/95 backdrop-blur-sm border-t border-hairline px-6 py-2 flex items-center gap-3 text-[12px] text-ink-faint z-30">
@@ -276,6 +337,7 @@ export default function ArticleEditor({ article }: Props) {
         <span className="hidden sm:inline">⌘S 保存</span>
       </div>
     </div>
+    </TooltipProvider>
     </EditorProvider>
   );
 }

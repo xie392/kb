@@ -143,7 +143,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     Details,
     DetailsSummary,
     DetailsContent,
-    TableOfContentsNode,
+    TableOfContentsNode.configure({ scrollOffset: 80 }),
     // 块级富内容（借鉴 demo/knloop-frontend-main，改造为手绘风格）
     Callout,
     Iframe,
