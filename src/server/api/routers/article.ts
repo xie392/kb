@@ -39,11 +39,7 @@ export const articleRouter = router({
       where.visibility = input.visibility;
     }
     if (input.keyword) {
-      where.OR = [
-        { title: { contains: input.keyword } },
-        { summary: { contains: input.keyword } },
-        { content: { contains: input.keyword } },
-      ];
+      where.title = { contains: input.keyword };
     }
     if (input.tagId) {
       where.tags = { some: { tagId: input.tagId } };

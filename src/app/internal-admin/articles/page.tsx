@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/trpc/client";
 import { formatDate } from "@/lib/format";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -41,19 +42,36 @@ const statusTabs: { id: StatusFilter; label: string }[] = [
   { id: "trash", label: "回收站" },
 ];
 
+const visibilityLabel: Record<string, string> = {
+  public: "公开",
+  private: "私有",
+};
+
 const PAGE_SIZE = 20;
 
 export default function AdminArticlesPage() {
   const [filter, setFilter] = useState<StatusFilter>("normal");
   const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [visibilityUpdatingId, setVisibilityUpdatingId] = useState<string | null>(null);
   const [pendingHardDelete, setPendingHardDelete] = useState<string[] | null>(null);
+
+  // 搜索防抖
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setKeyword(searchInput);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const { data, isFetching } = api.article.list.useQuery({
     status: filter,
     page,
     pageSize: PAGE_SIZE,
+    keyword: keyword || undefined,
   });
   const rows: Row[] = (data?.items ?? []).map((a) => ({
     ...a,
@@ -131,6 +149,17 @@ export default function AdminArticlesPage() {
             {tab.label}
           </Button>
         ))}
+      </div>
+
+      {/* 搜索框 */}
+      <div className="mb-4">
+        <Input
+          type="search"
+          placeholder="搜索文章标题..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="max-w-sm h-10 font-hand-body text-[15px]"
+        />
       </div>
 
       {/* 批量操作栏 */}
@@ -241,7 +270,7 @@ export default function AdminArticlesPage() {
                           : "text-ink-faint"
                       } disabled:opacity-50 disabled:cursor-wait`}
                     >
-                      <SelectValue />
+                      <span>{visibilityLabel[a.visibility]}</span>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="private">私有</SelectItem>

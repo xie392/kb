@@ -21,7 +21,7 @@ export { useArticleEditor } from "./use-editor";
 export type { UseArticleEditorOptions } from "./use-editor";
 export { EditorToolbar, ToolbarBtn, ToolbarDivider } from "./toolbar";
 export { EditorArea } from "./editor-area";
-export { CustomImage } from "./image-node";
+
 export { CustomCodeBlock, MarkdownPaste } from "@tipkit/extensions";
 export type {
   ImageAlign,

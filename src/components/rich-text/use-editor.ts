@@ -51,8 +51,8 @@ import {
   Iframe,
   Katex,
   Attachment,
+  ImageBlock,
 } from "@tipkit/extensions";
-import { CustomImage, ImageBlockCompat } from "./image-node";
 import { LinkCard } from "./link-card";
 
 import type { OutlineItem } from "./types";
@@ -133,9 +133,8 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     TableRow,
     TableHeader,
     TableCell,
-    // 媒体：CustomImage 处理最老 span.kb-img-wrap 遗留；ImageBlockCompat 接管普通 img/旧 div.kb-img-wrap
-    CustomImage,
-    ImageBlockCompat,
+    // 媒体
+    ImageBlock,
     LinkCard,
     MarkdownLink,
     // 高级结构
