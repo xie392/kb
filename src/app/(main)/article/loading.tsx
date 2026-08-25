@@ -89,13 +89,30 @@ function ArticleSkeleton() {
             </div>
           </header>
 
-          <div className="border-t-2 border-dashed border-hairline pt-8 space-y-4">
-            {[...Array(12)].map((_, i) => (
-              <SkeletonLine
-                key={i}
-                width={i % 3 === 0 ? "85%" : i % 4 === 0 ? "92%" : "100%"}
-                height="16px"
-              />
+          <div className="border-t-2 border-dashed border-hairline pt-8 space-y-6">
+            {/* 模拟多个段落，每个段落带标题 */}
+            {[...Array(4)].map((_, sectionIdx) => (
+              <div key={sectionIdx} className="space-y-3">
+                {/* 标题行 */}
+                <SkeletonLine
+                  width={`${40 + (sectionIdx % 3) * 15}%`}
+                  height="24px"
+                  className={`rotate-[-0.3deg] ${sectionIdx > 0 ? "mt-6" : ""}`}
+                />
+                {/* 段落文字行 */}
+                <div className="space-y-2.5">
+                  {[...Array(6 + (sectionIdx % 3))].map((_, lineIdx) => (
+                    <SkeletonLine
+                      key={lineIdx}
+                      width={
+                        lineIdx % 5 === 0 ? "88%" : lineIdx % 7 === 0 ? "94%" : "100%"
+                      }
+                      height="16px"
+                      className="rotate-[0.15deg]"
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 

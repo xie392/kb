@@ -17,9 +17,10 @@ import type { TocItem } from "@/lib/toc";
 interface ReadonlyArticleCtx {
   editor: Editor | null;
   outline: OutlineItem[];
+  content: string;
 }
 
-const Ctx = createContext<ReadonlyArticleCtx>({ editor: null, outline: [] });
+const Ctx = createContext<ReadonlyArticleCtx>({ editor: null, outline: [], content: "" });
 
 /** 包裹正文与 TOC，共享同一个只读编辑器实例（保持原 DOM 结构，TOC 可在 article 卡片外） */
 export function ReadonlyArticleProvider({
@@ -36,13 +37,13 @@ export function ReadonlyArticleProvider({
     onOutline: setOutline,
   });
 
-  const value = useMemo(() => ({ editor, outline }), [editor, outline]);
+  const value = useMemo(() => ({ editor, outline, content }), [editor, outline, content]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 /** 正文渲染区：放在 article 卡片内 */
 export function ReadonlyArticleContent() {
-  const { editor, outline } = useContext(Ctx);
+  const { editor, outline, content } = useContext(Ctx);
 
   // 编辑器渲染后给标题注入 id，供 TOC 锚点与 IntersectionObserver 使用
   useEffect(() => {
@@ -60,6 +61,18 @@ export function ReadonlyArticleContent() {
       headingEls.forEach((el) => el.removeAttribute("id"));
     };
   }, [editor, outline]);
+
+  // 编辑器未初始化时，直接用服务端 HTML 渲染占位，高度完全匹配避免跳动
+  if (!editor) {
+    return (
+      <div className="tk-theme-sketch tk-readonly">
+        <div
+          className="tk-editor"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="tk-theme-sketch tk-readonly">
