@@ -91,6 +91,12 @@
   margin: 1.2em 0 0.3em;
 }
 
+/* 编辑器/阅读页首个元素去掉上外边距 */
+.ProseMirror.prose-kb > :first-child,
+.tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror > :first-child {
+  margin-top: 0;
+}
+
 /* 阅读页标题样式调整（只读态） */
 .tk-readonly.tk-theme-sketch .tk-editor .tk-prosemirror h1 {
   font-size: 26px;

@@ -57,8 +57,6 @@ export default function ArticleToc({ items }: ArticleTocProps) {
     }
   }, [activeId]);
 
-  if (items.length === 0) return null;
-
   const handleClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     const el = document.getElementById(id);
@@ -67,6 +65,12 @@ export default function ArticleToc({ items }: ArticleTocProps) {
       history.replaceState(null, "", `#${id}`);
     }
   };
+
+  if (items.length === 0) {
+    return (
+      <aside className="hidden xl:block w-50 shrink-0" />
+    );
+  }
 
   return (
     <aside

@@ -134,10 +134,7 @@ export const articleRouter = router({
 
       const today = new Date().toISOString().slice(0, 10);
       await ctx.db.$transaction([
-        ctx.db.article.update({
-          where: { id: input.id },
-          data: { viewCount: { increment: 1 } },
-        }),
+        ctx.db.$executeRaw`UPDATE "Article" SET "viewCount" = "viewCount" + 1 WHERE "id" = ${input.id}`,
         ctx.db.articleDailyView.upsert({
           where: { articleId_date: { articleId: input.id, date: today } },
           create: { articleId: input.id, date: today, count: 1 },
