@@ -16,6 +16,12 @@
   max-width: 100%;
 }
 
+/* 重置通用 .prose-kb pre 外边距对 TipKit 代码块布局的干扰，修复复制按钮定位错位
+   （.prose-kb pre 设置的 margin:1.2em 0 会让 pre 脱离父容器边界，导致绝对定位的复制按钮漂到代码框外） */
+.prose-kb .tk-code-block-pre {
+  margin: 0 !important;
+}
+
 /* 富文本阅读样式 */
 .prose-kb {
   font-size: 16px;
@@ -29,12 +35,40 @@
   line-height: 1.6;
 }
 
+/* useTipKitEditor 不透传 editorProps，.tk-prosemirror 无 focus:outline-hidden，这里兜底去掉聚焦描边 */
+.tk-theme-sketch .tk-prosemirror:focus {
+  outline: none;
+}
+
 /* 详情页只读渲染：复用编辑器手绘排版（tk-prosemirror），
    覆盖 .tk-editor 的编辑态内边距/背景/最小高度（只读无块手柄留白） */
 .tk-readonly.tk-theme-sketch .tk-editor {
   padding: 0;
   min-height: 0;
   background: transparent;
+}
+
+/* 只读态：隐藏 TrailingNode 保留的末尾空段（编辑时保证可继续输入，保存为 HTML 后只读态应隐藏） */
+.tk-readonly.tk-theme-sketch .tk-prosemirror > p:last-child:is(:empty, .is-empty) {
+  display: none;
+}
+
+/* Mermaid 预览面板：顶部留白过多（min-height:320px + align-items:center），改为贴近顶部 */
+.tk-theme-sketch .tk-mermaid-preview {
+  min-height: 120px;
+  align-items: flex-start;
+}
+
+/* 只读态 mermaid 的两个悬浮按钮（全屏/复制）都固定到右上角，避免重叠在左下角 */
+.tk-theme-sketch .tk-code-block[data-editable="false"][data-language="mermaid"] .tk-code-block-copy-btn {
+  top: 8px;
+  bottom: auto;
+}
+.tk-theme-sketch .tk-code-block[data-editable="false"][data-language="mermaid"] .tk-code-block-copy-btn:nth-of-type(1) {
+  right: 40px;
+}
+.tk-theme-sketch .tk-code-block[data-editable="false"][data-language="mermaid"] .tk-code-block-copy-btn:nth-of-type(2) {
+  right: 8px;
 }
 
 /* 编辑态：.tk-editor 默认 72px 左右内边距（sketch.css），收窄为 24px 与标题 px-6 对齐 */

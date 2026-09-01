@@ -5,6 +5,7 @@ import type { Editor } from "@tiptap/react";
 import {
   SlashMenu,
   EmojiSuggestion,
+  AiMenu,
   TextMenu,
   LinkBubble,
   LinkDialogHost,
@@ -37,6 +38,11 @@ import {
   Table2,
   Text,
   TriangleAlert,
+  Badge,
+  Brush,
+  Sparkles,
+  Superscript,
+  Video,
   type LucideIcon,
 } from "lucide-react";
 
@@ -63,6 +69,11 @@ const SLASH_ICONS: Record<string, LucideIcon> = {
   Frame,
   Paperclip,
   Smile,
+  Badge,
+  Brush,
+  Sparkles,
+  Superscript,
+  Video,
 };
 
 function renderSlashIcon(icon: string) {
@@ -92,7 +103,8 @@ export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
     <div className="tk-editor">
       <TooltipProvider delayDuration={300}>
         <EditorContent editor={editor} />
-        <SlashMenu editor={editor} onUploadImage={onUploadImage} iconRenderer={renderSlashIcon} />
+        <SlashMenu editor={editor} onUploadImage={onUploadImage} iconRenderer={renderSlashIcon} aiEnabled />
+        <AiMenu editor={editor} />
         <EmojiSuggestion editor={editor} />
         <TextMenu editor={editor} />
         <LinkBubble editor={editor} />

@@ -32,6 +32,8 @@ import {
   PopoverTrigger,
 } from "@tipkit/components";
 import { getInsertActions, type InsertAction } from "@tipkit/extensions";
+import { FindReplacePanel } from "./find-replace";
+import { LanguageCheckPanel } from "./language-check";
 import {
   Bold,
   Check,
@@ -69,6 +71,11 @@ import {
   TriangleAlert,
   Underline,
   Undo2,
+  Badge,
+  Brush,
+  Sparkles,
+  SpellCheck,
+  Video,
   type LucideIcon,
 } from "lucide-react";
 
@@ -95,6 +102,11 @@ const INSERT_ICONS: Record<string, LucideIcon> = {
   Frame,
   Paperclip,
   Smile,
+  Badge,
+  Brush,
+  Sparkles,
+  Superscript,
+  Video,
 };
 
 /** 顶部通栏工具栏（单行），顺序参考语雀：
@@ -112,6 +124,7 @@ export function EditorToolbar({
   const [, force] = useState(0);
   const [textOpen, setTextOpen] = useState(false);
   const [insertOpen, setInsertOpen] = useState(false);
+  const [effPanel, setEffPanel] = useState<"find" | "check" | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!editor) return;
@@ -132,6 +145,7 @@ export function EditorToolbar({
             openImagePicker: () => fileRef.current?.click(),
             openLinkDialog,
             t,
+            aiEnabled: true,
           })
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,6 +271,40 @@ export function EditorToolbar({
         <Tip label="代码块">
           <ToolbarBtn icon={Code2} label="代码块" active={editor.isActive("codeBlock")} onClick={() => chain().toggleCodeBlock().run()} />
         </Tip>
+
+        <ToolbarDivider />
+
+        <Popover open={effPanel === "find"} onOpenChange={(o) => setEffPanel(o ? "find" : null)}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="查找替换"
+              data-active={effPanel === "find" || undefined}
+              className="tk-toolbar-btn inline-flex items-center justify-center w-8 h-8 rounded"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" sideOffset={8} className="w-auto p-0 bg-transparent border-none shadow-none">
+            <FindReplacePanel editor={editor} onClose={() => setEffPanel(null)} />
+          </PopoverContent>
+        </Popover>
+
+        <Popover open={effPanel === "check"} onOpenChange={(o) => setEffPanel(o ? "check" : null)}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="语法检查"
+              data-active={effPanel === "check" || undefined}
+              className="tk-toolbar-btn inline-flex items-center justify-center w-8 h-8 rounded"
+            >
+              <SpellCheck className="w-4 h-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" sideOffset={8} className="w-auto p-0 bg-transparent border-none shadow-none">
+            <LanguageCheckPanel editor={editor} onClose={() => setEffPanel(null)} />
+          </PopoverContent>
+        </Popover>
 
         <input
           ref={fileRef}

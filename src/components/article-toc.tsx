@@ -85,7 +85,8 @@ export default function ArticleToc({ items }: ArticleTocProps) {
           本文目录
         </div>
         <nav className="sketch-dashed p-1.5 bg-white/50">
-          <ul className="space-y-0">
+          {/* list-none：去掉 ul/li 默认小黑点 */}
+          <ul className="space-y-0 list-none">
             {items.map((item) => {
               const isActive = activeId === item.id;
               const indent = (item.level - 1) * 8;

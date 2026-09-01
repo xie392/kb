@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+// sketch 主题走 JS import（resolveAlias 指向本地 tipkit），替代 globals.css 里无法解析的 CSS @import
+import "@tipkit/themes/sketch.css";
 import { Geist, Caveat, Patrick_Hand } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { SITE_URL } from "@/lib/config";
@@ -58,7 +60,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("tk-theme-sketch font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[999] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-hand-body focus:text-[15px]"

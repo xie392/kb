@@ -8,3 +8,14 @@ allowBuilds:
 
 # 关闭新包 24h 发布冷却期（供应链检查），避免刚发布的依赖导致安装失败
 minimumReleaseAge: 0
+
+# 将本地 tipkit 包纳入同一 workspace，使 tipkit 包内部的 workspace:* 兄弟依赖可解析
+packages:
+  - .
+  - ../tipkit/packages/*
+
+# 强制把 workspace 包物理注入消费方 node_modules（而非 symlink 到 ../tipkit）。
+# Turbopack 的文件系统被沙箱在项目目录内，无法跟随出根的 symlink，
+# 物理注入后才能正常 resolve / 打包。
+injectWorkspacePackages: true
+

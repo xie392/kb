@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useEditor, type Editor } from "@tiptap/react";
+import type { Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
@@ -52,7 +52,18 @@ import {
   Katex,
   Attachment,
   ImageBlock,
+  Status,
+  Video,
+  Emoji,
+  createFootnoteExtensions,
+  TableReadonlyResize,
+  UniqueID,
+  SearchAndReplace,
+  LanguageTool,
+  AiGeneration,
+  Canvas,
 } from "@tipkit/extensions";
+import { createT, useTipKitEditor, useEditorDeps, zh } from "@tipkit/core";
 import { LinkCard } from "./link-card";
 
 import type { OutlineItem } from "./types";
@@ -86,6 +97,11 @@ export interface UseArticleEditorOptions {
 /** 创建编辑器实例：编排全部扩展，并把 HTML / 大纲变化回传给外部 */
 export function useArticleEditor(options: UseArticleEditorOptions) {
   const { value, onChange, onOutline, placeholder, onUploadImage, editable = true } = options;
+
+  /* 从 EditorProvider 读取注入的 deps（含 i18n t、uploadAttachment、ai 等），
+   * 未包裹 Provider 时 useEditorDeps 会返回 { t: defaultT(中文) }，天然兜底。 */
+  const deps = useEditorDeps();
+  const t = deps.t ?? createT(zh);
 
   const lastInternalHTML = useRef<string>("");
   const randomTextRef = useRef<string>(pickPlaceholder());
@@ -149,6 +165,18 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     Iframe,
     Katex,
     Attachment,
+    // tipkit 0.3.0 新增节点（编辑态与只读态共用，保证渲染结构一致）
+    Status,
+    Video,
+    Emoji,
+    ...createFootnoteExtensions(),
+    Canvas,
+    // 只读态表格列宽拖拽（编辑态内部自动让位于内置 columnResizing）
+    TableReadonlyResize,
+    // 节点自动 id：供目录跳转/评论锚点/协同定位
+    UniqueID.configure({
+      types: ["heading", "paragraph", "blockquote", "listItem", "taskItem", "codeBlock", "imageBlock", "callout"],
+    }),
   ];
 
   // 纯编辑态扩展：只读时全部剔除，避免不必要的 JS 与交互
@@ -194,32 +222,52 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
         // markdown 粘贴 / 序列化
         Markdown,
         MarkdownPaste,
+        // tipkit 0.3.0 新增编辑态功能（只读时剔除）
+        SearchAndReplace,
+        // 语法检查：默认走公共 API（有内容外发风险），建议注入自有 check 覆盖
+        LanguageTool.configure({}),
+        // AI 流式生成（headless 命令层，UI 走 @tipkit/ui 的 AiMenu + EditorDeps.ai）
+        AiGeneration,
       ]
     : [];
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    autofocus: false,
-    editable,
+  /* 使用 TipKit 标准 hook useTipKitEditor 创建实例（@tipkit/core 无头入口）：
+   * 自带 Placeholder / editable 同步，扩展编排在下方传入。
+   * 自定义 Placeholder（随机多文案）会按同名扩展覆盖 useTipKitEditor 内置的默认
+   * Placeholder —— 依赖 tipkit 的 useTipKitEditor 对同名扩展做去重（见 tipkit 侧改动）。 */
+  const editor = useTipKitEditor({
     extensions: [...contentExtensions, ...editingExtensions],
     content: value || "",
+    editable,
     editorProps: {
-      attributes: {
-        class: "tk-prosemirror focus:outline-hidden",
-      },
+      // 必须保留 tk-prosemirror：tipkit 主题的正文样式（含 .tk-toc-list{list-style:none}）
+      // 都挂在 .tk-theme-sketch .tk-editor .tk-prosemirror 下。
+      // 注：useTipKitEditor 用对象展开合并 attributes.class，会把这里的 class 整体覆盖
+      // 掉默认的 tk-prosemirror，因此必须显式带上，否则 tipkit 正文样式失效。
+      // prose-kb 启用 editor.css 的富文本排版（66215a1 迁移时被误删，需保留）。
+      attributes: { class: "tk-prosemirror prose-kb focus:outline-hidden" },
       scrollThreshold: { top: 8, right: 8, bottom: 44, left: 8 },
       scrollMargin: { top: 8, right: 8, bottom: 44, left: 8 },
     },
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
+    onUpdate: (ed) => {
+      const html = ed.getHTML();
       lastInternalHTML.current = html;
       onChange?.(html);
-      emitOutline(editor);
+      emitOutline(ed);
     },
-    onCreate: ({ editor }) => {
-      emitOutline(editor);
+    onCreate: (ed) => {
+      emitOutline(ed);
     },
   });
+
+  /* 按 TipKit 约定，把 deps.t 挂到 editor.__tipkitT，供原生 NodeView（Details/BlockHandles/Status 等）
+   * 读取翻译；语言切换时同步更新并派发 tipkit:langChange 事件刷新 tooltip。
+   * 这一步等价于 <TipKitEditor> 组件内部的 i18n 注入逻辑。 */
+  useEffect(() => {
+    if (!editor) return;
+    (editor as unknown as { __tipkitT?: typeof t }).__tipkitT = t;
+    editor.view.dom.dispatchEvent(new CustomEvent("tipkit:langChange"));
+  }, [editor, t]);
 
   function emitOutline(ed: Editor) {
     if (!onOutline) return;
@@ -238,10 +286,14 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
   }
 
   useEffect(() => {
-    if (editor && value && value !== lastInternalHTML.current) {
+    if (!editor) return;
+    if (!value || value === lastInternalHTML.current) return;
+    // 推迟到微任务队列，避免在 React 渲染周期内同步调用 setContent 触发 flushSync 报错
+    const raf = requestAnimationFrame(() => {
       editor.commands.setContent(value, { emitUpdate: false });
       emitOutline(editor);
-    }
+    });
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, value]);
 

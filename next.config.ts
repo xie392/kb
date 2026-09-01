@@ -17,6 +17,28 @@ const nextConfig: NextConfig = {
     "@prisma/client",
     "@prisma/adapter-better-sqlite3",
   ],
+  // better-sqlite3 为原生模块，webpack 下 serverExternalPackages 对经 ESM adapter
+  // 引入的依赖链不生效（会打包 bindings.js 导致 'fs' 解析失败），需手动外部化
+  // 同时将 node: 内置模块外部化，避免 instrumentation 打包时解析 node:fs 报错
+  webpack(config, { isServer }) {
+    if (isServer) {
+      const externals = config.externals ?? [];
+      const externalModules = ["better-sqlite3", "bindings", "file-uri-to-path"].map(
+        (m) => ({ [m]: `commonjs ${m}` }),
+      );
+      config.externals = [
+        ...(Array.isArray(externals) ? externals : [externals]),
+        ...externalModules,
+        ({ request }: { request?: string }, callback: (err?: unknown, result?: unknown) => void) => {
+          if (request && request.startsWith("node:")) {
+            return callback(null, `commonjs ${request}`);
+          }
+          callback();
+        },
+      ];
+    }
+    return config;
+  },
   // 附件目录由运行时环境变量配置，路径动态；忽略 Turbopack 的整树追踪警告
   // （本项目 Docker 全量部署，不依赖 standalone 产物）
   turbopack: {

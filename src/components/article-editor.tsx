@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { ADMIN_HOME } from "@/lib/config";
+import { deepSeekProvider } from "@/lib/ai-provider";
 import { EditorProvider } from "@tipkit/core";
 import type { Editor } from "@tiptap/react";
 import { List, X } from "lucide-react";
@@ -138,7 +139,7 @@ export default function ArticleEditor({ article }: Props) {
   }, [title, content, categoryId, visibility, tagIds]);
 
   return (
-    <EditorProvider deps={{ uploadAttachment: handleUploadAttachment }}>
+    <EditorProvider deps={{ uploadAttachment: handleUploadAttachment, ai: deepSeekProvider }}>
       <TooltipProvider delay={150}>
       <div className="tk-theme-sketch h-full flex flex-col bg-canvas">
       {/* ═══ 固定顶部操作栏 ═══ */}

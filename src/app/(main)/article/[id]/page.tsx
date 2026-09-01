@@ -11,8 +11,7 @@ import {
   ReadonlyArticleContent,
   ReadonlyArticleToc,
 } from "@/components/readonly-article";
-import "@tipkit/themes/base.css";
-import "@tipkit/themes/default.css";
+// sketch.css 内部已 @import base.css，自包含；default.css 是另一套独立风格（本项目用 sketch），无需引入
 import "@tipkit/themes/sketch.css";
 import "@tipkit/themes/dark.css";
 import "@/app/editor.css";

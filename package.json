@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001",
-    "build": "next build",
+    "dev": "next dev --port 3001 --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -21,11 +22,11 @@
     "@prisma/client": "^7.9.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-query": "^5.101.4",
-    "@tipkit/components": "0.2.0",
-    "@tipkit/core": "0.2.0",
-    "@tipkit/extensions": "0.2.0",
-    "@tipkit/themes": "0.2.0",
-    "@tipkit/ui": "0.2.0",
+    "@tipkit/components": "file:../tipkit/packages/components",
+    "@tipkit/core": "file:../tipkit/packages/core",
+    "@tipkit/extensions": "file:../tipkit/packages/extensions",
+    "@tipkit/themes": "file:../tipkit/packages/themes",
+    "@tipkit/ui": "file:../tipkit/packages/ui",
     "@tiptap/core": "^3.30.2",
     "@tiptap/extension-bold": "^3.30.2",
     "@tiptap/extension-character-count": "^3.30.2",
@@ -63,7 +64,7 @@
     "@trpc/react-query": "^11.18.0",
     "@trpc/server": "^11.18.0",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "^12.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -104,14 +105,5 @@
     "markdown-it": "^15.0.0",
     "shadcn": "^4.18.0",
     "typescript": "^7.0.2"
-  },
-  "pnpm": {
-    "overrides": {
-      "@tipkit/components": "file:../tipkit/packages/components",
-      "@tipkit/core": "file:../tipkit/packages/core",
-      "@tipkit/extensions": "file:../tipkit/packages/extensions",
-      "@tipkit/themes": "file:../tipkit/packages/themes",
-      "@tipkit/ui": "file:../tipkit/packages/ui"
-    }
   }
 }

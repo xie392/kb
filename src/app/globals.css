@@ -1,8 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-/* @import "@tipkit/themes/base.css"; */
-@import "@tipkit/themes/sketch.css";
+/* sketch.css 主题改由 layout.tsx 以 JS import 引入（CSS @import 无法解析本地 workspace 包的子路径） */
 
 /* ─── 修复：tipkit base.css 中 .tk-dialog-* 规则被 Lightning CSS 处理
    @import 时误删，导致链接弹窗退化为 static 定位显示在左下角。

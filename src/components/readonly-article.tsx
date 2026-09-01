@@ -62,14 +62,18 @@ export function ReadonlyArticleContent() {
     };
   }, [editor, outline]);
 
-  // 编辑器未初始化时，直接用服务端 HTML 渲染占位，高度完全匹配避免跳动
+  // 编辑器未初始化时，直接用服务端 HTML 渲染占位，高度完全匹配避免跳动。
+  // 必须给占位套上 tk-prosemirror prose-kb（与编辑器挂载后的 class 一致），
+  // 否则 SSR/首屏这段原始 HTML 没有正文排版样式，会出现"先无样式、等一下才有"的闪烁。
   if (!editor) {
     return (
       <div className="tk-theme-sketch tk-readonly">
-        <div
-          className="tk-editor"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
+        <div className="tk-editor">
+          <div
+            className="tk-prosemirror prose-kb"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        </div>
       </div>
     );
   }
@@ -94,7 +98,7 @@ function TocSkeleton() {
           <div className="w-16 h-[14px] bg-hairline/40 rounded-sm animate-pulse rotate-[-1deg]" />
         </div>
         <nav className="sketch-dashed p-1.5 bg-white/50">
-          <ul className="space-y-0">
+          <ul className="space-y-0 list-none">
             {[...Array(5)].map((_, i) => (
               <li key={i}>
                 <div

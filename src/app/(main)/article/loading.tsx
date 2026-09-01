@@ -26,7 +26,7 @@ function TocSkeleton() {
           <div className="w-16 h-[14px] bg-hairline/40 rounded-sm animate-pulse rotate-[-1deg]" />
         </div>
         <nav className="sketch-dashed p-1.5 bg-white/50">
-          <ul className="space-y-0">
+          <ul className="space-y-0 list-none">
             {[...Array(5)].map((_, i) => (
               <li key={i}>
                 <div
