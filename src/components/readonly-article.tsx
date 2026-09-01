@@ -31,13 +31,20 @@ export function ReadonlyArticleProvider({
   children: ReactNode;
 }) {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
+  // 入口统一去除尾部空段落，兼容历史被 TrailingNode 污染的数据
+  const trimmedContent = content
+    ? content.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "")
+    : content;
   const editor = useArticleEditor({
-    value: content,
+    value: trimmedContent,
     editable: false,
     onOutline: setOutline,
   });
 
-  const value = useMemo(() => ({ editor, outline, content }), [editor, outline, content]);
+  const value = useMemo(
+    () => ({ editor, outline, content: trimmedContent }),
+    [editor, outline, trimmedContent],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

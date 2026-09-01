@@ -83,6 +83,11 @@ function pickPlaceholder(): string {
   return PLACEHOLDER_TEXTS[Math.floor(Math.random() * PLACEHOLDER_TEXTS.length)]!;
 }
 
+/** 去除 HTML 末尾的空段落（TrailingNode 注入或历史遗留），避免只读页底部留白 */
+function trimTrailingEmptyParagraphs(html: string): string {
+  return html.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "");
+}
+
 export interface UseArticleEditorOptions {
   value: string;
   onChange?: (html: string) => void;
@@ -97,6 +102,8 @@ export interface UseArticleEditorOptions {
 /** 创建编辑器实例：编排全部扩展，并把 HTML / 大纲变化回传给外部 */
 export function useArticleEditor(options: UseArticleEditorOptions) {
   const { value, onChange, onOutline, placeholder, onUploadImage, editable = true } = options;
+  // 入口统一 trim 尾部空段落：兼容历史数据（已被 TrailingNode 污染）与新内容
+  const trimmedValue = value ? trimTrailingEmptyParagraphs(value) : value;
 
   /* 从 EditorProvider 读取注入的 deps（含 i18n t、uploadAttachment、ai 等），
    * 未包裹 Provider 时 useEditorDeps 会返回 { t: defaultT(中文) }，天然兜底。 */
@@ -237,7 +244,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
    * Placeholder —— 依赖 tipkit 的 useTipKitEditor 对同名扩展做去重（见 tipkit 侧改动）。 */
   const editor = useTipKitEditor({
     extensions: [...contentExtensions, ...editingExtensions],
-    content: value || "",
+    content: trimmedValue || "",
     editable,
     editorProps: {
       // 必须保留 tk-prosemirror：tipkit 主题的正文样式（含 .tk-toc-list{list-style:none}）
@@ -250,7 +257,11 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
       scrollMargin: { top: 8, right: 8, bottom: 44, left: 8 },
     },
     onUpdate: (ed) => {
-      const html = ed.getHTML();
+      // TrailingNode 扩展会在文档末尾追加空 <p> 以保证编辑时最后一行可点击，
+      // 但该空节点会被 getHTML 序列化进内容，保存后只读页也会渲染出底部空白。
+      // 此处序列化后统一 trim 尾部空段落，避免污染持久化数据。
+      const raw = ed.getHTML();
+      const html = raw.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "");
       lastInternalHTML.current = html;
       onChange?.(html);
       emitOutline(ed);
@@ -287,15 +298,15 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
 
   useEffect(() => {
     if (!editor) return;
-    if (!value || value === lastInternalHTML.current) return;
+    if (!trimmedValue || trimmedValue === lastInternalHTML.current) return;
     // 推迟到微任务队列，避免在 React 渲染周期内同步调用 setContent 触发 flushSync 报错
     const raf = requestAnimationFrame(() => {
-      editor.commands.setContent(value, { emitUpdate: false });
+      editor.commands.setContent(trimmedValue, { emitUpdate: false });
       emitOutline(editor);
     });
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, value]);
+  }, [editor, trimmedValue]);
 
   return editor;
 }
