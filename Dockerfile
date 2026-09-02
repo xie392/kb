@@ -30,7 +30,8 @@ COPY prisma ./prisma/
 
 # 利用 BuildKit 缓存挂载 pnpm store，只在 lock 文件变化时重新安装依赖
 RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
-    pnpm install --frozen-lockfile --prefer-offline
+    pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --frozen-lockfile --prefer-offline --network-concurrency=10
 
 # 再复制源代码（常变层，依赖层缓存可复用）
 COPY . .
