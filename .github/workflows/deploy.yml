@@ -12,7 +12,7 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      # 海外机器打包源码（几 MB），避免国内服务器 clone GitHub 超时
+      # 海外机器打包源码（几 MB），避免国内服务器访问 npm/GitHub 慢
       - name: 打包源码
         run: |
           tar czf /tmp/source.tar.gz \
