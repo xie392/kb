@@ -9,7 +9,36 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 通过 SSH 在服务器执行部署
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # 海外机器打包源码（几 MB），避免国内服务器 clone GitHub 超时
+      - name: 打包源码
+        run: |
+          tar czf /tmp/source.tar.gz \
+            --exclude=node_modules \
+            --exclude=.next \
+            --exclude=.git \
+            --exclude='public/uploads' \
+            --exclude='./data' \
+            --exclude='*.db' \
+            --exclude='*.db-journal' \
+            --exclude='.env*' \
+            .
+          mv /tmp/source.tar.gz source.tar.gz
+          ls -lh source.tar.gz
+
+      - name: 同步源码包到服务器
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "source.tar.gz"
+          target: "/opt/kb/"
+          timeout: "300s"
+
+      - name: 服务器解压并部署
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -19,19 +48,16 @@ jobs:
           envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
           script: |
             set -e
-            DEPLOY_DIR="/opt/kb"
-            mkdir -p "$DEPLOY_DIR"
-            cd "$DEPLOY_DIR"
+            cd /opt/kb
+            mkdir -p data
 
-            # 1. 先拉取/更新 repo 拿到最新的 deploy.sh 和配置
-            if [ ! -d repo/.git ]; then
-              rm -rf repo
-              git clone --depth 1 -b master https://github.com/xie392/kb.git repo
-            else
-              cd repo && git fetch origin master && git reset --hard origin/master && cd ..
-            fi
+            # 解压源码到 repo 目录
+            rm -rf repo
+            mkdir repo
+            tar xzf source.tar.gz -C repo
+            rm -f source.tar.gz
 
-            # 2. 首次部署：复制 docker-compose.yml 和 Caddyfile 到部署根目录
+            # 首次部署：复制配置文件
             if [ ! -f docker-compose.yml ]; then
               cp repo/docker-compose.yml ./
             fi
@@ -39,7 +65,7 @@ jobs:
               cp repo/Caddyfile ./
             fi
 
-            # 3. 执行一键部署脚本
+            # 执行部署脚本
             bash repo/deploy.sh
         env:
           ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
