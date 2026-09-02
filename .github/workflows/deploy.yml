@@ -83,7 +83,8 @@ jobs:
             # 在 repo 目录构建镜像
             # Dockerfile 多阶段构建会自己装 python3/make/g++，宿主机不需要
             cd repo
-            docker build \
+            # 启用 BuildKit 才能使用 Dockerfile 中的缓存挂载
+            DOCKER_BUILDKIT=1 docker build \
               --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${ADMIN_BASE_PATH}" \
               --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
               -t kb:latest .

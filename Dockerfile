@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 # base 镜像走 DaoCloud 加速（国内 docker.io 拉取慢/不稳定）
 # 本地构建想用原镜像：docker build --build-arg NODE_IMAGE=node:22-slim ...
 ARG NODE_IMAGE=docker.m.daocloud.io/library/node:22-slim
@@ -9,7 +10,9 @@ ARG APT_MIRROR=mirrors.aliyun.com
 ARG NPM_MIRROR=https://registry.npmmirror.com
 ENV npm_config_registry=${NPM_MIRROR} \
     COREPACK_NPM_REGISTRY=${NPM_MIRROR}
-RUN if [ -n "$APT_MIRROR" ]; then \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    if [ -n "$APT_MIRROR" ]; then \
         find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
             -exec sed -i "s|deb.debian.org|$APT_MIRROR|g" {} +; \
     fi \
@@ -21,10 +24,15 @@ RUN if [ -n "$APT_MIRROR" ]; then \
 FROM base AS build
 WORKDIR /app
 
+# 先复制依赖配置文件，这层不常变，优先缓存
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-# 先只装依赖，跳过 postinstall（此时 prisma schema 还没复制进来）
-RUN pnpm install --frozen-lockfile --ignore-scripts
+COPY prisma ./prisma/
 
+# 利用 BuildKit 缓存挂载 pnpm store，只在 lock 文件变化时重新安装依赖
+RUN --mount=type=cache,target=/pnpm/store,sharing=locked \
+    pnpm install --frozen-lockfile --prefer-offline
+
+# 再复制源代码（常变层，依赖层缓存可复用）
 COPY . .
 
 ARG NEXT_PUBLIC_ADMIN_BASE_PATH
@@ -32,20 +40,19 @@ ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_ADMIN_BASE_PATH=$NEXT_PUBLIC_ADMIN_BASE_PATH \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
-# 所有文件复制完后再生成 Prisma 客户端
-RUN pnpm exec prisma generate
-RUN pnpm build
+# Next.js 构建缓存挂载，增量构建不用每次全量编译
+RUN --mount=type=cache,target=/app/.next/cache,sharing=locked \
+    pnpm build
 
 # 移除 devDependencies（typescript/@types 等），只保留运行时必需的生产依赖
 RUN pnpm prune --prod
 
-# 裁剪后重新生成 Prisma 客户端和原生绑定，确保生产依赖下文件完整
-RUN pnpm exec prisma generate
-
 FROM ${NODE_IMAGE} AS runner
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH" NODE_ENV=production PORT=3000
 ARG APT_MIRROR=mirrors.aliyun.com
-RUN if [ -n "$APT_MIRROR" ]; then \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    if [ -n "$APT_MIRROR" ]; then \
         find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
             -exec sed -i "s|deb.debian.org|$APT_MIRROR|g" {} +; \
     fi \
