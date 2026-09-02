@@ -2,8 +2,23 @@
 
 import { useEffect, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import type { ChainedCommands } from "@tiptap/core";
 import { languageToolKey } from "@tipkit/extensions";
 import { X } from "lucide-react";
+
+type LanguageToolMatch = {
+  from: number;
+  message: string;
+  shortMessage?: string;
+  replacements?: { value: string }[];
+};
+
+type LanguageToolChain = ChainedCommands & {
+  checkLanguageTool: () => LanguageToolChain;
+  clearLanguageToolMatches: () => LanguageToolChain;
+  applyLanguageToolSuggestion: (index: number, replacement: string) => LanguageToolChain;
+  dismissLanguageToolMatch: (index: number) => LanguageToolChain;
+};
 
 /**
  * 语法检查面板 —— 基于 @tipkit/extensions 的 LanguageTool 命令层自建 UI。
@@ -33,12 +48,12 @@ export function LanguageCheckPanel({
   if (!editor) return null;
 
   /* 检查/清除/忽略不需要抢焦点；采纳建议需要把光标移到错误位置才 focus */
-  const quietChain = () => editor.chain();
-  const applyChain = () => editor.chain().focus();
+  const quietChain = () => editor.chain() as unknown as LanguageToolChain;
+  const applyChain = () => editor.chain().focus() as unknown as LanguageToolChain;
   const st = languageToolKey.getState(editor.state);
   const checking = st?.checking ?? false;
   const error = st?.error ?? null;
-  const matches = st?.matches ?? [];
+  const matches = (st?.matches ?? []) as LanguageToolMatch[];
 
   return (
     <div

@@ -246,7 +246,7 @@ export function useArticleEditor(options: UseArticleEditorOptions) {
     extensions: [...contentExtensions, ...editingExtensions],
     content: trimmedValue || "",
     editable,
-    editorProps: {
+    editorViewProps: {
       // 必须保留 tk-prosemirror：tipkit 主题的正文样式（含 .tk-toc-list{list-style:none}）
       // 都挂在 .tk-theme-sketch .tk-editor .tk-prosemirror 下。
       // 注：useTipKitEditor 用对象展开合并 attributes.class，会把这里的 class 整体覆盖

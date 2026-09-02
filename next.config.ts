@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
 const nextConfig: NextConfig = {
+  // 生产构建禁用 source map，加快构建速度并减少内存使用
+  productionBrowserSourceMaps: false,
   // @tipkit/* 以 TS 源码形式发布，需要显式编译
   transpilePackages: [
     "@tipkit/core",
@@ -21,6 +23,10 @@ const nextConfig: NextConfig = {
   // 引入的依赖链不生效（会打包 bindings.js 导致 'fs' 解析失败），需手动外部化
   // 同时将 node: 内置模块外部化，避免 instrumentation 打包时解析 node:fs 报错
   webpack(config, { isServer }) {
+    // 限制 webpack 并行度，避免在内存受限的服务器上 OOM 卡住
+    if (!config.parallelism) {
+      config.parallelism = 2;
+    }
     if (isServer) {
       const externals = config.externals ?? [];
       const externalModules = ["better-sqlite3", "bindings", "file-uri-to-path"].map(

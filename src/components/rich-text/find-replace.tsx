@@ -2,8 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
+import type { ChainedCommands } from "@tiptap/core";
 import { searchAndReplaceKey } from "@tipkit/extensions";
 import { X } from "lucide-react";
+
+type SearchReplaceChain = ChainedCommands & {
+  setSearchTerm: (term: string, options?: { caseSensitive?: boolean }) => SearchReplaceChain;
+  nextSearchMatch: () => SearchReplaceChain;
+  previousSearchMatch: () => SearchReplaceChain;
+  replaceSearchMatch: (replacement: string) => SearchReplaceChain;
+  replaceAllSearchMatches: (replacement: string) => SearchReplaceChain;
+};
 
 /**
  * 查找替换面板 —— 基于 @tipkit/extensions 的 SearchAndReplace 命令层自建 UI。
@@ -39,9 +48,9 @@ export function FindReplacePanel({
   if (!editor) return null;
 
   /* 不抢焦点的命令链：仅设置/替换搜索词，保持输入框焦点 */
-  const quietChain = () => editor.chain();
+  const quietChain = () => editor.chain() as unknown as SearchReplaceChain;
   /* 跳转类操作：需要移动光标到匹配位置时才 focus */
-  const jumpChain = () => editor.chain().focus();
+  const jumpChain = () => editor.chain().focus() as unknown as SearchReplaceChain;
 
   const st = searchAndReplaceKey.getState(editor.state);
   const count = st?.matches.length ?? 0;
