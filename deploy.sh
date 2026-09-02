@@ -16,6 +16,7 @@ mkdir -p data
 
 # 1. 检查/克隆 tipkit 依赖（workspace 依赖 ../tipkit）
 if [ ! -d "$DEPLOY_DIR/tipkit/.git" ]; then
+    rm -rf "$DEPLOY_DIR/tipkit"
     echo "🔍 未找到 tipkit 仓库，开始克隆..."
     git clone --depth 1 "$TIPKIT_REPO" "$DEPLOY_DIR/tipkit"
 else
@@ -26,6 +27,7 @@ fi
 
 # 2. 检查/克隆 kb 仓库
 if [ ! -d "$REPO_DIR/.git" ]; then
+    rm -rf "$REPO_DIR"
     echo "🔍 未找到 kb 仓库，开始克隆..."
     git clone --depth 1 -b "$BRANCH" "$KB_REPO" "$REPO_DIR"
 else

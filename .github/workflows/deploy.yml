@@ -25,6 +25,7 @@ jobs:
 
             # 1. 先拉取/更新 repo 拿到最新的 deploy.sh 和配置
             if [ ! -d repo/.git ]; then
+              rm -rf repo
               git clone --depth 1 -b master https://github.com/xie392/kb.git repo
             else
               cd repo && git fetch origin master && git reset --hard origin/master && cd ..
