@@ -9,38 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
-      # 打包源码：排除大目录和本地状态，只保留构建所需文件
-      # 跨国只传源码（几 MB），不传镜像（几百 MB）
-      # 输出到 /tmp 避开当前目录，否则 tar 会报 "file changed as we read it"
-      - name: 打包源码
-        run: |
-          tar czf /tmp/source.tar.gz \
-            --exclude=node_modules \
-            --exclude=.next \
-            --exclude=.git \
-            --exclude='public/uploads' \
-            --exclude='./data' \
-            --exclude='*.db' \
-            --exclude='*.db-journal' \
-            --exclude='.env*' \
-            .
-          mv /tmp/source.tar.gz source.tar.gz
-          ls -lh source.tar.gz
-
-      - name: 同步源码与部署文件到服务器
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "source.tar.gz,docker-compose.yml,Caddyfile"
-          target: "/opt/kb/"
-          timeout: "300s"
-
-      - name: 服务器构建并启动
+      - name: 通过 SSH 在服务器执行部署
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -50,53 +19,27 @@ jobs:
           envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
           script: |
             set -e
-            cd /opt/kb
-            mkdir -p data
+            DEPLOY_DIR="/opt/kb"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
 
-            # 解压源码到 repo 目录（先清空旧文件）
-            rm -rf repo && mkdir repo
-            tar xzf source.tar.gz -C repo
-            rm -f source.tar.gz
-
-            # 初始化 .env（仅首次）
-            if [ ! -f .env ]; then
-              SECRET=$(openssl rand -base64 32)
-              {
-                echo "AUTH_SECRET=\"${SECRET}\""
-                echo "DATABASE_URL=\"file:/data/dev.db\""
-                echo "ATTACHMENT_STORAGE_DIR=\"/data/attachments\""
-                echo "BACKUP_DIR=\"/data/backups\""
-                echo "AUTH_TRUST_HOST=\"true\""
-                echo "NEXT_PUBLIC_ADMIN_BASE_PATH=\"${ADMIN_BASE_PATH}\""
-                echo "NEXT_PUBLIC_SITE_URL=\"${SITE_URL}\""
-                echo "INIT_USERNAME=\"${INIT_USERNAME}\""
-                echo "INIT_PASSWORD=\"${INIT_PASSWORD}\""
-              } > .env
-              chmod 600 .env
-              echo "✅ 已创建 .env"
-              echo "   初始账号：${INIT_USERNAME}"
+            # 1. 先拉取/更新 repo 拿到最新的 deploy.sh 和配置
+            if [ ! -d repo/.git ]; then
+              git clone --depth 1 -b master https://github.com/xie392/kb.git repo
             else
-              echo "ℹ️ .env 已存在"
+              cd repo && git fetch origin master && git reset --hard origin/master && cd ..
             fi
-            chmod 600 .env
 
-            # 在 repo 目录构建镜像
-            # Dockerfile 多阶段构建会自己装 python3/make/g++，宿主机不需要
-            cd repo
-            # 启用 BuildKit 才能使用 Dockerfile 中的缓存挂载
-            DOCKER_BUILDKIT=1 docker build \
-              --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${ADMIN_BASE_PATH}" \
-              --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
-              -t kb:latest .
+            # 2. 首次部署：复制 docker-compose.yml 和 Caddyfile 到部署根目录
+            if [ ! -f docker-compose.yml ]; then
+              cp repo/docker-compose.yml ./
+            fi
+            if [ ! -f Caddyfile ]; then
+              cp repo/Caddyfile ./
+            fi
 
-            # 启动（docker-compose.yml 在 /opt/kb 下，image 用本地 kb:latest）
-            cd /opt/kb
-            docker compose up -d
-            docker image prune -f
-
-            # 清理构建产物：源码已打进镜像，repo 目录不再需要
-            rm -rf repo
-            echo "✅ 部署完成"
+            # 3. 执行一键部署脚本
+            bash repo/deploy.sh
         env:
           ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
           SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
