@@ -28,20 +28,20 @@ importers:
         specifier: ^5.101.4
         version: 5.102.8(react@19.2.8)
       '@tipkit/components':
-        specifier: ^0.3.0
+        specifier: ^0.3.1
         version: 0.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tipkit/core':
-        specifier: ^0.3.0
+        specifier: ^0.3.1
         version: 0.3.1(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tipkit/extensions':
-        specifier: ^0.3.0
+        specifier: ^0.3.1
         version: 0.3.1(45d7cfd1eb849310621010253e7859a0)
       '@tipkit/themes':
-        specifier: ^0.3.0
+        specifier: ^0.3.1
         version: 0.3.1
       '@tipkit/ui':
-        specifier: ^0.3.0
-        version: 0.3.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-code-block@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(highlight.js@11.12.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^0.3.1
+        version: 0.3.1(45d7cfd1eb849310621010253e7859a0)
       '@tiptap/core':
         specifier: ^3.30.2
         version: 3.30.5(@tiptap/pm@3.30.5)
@@ -1570,24 +1570,9 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@tipkit/components@0.3.0':
-    resolution: {integrity: sha512-qq/Rs6dcSdTV0fqKwx5xZdNdTVP2sb/c5qNzEFy/BgrXo9Wv+ei0cfVtPFai8Bppj21e+jVI4FXfh7iRIphD9A==}
-    peerDependencies:
-      react: ^19.0.0
-      react-dom: ^19.0.0
-
   '@tipkit/components@0.3.1':
     resolution: {integrity: sha512-RToxXQZ+fBMh9V5bT4Ojw8Gt22Z3Lgc1AgRdx2jsXEH1G5Oa3R5iWzywaIEbc3hPhHBErYy7JoU5wI+bG5VXAw==}
     peerDependencies:
-      react: ^19.0.0
-      react-dom: ^19.0.0
-
-  '@tipkit/core@0.3.0':
-    resolution: {integrity: sha512-cbVk8+r2yZCUw7abmCQQbpgSCMD59mTJxwQyELT5OnPb5ZjmCOOaQJEzF3US77lE9n8SDOmnc+Vga3XHhEVLHQ==}
-    peerDependencies:
-      '@tiptap/core': ^3.30.1
-      '@tiptap/pm': ^3.30.1
-      '@tiptap/react': ^3.30.1
       react: ^19.0.0
       react-dom: ^19.0.0
 
@@ -1599,15 +1584,6 @@ packages:
       '@tiptap/pm': ^3.30.2
       '@tiptap/react': ^3.30.2
       '@tiptap/starter-kit': ^3.30.2
-      react: ^19.0.0
-      react-dom: ^19.0.0
-
-  '@tipkit/extensions@0.3.0':
-    resolution: {integrity: sha512-oFoELFVg/JbIhlAlULfjq7XWnuThldkoPQnmTqL9JCfxwb05G13Pc5UZYMyP5eaO14V26VSY7GrWp1CMa9a08w==}
-    peerDependencies:
-      '@tiptap/core': ^3.30.1
-      '@tiptap/pm': ^3.30.1
-      '@tiptap/react': ^3.30.1
       react: ^19.0.0
       react-dom: ^19.0.0
 
@@ -1652,12 +1628,24 @@ packages:
   '@tipkit/themes@0.3.1':
     resolution: {integrity: sha512-+W8/pZq6JbvEOUD65ZoJjdKLq9pD0Ta1KT07SKOVf1vr9z81UgkWL6B5UoBkZwDajnFXdHS0cHR7lMWmkCpY7A==}
 
-  '@tipkit/ui@0.3.0':
-    resolution: {integrity: sha512-yenVvBl6mRRIsEF0gJVzVRGh0ZjxdMwK4UIl4ZWbR0/GkRYo+/+XRkg9yYJTFEUR/w/X01PuLTg8X7R4+otDJA==}
+  '@tipkit/ui@0.3.1':
+    resolution: {integrity: sha512-IG4Wz8MKijxbiqYWjYWtrJnroZ/rvaFdusc0UqHFr1wHXtv77qYQyvY44GtIBQq0LbT6U7z5OZ6duCN3f5R2+Q==}
     peerDependencies:
-      '@tiptap/core': ^3.30.1
-      '@tiptap/pm': ^3.30.1
-      '@tiptap/react': ^3.30.1
+      '@tiptap/core': ^3.30.2
+      '@tiptap/extension-color': ^3.30.2
+      '@tiptap/extension-font-family': ^3.30.2
+      '@tiptap/extension-highlight': ^3.30.2
+      '@tiptap/extension-link': ^3.30.2
+      '@tiptap/extension-table': ^3.30.2
+      '@tiptap/extension-table-cell': ^3.30.2
+      '@tiptap/extension-table-header': ^3.30.2
+      '@tiptap/extension-table-row': ^3.30.2
+      '@tiptap/extension-text-align': ^3.30.2
+      '@tiptap/extension-text-style': ^3.30.2
+      '@tiptap/extension-underline': ^3.30.2
+      '@tiptap/pm': ^3.30.2
+      '@tiptap/react': ^3.30.2
+      '@tiptap/starter-kit': ^3.30.2
       react: ^19.0.0
       react-dom: ^19.0.0
 
@@ -5690,24 +5678,6 @@ snapshots:
       '@tanstack/query-core': 5.102.8
       react: 19.2.8
 
-  '@tipkit/components@0.3.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-dropdown-menu': 2.1.24(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-popover': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-select': 2.3.7(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-slot': 1.3.3(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-tooltip': 1.2.16(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      class-variance-authority: 0.7.1
-      clsx: 2.1.1
-      lucide-react: 0.469.0(react@19.2.8)
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      tailwind-merge: 2.6.1
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-
   '@tipkit/components@0.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -5726,18 +5696,6 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@tipkit/core@0.3.0(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
-      '@tiptap/extension-placeholder': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/pm': 3.30.5
-      '@tiptap/react': 3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tiptap/starter-kit': 3.30.5
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-    transitivePeerDependencies:
-      - '@tiptap/extensions'
-
   '@tipkit/core@0.3.1(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
@@ -5747,58 +5705,6 @@ snapshots:
       '@tiptap/starter-kit': 3.30.5
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
-
-  '@tipkit/extensions@0.3.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-code-block@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(highlight.js@11.12.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@tipkit/components': 0.3.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/core': 0.3.0(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
-      '@tiptap/extension-bold': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-character-count': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-code': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-code-block-lowlight': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-code-block@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(highlight.js@11.12.0)(lowlight@3.3.0)
-      '@tiptap/extension-color': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
-      '@tiptap/extension-dropcursor': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-focus': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-font-family': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
-      '@tiptap/extension-highlight': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-horizontal-rule': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/extension-image': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-italic': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-link': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/extension-placeholder': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-strike': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-subscript': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/extension-superscript': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/extension-table': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/extension-table-cell': 3.30.5(@tiptap/extension-table@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-table-header': 3.30.5(@tiptap/extension-table@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-table-row': 3.30.5(@tiptap/extension-table@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-task-item': 3.30.5(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-task-list': 3.30.5(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
-      '@tiptap/extension-text-align': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-text-style': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-typography': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/extension-underline': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
-      '@tiptap/markdown': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      '@tiptap/pm': 3.30.5
-      '@tiptap/react': 3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tiptap/suggestion': 3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)
-      katex: 0.16.47
-      lowlight: 3.3.0
-      lucide-react: 0.469.0(react@19.2.8)
-      mermaid: 11.17.2
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      roughjs: 4.6.6
-    transitivePeerDependencies:
-      - '@floating-ui/dom'
-      - '@tiptap/extension-code-block'
-      - '@tiptap/extension-list'
-      - '@tiptap/extensions'
-      - '@types/react'
-      - '@types/react-dom'
-      - highlight.js
 
   '@tipkit/extensions@0.3.1(45d7cfd1eb849310621010253e7859a0)':
     dependencies:
@@ -5850,11 +5756,11 @@ snapshots:
 
   '@tipkit/themes@0.3.1': {}
 
-  '@tipkit/ui@0.3.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-code-block@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(highlight.js@11.12.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@tipkit/ui@0.3.1(45d7cfd1eb849310621010253e7859a0)':
     dependencies:
-      '@tipkit/components': 0.3.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/core': 0.3.0(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/extensions': 0.3.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-code-block@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extension-list@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(highlight.js@11.12.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/components': 0.3.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/core': 0.3.1(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/extensions': 0.3.1(45d7cfd1eb849310621010253e7859a0)
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
       '@tiptap/extension-color': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
       '@tiptap/extension-font-family': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
@@ -5875,13 +5781,26 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
       tippy.js: 6.3.7
     transitivePeerDependencies:
-      - '@floating-ui/dom'
-      - '@tiptap/extension-code-block'
-      - '@tiptap/extension-list'
-      - '@tiptap/extensions'
+      - '@tiptap/extension-bold'
+      - '@tiptap/extension-character-count'
+      - '@tiptap/extension-code'
+      - '@tiptap/extension-code-block-lowlight'
+      - '@tiptap/extension-dropcursor'
+      - '@tiptap/extension-focus'
+      - '@tiptap/extension-horizontal-rule'
+      - '@tiptap/extension-image'
+      - '@tiptap/extension-italic'
+      - '@tiptap/extension-placeholder'
+      - '@tiptap/extension-strike'
+      - '@tiptap/extension-subscript'
+      - '@tiptap/extension-superscript'
+      - '@tiptap/extension-task-item'
+      - '@tiptap/extension-task-list'
+      - '@tiptap/extension-typography'
+      - '@tiptap/markdown'
+      - '@tiptap/suggestion'
       - '@types/react'
       - '@types/react-dom'
-      - highlight.js
 
   '@tiptap/core@3.30.5(@tiptap/pm@3.30.5)':
     dependencies:
