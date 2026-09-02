@@ -22,7 +22,8 @@ FROM base AS build
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+# 先只装依赖，跳过 postinstall（此时 prisma schema 还没复制进来）
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
@@ -31,6 +32,8 @@ ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_ADMIN_BASE_PATH=$NEXT_PUBLIC_ADMIN_BASE_PATH \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
+# 所有文件复制完后再生成 Prisma 客户端
+RUN pnpm exec prisma generate
 RUN pnpm build
 
 # 移除 devDependencies（typescript/@types 等），只保留运行时必需的生产依赖
