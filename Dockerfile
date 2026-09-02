@@ -31,18 +31,25 @@ ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_ADMIN_BASE_PATH=$NEXT_PUBLIC_ADMIN_BASE_PATH \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
-RUN pnpm exec prisma generate
-ARG DATABASE_URL=file:/tmp/ci.db
-ENV DATABASE_URL=$DATABASE_URL
-RUN pnpm exec prisma migrate deploy
 RUN pnpm build
 
 # 移除 devDependencies（typescript/@types 等），只保留运行时必需的生产依赖
 RUN pnpm prune --prod
 
+# 裁剪后重新生成 Prisma 客户端和原生绑定，确保生产依赖下文件完整
+RUN pnpm exec prisma generate
+
 FROM ${NODE_IMAGE} AS runner
 ENV PNPM_HOME="/pnpm" PATH="/pnpm:$PATH" NODE_ENV=production PORT=3000
-RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+ARG APT_MIRROR=mirrors.aliyun.com
+RUN if [ -n "$APT_MIRROR" ]; then \
+        find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+            -exec sed -i "s|deb.debian.org|$APT_MIRROR|g" {} +; \
+    fi \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && corepack enable && corepack prepare pnpm@10.32.1 --activate
 WORKDIR /app
 COPY --from=build /app ./
 
