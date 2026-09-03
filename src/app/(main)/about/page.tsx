@@ -3,6 +3,9 @@ import { createServerCaller } from "@/trpc/server";
 import AboutHero from "@/components/about/about-hero";
 import AboutContent from "@/components/about/about-content";
 
+// 关于页内容不常变，缓存 1 小时
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "关于我",
   description:

@@ -94,17 +94,49 @@ export default async function ArticlePage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: article.title,
-    description: getDescription(article),
-    datePublished: article.createdAt.toISOString(),
-    dateModified: article.updatedAt.toISOString(),
-    author: { "@type": "Person", name: "xie392" },
-    keywords: article.tagNames.join(","),
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/article/${article.id}`,
-    },
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${SITE_URL}/article/${article.id}#article`,
+        headline: article.title,
+        description: getDescription(article),
+        datePublished: article.createdAt.toISOString(),
+        dateModified: article.updatedAt.toISOString(),
+        author: { "@id": `${SITE_URL}/#author` },
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        keywords: article.tagNames.join(","),
+        articleSection: article.categoryName ?? "未分类",
+        inLanguage: "zh-CN",
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": `${SITE_URL}/article/${article.id}`,
+        },
+      },
+      // 面包屑导航（帮助AI理解内容层级）
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "首页",
+            item: SITE_URL,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: article.categoryName ?? "分类",
+            item: article.categoryName ? `${SITE_URL}/categories?cat=${article.categoryId}` : `${SITE_URL}/categories`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: article.title,
+            item: `${SITE_URL}/article/${article.id}`,
+          },
+        ],
+      },
+    ],
   };
 
   const caller = await createServerCaller();

@@ -71,16 +71,39 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // 首页也是 auth 相关的动态渲染，默认 no-store 会禁用 bfcache
-        source: "/",
+        // 公开图片/Logo 缓存 7 天
+        source: "/:path*.(svg|png|jpg|jpeg|gif|webp|ico)",
         headers: [
-          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+          { key: "Cache-Control", value: "public, max-age=604800" },
         ],
       },
       {
+        // 首页：使用 Stale-While-Revalidate 策略
+        // 用户立刻拿到缓存（<100ms），后台静默更新新鲜内容
+        source: "/",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=60, stale-while-revalidate=300" },
+        ],
+      },
+      {
+        // 公开文章页：同样使用 SWR，缓存 5 分钟
         source: "/article/:id",
         headers: [
-          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=3600" },
+        ],
+      },
+      {
+        // 分类、标签页：缓存 10 分钟
+        source: "/:path(categories|tags|about)",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=600, stale-while-revalidate=3600" },
+        ],
+      },
+      {
+        // API 路由、后台、TRPC 不缓存，保持动态
+        source: "/(api|trpc|_trpc)/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-cache, no-store, must-revalidate" },
         ],
       },
     ];

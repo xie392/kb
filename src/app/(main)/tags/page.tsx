@@ -2,8 +2,8 @@ import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { createServerCaller } from "@/trpc/server";
 
-// 依赖数据库查询，禁止构建时静态预生成
-export const dynamic = "force-dynamic";
+// 标签页使用 ISR，10分钟缓存，用户访问秒开
+export const revalidate = 600;
 
 export default async function TagsPage() {
   const caller = await createServerCaller();

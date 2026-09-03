@@ -6,8 +6,9 @@ import HomeFeatured from "@/components/home-featured";
 import { createServerCaller } from "@/trpc/server";
 import { SITE_NAME } from "@/lib/config";
 
-// 首页依赖数据库查询，必须动态渲染，禁止构建时静态预生成
-export const dynamic = "force-dynamic";
+// 首页使用 ISR：每60秒重新验证，后台静默更新，用户访问秒开
+// 既保证数据新鲜度，又能获得静态页面的极速响应
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
