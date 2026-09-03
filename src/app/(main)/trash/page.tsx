@@ -1,6 +1,9 @@
 import { createServerCaller } from "@/trpc/server";
 import TrashList from "@/components/trash-list";
 
+// 依赖数据库查询，禁止构建时静态预生成
+export const dynamic = "force-dynamic";
+
 export default async function TrashPage() {
   const caller = await createServerCaller();
   const list = await caller.article.list({ status: "trash", page: 1, pageSize: 100 });
