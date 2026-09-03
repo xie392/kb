@@ -26,24 +26,29 @@ export default function HomeLayout({
 
       {/* 手绘页脚 */}
       <footer className="border-t-2 border-dashed border-hairline py-8">
-        <div className="max-w-250 mx-auto px-4 sm:px-6 flex items-center justify-center gap-3 font-hand-body text-[15px] text-ink-faint">
-          {/* TODO: 备案信息（ICP/公安备案号），备案完成后替换为真实信息 */}
+        <div className="max-w-250 mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-center gap-3 font-hand-body text-[15px] text-ink-faint">
           <a
             href="https://beian.miit.gov.cn/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-primary transition-colors"
           >
-            粤ICP备2026000000号-1
+            桂ICP备2026019706号-1
           </a>
           <a
-            href="https://beian.mps.gov.cn/"
+            href="https://beian.mps.gov.cn/#/query/webSearch?code=45098102000582"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 hover:text-primary transition-colors"
           >
-            <span className="w-3 h-3 rounded-full bg-ink-faint/60 inline-block" />
-            粤公网安备44030002000000号
+            <img
+              src="/police-badge.png"
+              alt="公安备案图标"
+              width={16}
+              height={16}
+              className="w-4 h-4 inline-block"
+            />
+            桂公网安备45098102000582号
           </a>
         </div>
       </footer>
