@@ -40,12 +40,12 @@ ARG NEXT_PUBLIC_ADMIN_BASE_PATH
 ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_ADMIN_BASE_PATH=$NEXT_PUBLIC_ADMIN_BASE_PATH \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NODE_OPTIONS="--max-old-space-size=4096"
+    NODE_OPTIONS="--max-old-space-size=1536"
 
 # Next.js 构建缓存挂载，增量构建不用每次全量编译
-# 增加 CI=1 禁用交互式输出，--max-old-space-size 避免 webpack 构建时 OOM 卡住
+# 限制 Node 内存 1.5G，避免小内存服务器 OOM 被 kill
 RUN --mount=type=cache,target=/app/.next/cache,sharing=locked \
-    NODE_OPTIONS="--max-old-space-size=4096" CI=1 pnpm build
+    NODE_OPTIONS="--max-old-space-size=1536" CI=1 pnpm build
 
 # 移除 devDependencies（typescript/@types 等），只保留运行时必需的生产依赖
 RUN pnpm prune --prod

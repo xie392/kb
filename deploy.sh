@@ -38,11 +38,30 @@ chmod 600 .env
 
 # 构建镜像（使用 BuildKit 缓存）
 echo "🔨 开始构建镜像..."
+# 小内存服务器构建前临时创建 2G swap，防止 OOM
+SWAP_FILE="/swapfile"
+NEED_CLOSE_SWAP=0
+if [ ! -f "$SWAP_FILE" ] && [ $(free -g | awk '/^Mem:/{print $2}') -lt 4 ]; then
+    echo "⚠️  检测到服务器内存小于4G，创建临时2G swap防止构建OOM..."
+    fallocate -l 2G $SWAP_FILE || dd if=/dev/zero of=$SWAP_FILE bs=1M count=2048
+    chmod 600 $SWAP_FILE
+    mkswap $SWAP_FILE
+    swapon $SWAP_FILE
+    NEED_CLOSE_SWAP=1
+fi
+
 cd "$REPO_DIR"
 DOCKER_BUILDKIT=1 docker build \
     --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${ADMIN_BASE_PATH:-$(grep NEXT_PUBLIC_ADMIN_BASE_PATH "$DEPLOY_DIR/.env" | cut -d'"' -f2)}" \
     --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL:-$(grep NEXT_PUBLIC_SITE_URL "$DEPLOY_DIR/.env" | cut -d'"' -f2)}" \
     -t kb:latest .
+
+# 构建完关闭临时swap
+if [ $NEED_CLOSE_SWAP -eq 1 ]; then
+    swapoff $SWAP_FILE
+    rm -f $SWAP_FILE
+    echo "✅ 已清理临时swap"
+fi
 
 # 重启服务
 echo "🚀 启动服务..."
