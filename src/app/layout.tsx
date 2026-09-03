@@ -10,6 +10,9 @@ import { Toaster } from "@/components/ui/sonner";
 import BackToTop from "@/components/back-to-top";
 import { ThemeProvider } from "@/components/theme-provider";
 
+// 全局强制动态渲染，所有页面都不在构建时静态预生成（数据库在启动时才迁移）
+export const dynamic = "force-dynamic";
+
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const caveat = Caveat({
   subsets: ["latin"],
