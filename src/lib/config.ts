@@ -20,7 +20,7 @@ export const ADMIN_LOGIN = `${ADMIN_HOME}/login`;
 // 站点对外 URL（SEO：canonical / OG / sitemap / robots 使用）。
 // 生产环境通过 NEXT_PUBLIC_SITE_URL 配置公网域名，默认本地开发地址。
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 ).replace(/\/+$/, "");
 
 // 站点显示名称（导航 / 首页 / 登录页等前台展示）。

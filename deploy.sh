@@ -36,6 +36,11 @@ else
 fi
 chmod 600 .env
 
+# 加载 .env，保证构建参数（NEXT_PUBLIC_*）一定能取到值，不受引号写法影响
+set -a
+. ./.env
+set +a
+
 # 构建镜像（使用 BuildKit 缓存）
 echo "🔨 开始构建镜像..."
 # 小内存服务器构建前临时创建 2G swap，防止 OOM
@@ -52,8 +57,8 @@ fi
 
 cd "$REPO_DIR"
 DOCKER_BUILDKIT=1 docker build \
-    --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${ADMIN_BASE_PATH:-$(grep NEXT_PUBLIC_ADMIN_BASE_PATH "$DEPLOY_DIR/.env" | cut -d'"' -f2)}" \
-    --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL:-$(grep NEXT_PUBLIC_SITE_URL "$DEPLOY_DIR/.env" | cut -d'"' -f2)}" \
+    --build-arg NEXT_PUBLIC_ADMIN_BASE_PATH="${NEXT_PUBLIC_ADMIN_BASE_PATH}" \
+    --build-arg NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL}" \
     -t kb:latest .
 
 # 构建完关闭临时swap
