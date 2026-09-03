@@ -5,7 +5,11 @@ import { ADMIN_BASE_PATH, ADMIN_HOME, ADMIN_LOGIN } from "@/lib/config";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const forwarded = req.headers.get("x-forwarded-proto");
+  const secureCookie = forwarded
+    ? forwarded.split(",")[0].trim() === "https"
+    : req.nextUrl.protocol === "https:";
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET, secureCookie });
 
   // 隐藏登录页：未登录放行渲染，已登录直接进后台
   if (pathname === ADMIN_LOGIN) {
