@@ -2,6 +2,9 @@ import Link from "next/link";
 import { formatDate } from "@/lib/format";
 import { createServerCaller } from "@/trpc/server";
 
+// 依赖数据库查询，禁止构建时静态预生成
+export const dynamic = "force-dynamic";
+
 export default async function TagsPage() {
   const caller = await createServerCaller();
   const [tags, list] = await Promise.all([

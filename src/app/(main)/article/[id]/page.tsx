@@ -13,6 +13,9 @@ import {
 } from "@/components/readonly-article";
 // sketch.css 内部已 @import base.css，自包含；default.css 是另一套独立风格（本项目用 sketch），无需引入
 import "@tipkit/themes/sketch.css";
+
+// 依赖数据库查询，禁止构建时静态预生成
+export const dynamic = "force-dynamic";
 import "@tipkit/themes/dark.css";
 import "@/app/editor.css";
 

@@ -6,6 +6,9 @@ import HomeFeatured from "@/components/home-featured";
 import { createServerCaller } from "@/trpc/server";
 import { SITE_NAME } from "@/lib/config";
 
+// 首页依赖数据库查询，必须动态渲染，禁止构建时静态预生成
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };

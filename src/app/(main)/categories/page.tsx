@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { createServerCaller } from "@/trpc/server";
 import KnowledgeBase from "@/components/knowledge-base";
 
+// 依赖数据库查询，禁止构建时静态预生成
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "知识库",
 };
