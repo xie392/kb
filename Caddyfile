@@ -1,5 +1,13 @@
 # Caddy 反向代理配置（放服务器 /opt/kb 目录，与 docker-compose.yml 同级）
-# 首次访问自动申请 Let's Encrypt 证书，之后自动续期；无需手动配置 HTTPS
+# 证书为 Cloudflare Origin CA 签发的泛域名证书（xie392.cn + *.xie392.cn），
+# 显式写 tls 指令后不走 Let's Encrypt 自动签发；外层由 Cloudflare 代理
 xie392.cn, www.xie392.cn {
+	tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 	reverse_proxy kb:3000
+}
+
+# Umami 统计后台（首次访问 admin/umami，默认账号 admin / umami，登录后立即改密码）
+stats.xie392.cn {
+	tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
+	reverse_proxy umami:3000
 }
