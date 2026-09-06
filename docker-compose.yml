@@ -61,6 +61,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # Cloudflare Origin CA 证书（服务器 /opt/kb/certs/，Caddyfile 里的 tls 指令引用）
+      - ./certs:/etc/caddy/certs:ro
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
