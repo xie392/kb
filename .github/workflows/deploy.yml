@@ -57,13 +57,9 @@ jobs:
             tar xzf source.tar.gz -C repo
             rm -f source.tar.gz
 
-            # 首次部署：复制配置文件
-            if [ ! -f docker-compose.yml ]; then
-              cp repo/docker-compose.yml ./
-            fi
-            if [ ! -f Caddyfile ]; then
-              cp repo/Caddyfile ./
-            fi
+            # 同步配置文件（repo 为准，每次部署都覆盖；certs/.env/data 等运行时文件只在服务器上）
+            cp repo/docker-compose.yml ./
+            cp repo/Caddyfile ./
 
             # 执行部署脚本
             bash repo/deploy.sh
