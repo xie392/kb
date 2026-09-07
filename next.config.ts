@@ -4,8 +4,8 @@ import { ADMIN_BASE_PATH } from "./src/lib/config";
 const nextConfig: NextConfig = {
   // 生产构建禁用 source map，加快构建速度并减少内存使用
   productionBrowserSourceMaps: false,
-  // 跳过 next build 内置的类型检查（小内存服务器上 tsc 会在 swap 抖动中卡死触发超时）。
-  // 类型把关由本地 `npx tsc --noEmit` / CI 单独执行，构建产物不受影响。
+  // 跳过 next build 内置的类型检查（小内存服务器上 tsc 会额外吃内存）。
+  // 类型/代码规范把关由本地 `npx tsc --noEmit && next lint` / CI 单独执行，构建产物不受影响。
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -28,10 +28,6 @@ const nextConfig: NextConfig = {
   // 引入的依赖链不生效（会打包 bindings.js 导致 'fs' 解析失败），需手动外部化
   // 同时将 node: 内置模块外部化，避免 instrumentation 打包时解析 node:fs 报错
   webpack(config, { isServer }) {
-    // 限制 webpack 并行度，避免在内存受限的服务器上 OOM 卡住
-    if (!config.parallelism) {
-      config.parallelism = 2;
-    }
     if (isServer) {
       const externals = config.externals ?? [];
       const externalModules = ["better-sqlite3", "bindings", "file-uri-to-path"].map(

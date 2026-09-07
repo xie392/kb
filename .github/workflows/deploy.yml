@@ -1,69 +1,102 @@
-name: Deploy to Server
+name: Build & Deploy
 
 on:
   push:
     branches: [master]
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
     steps:
-      - name: 检出代码
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 海外机器打包源码（几 MB），避免国内服务器访问 npm/GitHub 慢
-      - name: 打包源码
-        run: |
-          tar czf /tmp/source.tar.gz \
-            --exclude=node_modules \
-            --exclude=.next \
-            --exclude=.git \
-            --exclude='public/uploads' \
-            --exclude='./data' \
-            --exclude='*.db' \
-            --exclude='*.db-journal' \
-            --exclude='.env*' \
-            .
-          mv /tmp/source.tar.gz source.tar.gz
-          ls -lh source.tar.gz
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: 同步源码包到服务器
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
+            NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout (for config files)
+        uses: actions/checkout@v4
+
+      - name: Sync config files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "source.tar.gz"
-          target: "/opt/kb/"
-          timeout: "300s"
+          source: "docker-compose.yml,Caddyfile,deploy.sh"
+          target: "/opt/kb/repo/"
+          strip_components: 0
 
-      - name: 服务器解压并部署
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          command_timeout: "60m"
-          envs: ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
+          command_timeout: "300s"
+          envs: IMAGE_TAG,ADMIN_BASE_PATH,SITE_URL,INIT_USERNAME,INIT_PASSWORD
           script: |
             set -e
             cd /opt/kb
             mkdir -p data
 
-            # 解压源码到 repo 目录
-            rm -rf repo
-            mkdir repo
-            tar xzf source.tar.gz -C repo
-            rm -f source.tar.gz
-
-            # 同步配置文件（repo 为准，每次部署都覆盖；certs/.env/data 等运行时文件只在服务器上）
+            # 同步配置文件
             cp repo/docker-compose.yml ./
             cp repo/Caddyfile ./
+            cp repo/deploy.sh ./
 
             # 执行部署脚本
-            bash repo/deploy.sh
+            bash deploy.sh
         env:
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
           ADMIN_BASE_PATH: ${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
           SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           INIT_USERNAME: ${{ secrets.INIT_USERNAME }}

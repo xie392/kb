@@ -1,8 +1,9 @@
 services:
   kb:
-    image: kb:latest
+    image: m.daocloud.io/ghcr.io/${GITHUB_REPOSITORY:-xie392/kb}:${IMAGE_TAG:-latest}
     container_name: kb
     restart: unless-stopped
+    pull_policy: always
     mem_limit: 768m
     ports:
       - "127.0.0.1:3000:3000"
