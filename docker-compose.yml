@@ -1,6 +1,6 @@
 services:
   kb:
-    image: m.daocloud.io/ghcr.io/${GITHUB_REPOSITORY:-xie392/kb}:${IMAGE_TAG:-latest}
+    image: ${ACR_REGISTRY}/xie392/kb:${IMAGE_TAG:-latest}
     container_name: kb
     restart: unless-stopped
     pull_policy: always

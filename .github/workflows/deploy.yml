@@ -6,8 +6,10 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY_GHCR: ghcr.io
+  REGISTRY_ALIYUN: ${{ secrets.ACR_REGISTRY }}
+  IMAGE_NAME_GHCR: ${{ github.repository }}
+  IMAGE_NAME_ALIYUN: ${{ secrets.ACR_NAMESPACE }}/kb
 
 jobs:
   build-and-push:
@@ -16,13 +18,10 @@ jobs:
       contents: read
       packages: write
     outputs:
-      image_tag: ${{ steps.meta.outputs.version }}
+      image_tag: ${{ steps.meta-ghcr.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -30,15 +29,33 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.REGISTRY_GHCR }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
+      - name: Log in to Aliyun ACR
+        if: ${{ env.REGISTRY_ALIYUN != '' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_ALIYUN }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Extract metadata (GHCR)
+        id: meta-ghcr
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME_GHCR }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Extract metadata (Aliyun)
+        id: meta-aliyun
+        if: ${{ env.REGISTRY_ALIYUN != '' }}
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_ALIYUN }}/${{ env.IMAGE_NAME_ALIYUN }}
           tags: |
             type=sha,prefix=,format=short
             type=raw,value=latest,enable={{is_default_branch}}
@@ -49,8 +66,10 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.meta-ghcr.outputs.tags }}
+            ${{ steps.meta-aliyun.outputs.tags }}
+          labels: ${{ steps.meta-ghcr.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}

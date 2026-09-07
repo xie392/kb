@@ -23,6 +23,7 @@ NEXT_PUBLIC_SITE_URL="${SITE_URL}"
 INIT_USERNAME="${INIT_USERNAME}"
 INIT_PASSWORD="${INIT_PASSWORD}"
 GITHUB_REPOSITORY="xie392/kb"
+ACR_REGISTRY="${ACR_REGISTRY:-crpi-v7awq8xgmwpsld7c.cn-guangzhou.personal.cr.aliyuncs.com}"
 EOF
     chmod 600 .env
     echo "✅ 已创建 .env，初始账号: ${INIT_USERNAME}"
@@ -35,15 +36,23 @@ chmod 600 .env
 if ! grep -q "^GITHUB_REPOSITORY=" .env; then
     echo 'GITHUB_REPOSITORY="xie392/kb"' >> .env
 fi
+# 确保 ACR_REGISTRY 在 .env 中存在（兼容旧部署，广州地域个人版）
+if ! grep -q "^ACR_REGISTRY=" .env; then
+    echo 'ACR_REGISTRY="crpi-v7awq8xgmwpsld7c.cn-guangzhou.personal.cr.aliyuncs.com"' >> .env
+fi
 
 # 加载 .env
 set -a
 . ./.env
 set +a
 
-export GITHUB_REPOSITORY IMAGE_TAG
+export GITHUB_REPOSITORY IMAGE_TAG ACR_REGISTRY ACR_USERNAME ACR_PASSWORD
 
-echo "🔍 拉取镜像: m.daocloud.io/ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:-latest}"
+echo "🔍 拉取镜像: ${ACR_REGISTRY}/xie392/kb:${IMAGE_TAG:-latest}"
+# 登录 ACR（如果配置了用户名密码）
+if [ -n "$ACR_USERNAME" ] && [ -n "$ACR_PASSWORD" ]; then
+    echo "$ACR_PASSWORD" | docker login $ACR_REGISTRY -u $ACR_USERNAME --password-stdin
+fi
 docker compose pull kb
 
 echo "🚀 启动服务..."
