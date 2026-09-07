@@ -84,8 +84,9 @@ export default function SiteNav() {
         </a>
       </div>
 
-      {/* 移动端汉堡菜单（Base UI DropdownMenu，内置 click-outside 关闭） */}
-      <div className="md:hidden">
+      {/* 移动端导航区域 */}
+      <div className="md:hidden flex items-center gap-1.5">
+        <ThemeToggle variant="icon" />
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger
             render={

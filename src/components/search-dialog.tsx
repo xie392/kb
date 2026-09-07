@@ -65,7 +65,7 @@ export default function SearchDialog() {
       {/* 触发按钮 */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3.5 py-1.5 bg-white sketch-border sketch-shadow font-hand-display text-[16px] text-ink-muted hover:text-primary hover:-translate-y-0.5 transition-[color,transform] rotate-[0.5deg]"
+        className="hidden md:flex items-center gap-2 px-3.5 py-1.5 bg-white sketch-border sketch-shadow font-hand-display text-[16px] text-ink-muted hover:text-primary hover:-translate-y-0.5 transition-[color,transform] rotate-[0.5deg]"
         aria-label="搜索"
       >
         <svg aria-hidden="true" className="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -76,6 +76,17 @@ export default function SearchDialog() {
         <kbd aria-hidden="true" className="hidden sm:inline font-hand-body text-[12px] text-ink-faint border border-hairline rounded px-1">
           ⌘K
         </kbd>
+      </button>
+      {/* 移动端搜索图标按钮 */}
+      <button
+        onClick={() => setOpen(true)}
+        className="md:hidden flex items-center justify-center size-10 bg-white sketch-border sketch-shadow text-ink-muted hover:text-primary transition-colors rotate-[0.5deg]"
+        aria-label="搜索"
+      >
+        <svg aria-hidden="true" className="w-5 h-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <circle cx="9" cy="9" r="5.5" />
+          <path d="M13.5 13.5L17 17" strokeLinecap="round" />
+        </svg>
       </button>
 
       {/* 搜索弹窗：Dialog + Command 实现，手绘视觉沿用 ui/command 默认 */}

@@ -46,7 +46,11 @@ function MoonIcon({ className }: { className?: string }) {
  * 色条通过 portal 挂到 <body>，避免 sticky header 的 backdrop-filter
  * 变成 fixed 元素的包含块导致无法全屏。
  */
-export default function ThemeToggle() {
+interface ThemeToggleProps {
+  variant?: "default" | "icon";
+}
+
+export default function ThemeToggle({ variant = "default" }: ThemeToggleProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const sweepRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
@@ -98,12 +102,16 @@ export default function ThemeToggle() {
     );
   };
 
+  const buttonClass = variant === "icon" 
+    ? "flex items-center justify-center size-10 bg-white sketch-border sketch-shadow text-ink-muted hover:text-primary transition-colors rotate-[0.5deg]"
+    : "p-2 text-ink-muted hover:text-primary transition-colors rotate-[0.5deg]";
+
   return (
     <>
       <button
         type="button"
         onClick={handleToggle}
-        className="p-2 text-ink-muted hover:text-primary transition-colors rotate-[0.5deg]"
+        className={buttonClass}
         aria-label={isDark ? "切换到亮色模式" : "切换到暗色模式"}
         title={isDark ? "切换到亮色模式" : "切换到暗色模式"}
       >
