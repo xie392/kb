@@ -66,6 +66,7 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
+          provenance: false
           tags: |
             ${{ steps.meta-ghcr.outputs.tags }}
             ${{ steps.meta-aliyun.outputs.tags }}
