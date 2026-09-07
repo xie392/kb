@@ -108,6 +108,17 @@ export default function RootLayout({
       className={cn("tk-theme-sketch font-sans", geist.variable, caveat.variable, patrick.variable)}
     >
       <body className="min-h-screen antialiased" suppressHydrationWarning>
+        {/* Umami 访问统计：未配置 NEXT_PUBLIC_UMAMI_URL 时不加载（本地开发默认关闭） */}
+        {process.env.NEXT_PUBLIC_UMAMI_URL && process.env.NEXT_PUBLIC_UMAMI_SITE_ID && (
+          <script
+            defer
+            src={`${process.env.NEXT_PUBLIC_UMAMI_URL}/script.js`}
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_SITE_ID}
+            {...(process.env.NEXT_PUBLIC_UMAMI_DOMAINS
+              ? { "data-domains": process.env.NEXT_PUBLIC_UMAMI_DOMAINS }
+              : {})}
+          />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -55,3 +55,8 @@ demo/
 
 # 本地调试脚本
 scripts-dev/
+# 本地环境变量（Umami 测试等）
+.env.local
+
+# 本地运行时数据（umami-db 等）
+data/

@@ -3,11 +3,53 @@ services:
     image: kb:latest
     container_name: kb
     restart: unless-stopped
+    mem_limit: 768m
     ports:
       - "127.0.0.1:3000:3000"
     env_file: .env
     volumes:
       - ./data:/data
+    networks:
+      - kb-net
+
+  # 访问统计（Umami v3 仅支持 Postgres/MySQL；Postgres 限制内存，2G 服务器可用）
+  umami-db:
+    # 国内拉取走 DaoCloud 镜像加速（https://github.com/DaoCloud/public-image-mirror），内容同官方镜像
+    image: m.daocloud.io/docker.io/library/postgres:16-alpine
+    container_name: umami-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:-please-change-me}
+    mem_limit: 256m
+    volumes:
+      - ./data/umami-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - kb-net
+
+  umami:
+    image: m.daocloud.io/ghcr.io/umami-software/umami:postgresql-latest
+    container_name: umami
+    restart: unless-stopped
+    environment:
+      DATABASE_TYPE: postgresql
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:-please-change-me}@umami-db:5432/umami
+      # 用于加密遥测数据的随机串，生成方式：openssl rand -base64 32
+      APP_SECRET: ${UMAMI_APP_SECRET:-please-change-me}
+    # Next.js 启动峰值内存较高，256m 会被 cgroup OOM 杀掉，实测需 512m
+    mem_limit: 512m
+    ports:
+      # 本地测试用（映射到 3002，避开 dev 的 3001）；服务器上由 Caddy 反代，删除此行
+      - "127.0.0.1:3002:3000"
+    depends_on:
+      umami-db:
+        condition: service_healthy
     networks:
       - kb-net
 
@@ -19,6 +61,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # Cloudflare Origin CA 证书（服务器 /opt/kb/certs/，Caddyfile 里的 tls 指令引用）
+      - ./certs:/etc/caddy/certs:ro
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
