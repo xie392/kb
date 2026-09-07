@@ -4,6 +4,11 @@ import { ADMIN_BASE_PATH } from "./src/lib/config";
 const nextConfig: NextConfig = {
   // 生产构建禁用 source map，加快构建速度并减少内存使用
   productionBrowserSourceMaps: false,
+  // 跳过 next build 内置的类型检查（小内存服务器上 tsc 会在 swap 抖动中卡死触发超时）。
+  // 类型把关由本地 `npx tsc --noEmit` / CI 单独执行，构建产物不受影响。
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // @tipkit/* 以 TS 源码形式发布，需要显式编译
   transpilePackages: [
     "@tipkit/core",
