@@ -1,13 +1,6 @@
 import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
-// Next dev（webpack）的 React Refresh 运行时依赖 eval 做热更新，会被严格 CSP 阻断，
-// 导致客户端 bootstrap 中断、前端 tRPC 请求不发。仅在开发环境放开 'unsafe-eval'，生产保持严格。
-const cspScriptSrc =
-  process.env.NODE_ENV === "development"
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    : "script-src 'self' 'unsafe-inline'";
-
 const nextConfig: NextConfig = {
   // 生产构建禁用 source map，加快构建速度并减少内存使用
   productionBrowserSourceMaps: false,
@@ -126,10 +119,6 @@ const nextConfig: NextConfig = {
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          {
-            key: "Content-Security-Policy",
-            value: `default-src 'self'; ${cspScriptSrc}; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none';`,
-          },
         ],
       },
     ];
