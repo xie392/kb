@@ -4,6 +4,8 @@ import { ADMIN_BASE_PATH } from "./src/lib/config";
 const nextConfig: NextConfig = {
   // 生产构建禁用 source map，加快构建速度并减少内存使用
   productionBrowserSourceMaps: false,
+  // 关闭 x-powered-by: Next.js 响应头，减少技术栈指纹暴露
+  poweredByHeader: false,
   // 跳过 next build 内置的类型检查（小内存服务器上 tsc 会额外吃内存）。
   // 类型/代码规范把关由本地 `npx tsc --noEmit && next lint` / CI 单独执行，构建产物不受影响。
   typescript: {
@@ -105,6 +107,23 @@ const nextConfig: NextConfig = {
         source: "/(api|trpc|_trpc)/:path*",
         headers: [
           { key: "Cache-Control", value: "private, no-cache, no-store, must-revalidate" },
+        ],
+      },
+      {
+        // 全站安全响应头（#05）：补齐报告缺失的 6 项安全头
+        // CSP 依赖内联脚本/样式（Next.js RSC 注入 + Tailwind），必须保留 unsafe-inline
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none';",
+          },
         ],
       },
     ];

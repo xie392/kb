@@ -4,6 +4,11 @@
 xie392.cn, www.xie392.cn {
 	tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
 	reverse_proxy kb:3000
+	# 隐藏反代指纹头（#06），其余安全头由应用层 next.config headers() 注入
+	header {
+		-Server
+		-Via
+	}
 }
 
 # Umami 统计后台（首次访问 admin/umami，默认账号 admin / umami，登录后立即改密码）
