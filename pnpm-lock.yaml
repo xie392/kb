@@ -28,20 +28,20 @@ importers:
         specifier: ^5.101.4
         version: 5.102.8(react@19.2.8)
       '@tipkit/components':
-        specifier: ^0.3.4
-        version: 0.3.4(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^0.3.5
+        version: 0.3.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tipkit/core':
-        specifier: ^0.3.4
-        version: 0.3.4(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^0.3.5
+        version: 0.3.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tipkit/extensions':
-        specifier: ^0.3.4
-        version: 0.3.4(5ff6da1cd141562190e27eb2569e0d0c)
+        specifier: ^0.3.5
+        version: 0.3.5(5ff6da1cd141562190e27eb2569e0d0c)
       '@tipkit/themes':
-        specifier: ^0.3.4
-        version: 0.3.4
+        specifier: ^0.3.5
+        version: 0.3.5
       '@tipkit/ui':
-        specifier: ^0.3.4
-        version: 0.3.4(ecf0769e01c4b90830106b19da9e1368)
+        specifier: ^0.3.5
+        version: 0.3.5(ecf0769e01c4b90830106b19da9e1368)
       '@tiptap/core':
         specifier: ^3.30.2
         version: 3.30.5(@tiptap/pm@3.30.5)
@@ -1570,14 +1570,14 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@tipkit/components@0.3.4':
-    resolution: {integrity: sha512-4+cYo9Ivo00DqaJL49wR39IVtcuhZmoHkLnRBsp6/PIW0R/DYAxbYJWV+AOGMuQyHys7oWnMsCc01OU8MGhxWQ==}
+  '@tipkit/components@0.3.5':
+    resolution: {integrity: sha512-fVSw7gInkYLLgi7qo3G3vTWPkA/7pL7CT+z8+gMl8RT9/tx1hrdRBpavxDAGvsvXVaK4evznsju5Q2rsH/nr9A==}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@tipkit/core@0.3.4':
-    resolution: {integrity: sha512-5Yx4A7nJpU1jVhiBGv7gYreGqzbNgeTUKwhHcrE80Qo0VAGdq+ifrOdWodBD0y9TOhMi6Qz+OJocWhMv0A2ZUw==}
+  '@tipkit/core@0.3.5':
+    resolution: {integrity: sha512-sVoQWtOPOwyyPByVyg/LYbghy6gHJFdYADrwv0ujdjshyeVfxPjOAkfUEYpTeNqoVi4MddOBJjU8B2NprUqk1w==}
     peerDependencies:
       '@tiptap/core': ^3.30.2
       '@tiptap/extension-placeholder': ^3.30.2
@@ -1587,8 +1587,8 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@tipkit/extensions@0.3.4':
-    resolution: {integrity: sha512-5rdR3cNiXR83bgw3p2+o/9dFPDmFZeCu8pwQLxIbTOdrA5JZhUYoFWgBJ1zcZYktNn8VMoGRW91NVCS9p/IRVA==}
+  '@tipkit/extensions@0.3.5':
+    resolution: {integrity: sha512-T6eFWHmxNb9OiKnwIs8PDofyKkdukk+DoA/bEqQy3g/NkgOI9oingeFttf59EDyOb531Sqo7cl21nl/swaUH9A==}
     peerDependencies:
       '@tiptap/core': ^3.30.2
       '@tiptap/extension-bold': ^3.30.2
@@ -1622,11 +1622,11 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@tipkit/themes@0.3.4':
-    resolution: {integrity: sha512-HrOxuQZzqqW3xST4MQCVgJNhWfrVKAMA5RN2OfvrLvHGmcz8zHux4vctBy0uveWv06yo17B69T5k8XgjX7Aw6w==}
+  '@tipkit/themes@0.3.5':
+    resolution: {integrity: sha512-ljmpp0goZsu543BDdZGnvSwjAin6ekuBBz2OdmUsNLXcHQHiVT+SWin6HfzTGbyVvWVi22x83RBeSzpAgAGVkg==}
 
-  '@tipkit/ui@0.3.4':
-    resolution: {integrity: sha512-bUV0HYAJwIdt+2mzDIE9d7b852vUk90UlYx5/oVYba5k6yoalZp5YJWx+GxL4mMB0mFQzTvp0bAL0iadDLp52g==}
+  '@tipkit/ui@0.3.5':
+    resolution: {integrity: sha512-TEFkwKgObWQjERNwUESXBFlIXgWvxd07l0z3BsmGTm99S0Ic39jtncB6pPNfbPh9+3SQdXa0447grxT3G0C+pQ==}
     peerDependencies:
       '@tiptap/core': ^3.30.2
       '@tiptap/extension-color': ^3.30.2
@@ -5681,7 +5681,7 @@ snapshots:
       '@tanstack/query-core': 5.102.8
       react: 19.2.8
 
-  '@tipkit/components@0.3.4(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@tipkit/components@0.3.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-dropdown-menu': 2.1.24(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -5699,7 +5699,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@tipkit/core@0.3.4(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@tipkit/core@0.3.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
       '@tiptap/extension-placeholder': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
@@ -5709,10 +5709,10 @@ snapshots:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
-  '@tipkit/extensions@0.3.4(5ff6da1cd141562190e27eb2569e0d0c)':
+  '@tipkit/extensions@0.3.5(5ff6da1cd141562190e27eb2569e0d0c)':
     dependencies:
-      '@tipkit/components': 0.3.4(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/core': 0.3.4(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/components': 0.3.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/core': 0.3.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
       '@tiptap/extension-bold': 3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))
       '@tiptap/extension-character-count': 3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5))
@@ -5756,13 +5756,13 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@tipkit/themes@0.3.4': {}
+  '@tipkit/themes@0.3.5': {}
 
-  '@tipkit/ui@0.3.4(ecf0769e01c4b90830106b19da9e1368)':
+  '@tipkit/ui@0.3.5(ecf0769e01c4b90830106b19da9e1368)':
     dependencies:
-      '@tipkit/components': 0.3.4(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/core': 0.3.4(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tipkit/extensions': 0.3.4(5ff6da1cd141562190e27eb2569e0d0c)
+      '@tipkit/components': 0.3.5(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/core': 0.3.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/extension-placeholder@3.30.5(@tiptap/extensions@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)))(@tiptap/pm@3.30.5)(@tiptap/react@3.30.5(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.5(@tiptap/pm@3.30.5))(@tiptap/pm@3.30.5)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tiptap/starter-kit@3.30.5)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tipkit/extensions': 0.3.5(5ff6da1cd141562190e27eb2569e0d0c)
       '@tiptap/core': 3.30.5(@tiptap/pm@3.30.5)
       '@tiptap/extension-color': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
       '@tiptap/extension-font-family': 3.30.5(@tiptap/extension-text-style@3.30.5(@tiptap/core@3.30.5(@tiptap/pm@3.30.5)))
