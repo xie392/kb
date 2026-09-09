@@ -22,6 +22,13 @@ interface ReadonlyArticleCtx {
 
 const Ctx = createContext<ReadonlyArticleCtx>({ editor: null, outline: [], content: "" });
 
+/** 统一去除尾部空段落，兼容历史被 TrailingNode 污染的数据 */
+function trimTrailingEmptyParagraphs(content: string): string {
+  return content
+    ? content.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "")
+    : content;
+}
+
 /** 包裹正文与 TOC，共享同一个只读编辑器实例（保持原 DOM 结构，TOC 可在 article 卡片外） */
 export function ReadonlyArticleProvider({
   content,
@@ -32,9 +39,7 @@ export function ReadonlyArticleProvider({
 }) {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
   // 入口统一去除尾部空段落，兼容历史被 TrailingNode 污染的数据
-  const trimmedContent = content
-    ? content.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "")
-    : content;
+  const trimmedContent = trimTrailingEmptyParagraphs(content);
   const editor = useArticleEditor({
     value: trimmedContent,
     editable: false,
@@ -128,14 +133,12 @@ function TocSkeleton() {
 
 /** 目录：放在 article 卡片外，保持 sticky 定位 */
 export function ReadonlyArticleToc() {
-  const { editor, outline } = useContext(Ctx);
+  const { outline } = useContext(Ctx);
   const items = useMemo<TocItem[]>(
     () => outline.map((it) => ({ id: it.id, text: it.text, level: it.level })),
     [outline],
   );
 
-  // 编辑器未初始化时显示骨架占位，避免布局偏移
-  if (!editor) return <TocSkeleton />;
-
+  if (outline.length === 0) return <TocSkeleton />;
   return <ArticleToc items={items} />;
 }

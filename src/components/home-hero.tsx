@@ -78,33 +78,7 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
           "-=0.3"
         );
 
-      gsap.to(".hero-doodle-1", {
-        y: "+=18",
-        x: "+=10",
-        rotate: 6,
-        duration: 3.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".hero-doodle-2", {
-        y: "+=22",
-        x: "-=12",
-        rotate: -5,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".hero-doodle-3", {
-        y: "+=14",
-        x: "+=8",
-        rotate: 4,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+      // 装饰漂浮由 CSS transform 动画实现（GPU 合成、不占主线程），这里不再用 GSAP 无限循环
     },
     { scope: rootRef }
   );
