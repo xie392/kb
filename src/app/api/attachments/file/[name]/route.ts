@@ -4,8 +4,6 @@ import path from "node:path";
 import { db } from "@/server/db";
 import { getAttachmentStorageDir } from "@/server/storage";
 
-export const dynamic = "force-dynamic";
-
 /** 附件文件访问入口：仅服务数据库中有记录的附件，与存储目录位置解耦 */
 export async function GET(
   _req: NextRequest,

@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
 const MAX_BYTES = 2 * 1024 * 1024;
 const TIMEOUT_MS = 6000;
 

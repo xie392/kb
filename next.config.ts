@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
 
 const nextConfig: NextConfig = {
+  // Cache Components + Partial Prefetching：前台公开查询用 "use cache" 进静态壳/预取，
+  // 点击切换时立即渲染缓存内容，实现丝滑跳转（而非骨架等待）。
+  cacheComponents: true,
+  partialPrefetching: true,
+  // 前台内容缓存档案。关键：expire < 5min 使内容成为 "dynamic hole"（构建期不执行数据库查询，
+  // 从而 CI/构建环境无需 SQLite 也能构建），运行时首次访问流式生成、之后缓存秒开。
+  // revalidate 后台静默刷新；后台写操作后再 revalidateTag('kb') 即时失效。
+  cacheLife: {
+    kb: { stale: 300, revalidate: 60, expire: 240 },
+  },
   // 生产构建禁用 source map，加快构建速度并减少内存使用
   productionBrowserSourceMaps: false,
   // 关闭 x-powered-by: Next.js 响应头，减少技术栈指纹暴露

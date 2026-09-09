@@ -10,8 +10,9 @@ import { Toaster } from "@/components/ui/sonner";
 import BackToTop from "@/components/back-to-top";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// 全局强制动态渲染，所有页面都不在构建时静态预生成（数据库在启动时才迁移）
-export const dynamic = "force-dynamic";
+// 移除全局 force-dynamic：前台公开内容改用 Cache Components（"use cache"）进入静态壳/预取，
+// 点击切换即可即时渲染，实现丝滑跳转。数据库构建时不再需要（缓存函数构建期不执行）。
+// 后台等真正动态的页面仍各自处理。线上数据库迁移仍走容器启动时的 entrypoint。
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const caveat = Caveat({

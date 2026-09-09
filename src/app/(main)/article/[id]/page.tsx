@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
-import { createServerCaller } from "@/trpc/server";
 import { SITE_URL } from "@/lib/config";
+import { getArticle, getAdjacent } from "@/server/queries/public";
 import ArticleViewTracker from "@/components/article-view-tracker";
 import {
   ReadonlyArticleProvider,
@@ -15,15 +14,11 @@ import {
 import "@tipkit/themes/sketch.css";
 
 // 依赖数据库查询，禁止构建时静态预生成
-export const dynamic = "force-dynamic";
 import "@tipkit/themes/dark.css";
 import "@/app/editor.css";
 
-// generateMetadata 与页面组件共用，同一请求内只查询一次数据库
-const getArticle = cache(async (id: string) => {
-  const caller = await createServerCaller();
-  return caller.article.get({ id });
-});
+// 文章内容随 id 运行时变化，无法静态预渲染；退出 instant 校验，保持运行时动态渲染（内容仍走 use cache 缓存）
+export const instant = false;
 
 /** 去掉富文本标签，生成纯文本摘要 */
 function plainText(html: string) {
@@ -41,12 +36,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  let article;
-  try {
-    article = await getArticle(id);
-  } catch {
-    return {};
-  }
+  const article = await getArticle(id);
+  if (!article) return {};
 
   const description = getDescription(article);
   const keywords = [...article.tagNames];
@@ -85,12 +76,8 @@ export default async function ArticlePage({
 }) {
   const { id } = await params;
 
-  let article;
-  try {
-    article = await getArticle(id);
-  } catch {
-    notFound();
-  }
+  const article = await getArticle(id);
+  if (!article) notFound();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -139,9 +126,8 @@ export default async function ArticlePage({
     ],
   };
 
-  const caller = await createServerCaller();
   // 定向查询上一篇/下一篇，避免每篇都全量拉取列表
-  const { prev, next } = await caller.article.adjacent({ id });
+  const { prev, next } = await getAdjacent(id);
 
   return (
     <ReadonlyArticleProvider content={article.content}>

@@ -1,26 +1,58 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { io } from "next/cache";
 import HandChart from "@/components/hand-chart";
 import HomeArticleFeed from "@/components/home-article-feed";
 import HomeHero from "@/components/home-hero";
 import HomeFeatured from "@/components/home-featured";
-import { createServerCaller } from "@/trpc/server";
+import { listArticles, getCategoryTree, getTagList, getTrend } from "@/server/queries/public";
 import { SITE_NAME } from "@/lib/config";
-
-// 首页使用 ISR：每60秒重新验证，后台静默更新，用户访问秒开
-// 既保证数据新鲜度，又能获得静态页面的极速响应
-export const revalidate = 60;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
 export default async function HomePage() {
-  const caller = await createServerCaller();
+  return (
+    <Suspense fallback={<HomeSkeleton />}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+function HomeSkeleton() {
+  return (
+    <div className="graph-paper min-h-screen font-hand-body text-ink-secondary">
+      <div className="max-w-250 mx-auto px-4 sm:px-6 py-10 text-center">
+        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-4" style={{ width: 120, height: 18 }} />
+        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-6" style={{ width: 320, height: 52 }} />
+        <div className="flex justify-center gap-3 mb-10">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-hairline/40 rounded-sm animate-pulse" style={{ width: 90, height: 20 }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-left">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white sketch-border sketch-shadow p-5">
+              <div className="bg-hairline/40 rounded-sm animate-pulse mb-3" style={{ width: "50%", height: 14 }} />
+              <div className="bg-hairline/40 rounded-sm animate-pulse mb-3" style={{ width: "85%", height: 20 }} />
+              <div className="bg-hairline/40 rounded-sm animate-pulse mb-2" style={{ height: 13 }} />
+              <div className="bg-hairline/40 rounded-sm animate-pulse" style={{ width: "70%", height: 13 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function HomePageContent() {
+  await io(); // 动态渲染：规避相对时间等 request-time 值，放 Suspense 内不阻止 instant 导航
   const [list, cats, tags, trend] = await Promise.all([
-    caller.article.list({ status: "normal", page: 1, pageSize: 50 }),
-    caller.category.tree(),
-    caller.tag.list(),
-    caller.stats.trend(),
+    listArticles({ page: 1, pageSize: 50 }),
+    getCategoryTree(),
+    getTagList(),
+    getTrend(),
   ]);
 
   const articles = list.items;

@@ -2,9 +2,6 @@ import type { MetadataRoute } from "next";
 import { db } from "@/server/db";
 import { SITE_URL } from "@/lib/config";
 
-// 每 6 小时重新生成一次，新发布的公开文章会自动进入 sitemap
-export const revalidate = 21600;
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 遵循 sitemaps.org 极简规范：只保留 loc + lastmod，
   // changefreq/priority 已不被搜索引擎重视，生产普遍省略。

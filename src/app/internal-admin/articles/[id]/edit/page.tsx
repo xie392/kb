@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { createServerCaller } from "@/trpc/server";
 import ArticleEditor from "@/components/article-editor";
 
+// 编辑页依赖登录态与运行时 id，允许阻塞路由（后台无需 instant 预渲染）
+export const instant = false;
+
 export default async function EditArticlePage({
   params,
 }: {

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
 import Link from "next/link";
 import AdminHeader from "./admin-header";
 import AdminNav from "@/components/admin-nav";
@@ -14,11 +16,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// 后台是登录后的动态控制台（编辑器含 Math.random() 等 request-time 值）。
+// 通过 Suspense 内的 DynamicGate 读取 cookies，强制整树 request 时动态渲染，
+// 避免后台 client 页面被静态预渲染（其含 useSearchParams/Date 等运行时数据）。
+async function DynamicGate() {
+  await cookies();
+  return null;
+}
+
 export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="graph-paper h-screen flex overflow-hidden font-hand-body text-ink-secondary">
+      <Suspense fallback={null}>
+        <DynamicGate />
+      </Suspense>
       {/* 后台侧边导航（固定不滚动） */}
       <aside className="w-55 shrink-0 h-full flex flex-col bg-white border-r-2 border-dashed border-hairline">
         <div className="px-4 pt-4 pb-3 flex items-center justify-between">
@@ -33,7 +46,9 @@ export default function AdminLayout({
           </Link>
         </div>
 
-        <AdminNav />
+        <Suspense fallback={null}>
+          <AdminNav />
+        </Suspense>
 
         <div className="px-3 pb-4 border-t border-hairline pt-3">
           <Link
@@ -50,7 +65,10 @@ export default function AdminLayout({
 
       {/* 内容区（锁定视口高度，超出部分在内部滚动） */}
       <div className="flex-1 min-w-0 h-full overflow-hidden flex flex-col">
-        <AdminHeader />
+        {/* usePathname 依赖运行时路径，包 Suspense 以通过 prerender 校验 */}
+        <Suspense fallback={null}>
+          <AdminHeader />
+        </Suspense>
         <main id="main" className="flex-1 min-h-0 overflow-y-auto">{children}</main>
       </div>
     </div>

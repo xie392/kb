@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { revalidateKb } from "@/server/queries/revalidate";
 
 export const categoryRouter = router({
   /** 分类树（任意层级嵌套，含子分类和笔记数） */
@@ -66,13 +67,15 @@ export const categoryRouter = router({
         });
         if (!parent) throw new TRPCError({ code: "NOT_FOUND" });
       }
-      return ctx.db.category.create({
+      const created = await ctx.db.category.create({
         data: {
           name: input.name,
           parentId: input.parentId,
           sort: input.sort,
         },
       });
+      revalidateKb();
+      return created;
     }),
 
   update: protectedProcedure
@@ -85,7 +88,9 @@ export const categoryRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
-      return ctx.db.category.update({ where: { id }, data });
+      const updated = await ctx.db.category.update({ where: { id }, data });
+      revalidateKb();
+      return updated;
     }),
 
   /** 删除分类：有子分类或笔记时拒绝 */
@@ -107,6 +112,7 @@ export const categoryRouter = router({
           message: `该分类下有 ${articles} 篇文章，请先删除该分类下的文章后再删除该分类`,
         });
       await ctx.db.category.delete({ where: { id: input.id } });
+      revalidateKb();
       return { ok: true };
     }),
 });

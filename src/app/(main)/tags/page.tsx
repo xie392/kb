@@ -1,15 +1,50 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { io } from "next/cache";
 import { formatDate } from "@/lib/format";
-import { createServerCaller } from "@/trpc/server";
-
-// 标签页使用 ISR，10分钟缓存，用户访问秒开
-export const revalidate = 600;
+import { getTagList, listArticles } from "@/server/queries/public";
 
 export default async function TagsPage() {
-  const caller = await createServerCaller();
+  return (
+    <Suspense fallback={<TagsSkeleton />}>
+      <TagsContent />
+    </Suspense>
+  );
+}
+
+function TagsSkeleton() {
+  return (
+    <div className="max-w-250 mx-auto px-4 sm:px-6 py-10">
+      <div className="mb-10 text-center">
+        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-4" style={{ width: 120, height: 18 }} />
+        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-6" style={{ width: 320, height: 52 }} />
+        <div className="flex justify-center gap-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-hairline/40 rounded-full animate-pulse" style={{ width: 70 + (i % 3) * 12, height: 36 }} />
+          ))}
+        </div>
+      </div>
+      <div className="space-y-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i}>
+            <div className="bg-hairline/40 rounded-sm animate-pulse mb-3" style={{ width: `${40 + i * 10}%`, height: 20 }} />
+            <div className="space-y-2.5">
+              {[...Array(5)].map((_, j) => (
+                <div key={j} className="bg-hairline/40 rounded-sm animate-pulse" style={{ width: `${95 - (j % 3) * 10}%`, height: 44 }} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function TagsContent() {
+  await io(); // 动态渲染：formatDate 依赖当前时间，放在 Suspense 内不阻止 instant 导航
   const [tags, list] = await Promise.all([
-    caller.tag.list(),
-    caller.article.list({ status: "normal", page: 1, pageSize: 100 }),
+    getTagList(),
+    listArticles({ page: 1, pageSize: 100 }),
   ]);
 
   const all = list.items;

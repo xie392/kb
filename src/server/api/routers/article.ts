@@ -2,6 +2,7 @@ import { z } from "zod";
 import { cookies } from "next/headers";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { revalidateKb } from "@/server/queries/revalidate";
 
 const articleSelect = {
   id: true,
@@ -223,7 +224,7 @@ export const articleRouter = router({
       const summary =
         input.summary ??
         input.content.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").slice(0, 100);
-      return ctx.db.article.create({
+      const created = await ctx.db.article.create({
         data: {
           title: input.title,
           content: input.content,
@@ -235,6 +236,8 @@ export const articleRouter = router({
           },
         },
       });
+      revalidateKb();
+      return created;
     }),
 
   update: protectedProcedure
@@ -258,7 +261,9 @@ export const articleRouter = router({
           data: tagIds.map((tagId) => ({ articleId: id, tagId })),
         });
       }
-      return ctx.db.article.update({ where: { id }, data });
+      const updated = await ctx.db.article.update({ where: { id }, data });
+      revalidateKb();
+      return updated;
     }),
 
   softDelete: protectedProcedure
@@ -268,6 +273,7 @@ export const articleRouter = router({
         where: { id: { in: input.ids } },
         data: { status: "trash", deletedAt: new Date() },
       });
+      revalidateKb();
       return { ok: true };
     }),
 
@@ -278,6 +284,7 @@ export const articleRouter = router({
         where: { id: { in: input.ids } },
         data: { status: "normal", deletedAt: null },
       });
+      revalidateKb();
       return { ok: true };
     }),
 
@@ -285,6 +292,7 @@ export const articleRouter = router({
     .input(z.object({ ids: z.array(z.string().min(1).max(50)).min(1) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.article.deleteMany({ where: { id: { in: input.ids } } });
+      revalidateKb();
       return { ok: true };
     }),
 
@@ -309,6 +317,7 @@ export const articleRouter = router({
         where: { id: { in: input.ids } },
         data,
       });
+      revalidateKb();
       return { ok: true };
     }),
 });

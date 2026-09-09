@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import { revalidateKb } from "@/server/queries/revalidate";
 
 export const tagRouter = router({
   list: publicProcedure.query(async ({ ctx }) => {
@@ -18,26 +19,31 @@ export const tagRouter = router({
   create: protectedProcedure
     .input(z.object({ name: z.string().min(1).max(30) }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.tag.upsert({
+      const tag = await ctx.db.tag.upsert({
         where: { name: input.name },
         update: {},
         create: { name: input.name },
       });
+      revalidateKb();
+      return tag;
     }),
 
   update: protectedProcedure
     .input(z.object({ id: z.string().min(1).max(50), name: z.string().min(1).max(30) }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.tag.update({
+      const tag = await ctx.db.tag.update({
         where: { id: input.id },
         data: { name: input.name },
       });
+      revalidateKb();
+      return tag;
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1).max(50) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.tag.delete({ where: { id: input.id } });
+      revalidateKb();
       return { ok: true };
     }),
 
@@ -52,6 +58,7 @@ export const tagRouter = router({
         where: { id: { in: empty.map((t) => t.id) } },
       });
     }
+    revalidateKb();
     return { removed: empty.length };
   }),
 });

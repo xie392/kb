@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { createServerCaller } from "@/trpc/server";
+import { Suspense } from "react";
+import { io } from "next/cache";
+import { listArticles, getCategoryTree, getTagList } from "@/server/queries/public";
 import AboutHero from "@/components/about/about-hero";
 import AboutContent from "@/components/about/about-content";
-
-// 关于页内容不常变，缓存 1 小时
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "关于我",
@@ -14,11 +13,19 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const caller = await createServerCaller();
+  return (
+    <Suspense fallback={null}>
+      <AboutPageContent />
+    </Suspense>
+  );
+}
+
+async function AboutPageContent() {
+  await io(); // 动态渲染：规避相对时间等 request-time 值，放 Suspense 内不阻止 instant 导航
   const [list, cats, tags] = await Promise.all([
-    caller.article.list({ status: "normal", page: 1, pageSize: 1 }),
-    caller.category.tree(),
-    caller.tag.list(),
+    listArticles({ page: 1, pageSize: 1 }),
+    getCategoryTree(),
+    getTagList(),
   ]);
 
   const stats = [
