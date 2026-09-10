@@ -233,7 +233,7 @@ export default function AdminArticlesPage() {
                   <div className="flex items-center gap-2">
                     {a.isPinned && <span className="text-primary">★</span>}
                     <Link
-                      href={`/article/${a.id}`}
+                      href={a.visibility === "public" ? `/article/${a.id}` : `${ADMIN_HOME}/articles/${a.id}/edit`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-hand-display text-[17px] font-bold text-ink-secondary truncate max-w-60 hover:text-primary hover:underline transition-colors"
