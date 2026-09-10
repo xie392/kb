@@ -1,13 +1,13 @@
-// 前台公开内容查询（Cache Components）。
-// 说明：前台页面始终处于未登录态，故所有查询固定只取 visibility: "public" 的文章，
-// 与 tRPC 中「未登录 ctx.user 为空」分支的行为完全一致，但不再依赖 auth()/cookies，
-// 因此可用 "use cache" 进静态壳/预取，实现点击即跳转。
+// 前台内容查询。
+// - 未登录：只查公开文章，走 "use cache" 缓存，点击即跳转
+// - 已登录：可以查看所有正常状态文章（包括私有），不走缓存（缓存不区分用户）
 //
 // 缓存失效：
 // - 时间维度由 cacheLife('kb') 后台静默刷新；
 // - 后台写操作后调用 revalidateTag('kb', 'max') 即时失效（见 server/queries/revalidate.ts）。
 import { cacheLife, cacheTag } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import { auth } from "@/server/auth";
 import { db } from "@/server/db";
 
 const articleSelect = {
@@ -18,6 +18,7 @@ const articleSelect = {
   isPinned: true,
   viewCount: true,
   status: true,
+  categoryId: true,
   createdAt: true,
   updatedAt: true,
   category: { select: { id: true, name: true, parent: { select: { name: true } } } },
@@ -25,6 +26,7 @@ const articleSelect = {
 } as const;
 
 type ArticleListItem = Prisma.ArticleGetPayload<{ select: typeof articleSelect }>;
+type ArticleDetail = ArticleListItem & { content: string };
 
 function mapArticle(a: ArticleListItem) {
   return {
@@ -38,8 +40,30 @@ function mapArticle(a: ArticleListItem) {
   };
 }
 
-/** 文章列表（等价 article.list 的未登录分支） */
-export async function listArticles(input: { page?: number; pageSize?: number }) {
+function mapArticleDetail(a: ArticleDetail) {
+  return {
+    ...a,
+    categoryName: a.category
+      ? a.category.parent
+        ? `${a.category.parent.name}/${a.category.name}`
+        : a.category.name
+      : null,
+    tagNames: a.tags.map((t) => t.tag.name),
+  };
+}
+
+/** 检查是否已登录（供查询函数判断是否放开权限） */
+async function isAuthed() {
+  try {
+    const session = await auth();
+    return !!session?.user;
+  } catch {
+    return false;
+  }
+}
+
+/** 文章列表（未登录缓存版本） */
+async function listArticlesPublic(input: { page?: number; pageSize?: number }) {
   "use cache";
   cacheLife("kb");
   cacheTag("kb");
@@ -68,8 +92,40 @@ export async function listArticles(input: { page?: number; pageSize?: number }) 
   };
 }
 
-/** 文章详情（等价 article.get 的未登录分支；不存在或非公开时返回 null） */
-export async function getArticle(id: string) {
+/** 文章列表（登录动态版本，不走缓存） */
+async function listArticlesAuthed(input: { page?: number; pageSize?: number }) {
+  const page = input.page ?? 1;
+  const pageSize = input.pageSize ?? 20;
+  const where = { status: "normal" as const };
+
+  const [items, total] = await Promise.all([
+    db.article.findMany({
+      where,
+      select: articleSelect,
+      orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    db.article.count({ where }),
+  ]);
+
+  return {
+    items: items.map(mapArticle),
+    total,
+    page,
+    pageSize,
+    nextCursor: page * pageSize < total ? page + 1 : null,
+  };
+}
+
+/** 文章列表（根据登录态自动选择版本） */
+export async function listArticles(input: { page?: number; pageSize?: number }) {
+  const authed = await isAuthed();
+  return authed ? listArticlesAuthed(input) : listArticlesPublic(input);
+}
+
+/** 文章详情（未登录缓存版本） */
+async function getArticlePublic(id: string) {
   "use cache";
   cacheLife("kb");
   cacheTag("kb");
@@ -81,20 +137,31 @@ export async function getArticle(id: string) {
       tags: { select: { tag: { select: { id: true, name: true } } } },
     },
   });
-  if (!article || article.visibility !== "public") return null;
-  return {
-    ...article,
-    categoryName: article.category
-      ? article.category.parent
-        ? `${article.category.parent.name}/${article.category.name}`
-        : article.category.name
-      : null,
-    tagNames: article.tags.map((t) => t.tag.name),
-  };
+  if (!article || article.visibility !== "public" || article.status !== "normal") return null;
+  return mapArticleDetail(article);
 }
 
-/** 上一篇/下一篇（等价 article.adjacent 的未登录分支） */
-export async function getAdjacent(id: string) {
+/** 文章详情（登录动态版本，不走缓存） */
+async function getArticleAuthed(id: string) {
+  const article = await db.article.findUnique({
+    where: { id },
+    include: {
+      category: { select: { id: true, name: true, parent: { select: { name: true } } } },
+      tags: { select: { tag: { select: { id: true, name: true } } } },
+    },
+  });
+  if (!article || article.status !== "normal") return null;
+  return mapArticleDetail(article);
+}
+
+/** 文章详情（根据登录态自动选择版本：未登录只看公开，登录看所有正常文章） */
+export async function getArticle(id: string) {
+  const authed = await isAuthed();
+  return authed ? getArticleAuthed(id) : getArticlePublic(id);
+}
+
+/** 上一篇/下一篇（未登录缓存版本） */
+async function getAdjacentPublic(id: string) {
   "use cache";
   cacheLife("kb");
   cacheTag("kb");
@@ -107,7 +174,27 @@ export async function getAdjacent(id: string) {
 
   const pick = { id: true, title: true } as const;
   const base = { status: "normal" as const, visibility: "public" as const };
+  return getAdjacentLogic(self, base, pick);
+}
 
+/** 上一篇/下一篇（登录动态版本，不走缓存） */
+async function getAdjacentAuthed(id: string) {
+  const self = await db.article.findUnique({
+    where: { id },
+    select: { isPinned: true, updatedAt: true },
+  });
+  if (!self) return { prev: null, next: null };
+
+  const pick = { id: true, title: true } as const;
+  const base = { status: "normal" as const };
+  return getAdjacentLogic(self, base, pick);
+}
+
+async function getAdjacentLogic(
+  self: { isPinned: boolean; updatedAt: Date },
+  base: { status: "normal"; visibility?: "public" },
+  pick: { id: true; title: true }
+) {
   let prev = null;
   if (self.isPinned) {
     prev = await db.article.findFirst({
@@ -155,7 +242,13 @@ export async function getAdjacent(id: string) {
   return { prev, next };
 }
 
-/** 分类树（等价 category.tree 的未登录分支，笔记数只统计公开文章） */
+/** 上一篇/下一篇（根据登录态自动选择版本） */
+export async function getAdjacent(id: string) {
+  const authed = await isAuthed();
+  return authed ? getAdjacentAuthed(id) : getAdjacentPublic(id);
+}
+
+/** 分类树（未登录缓存版本，笔记数只统计公开文章） */
 export async function getCategoryTree() {
   "use cache";
   cacheLife("kb");
@@ -193,7 +286,7 @@ export async function getCategoryTree() {
   return build(null);
 }
 
-/** 标签列表（等价 tag.list 的未登录分支，文章数只统计公开文章） */
+/** 标签列表（未登录缓存版本，文章数只统计公开文章） */
 export async function getTagList() {
   "use cache";
   cacheLife("kb");
@@ -207,7 +300,7 @@ export async function getTagList() {
   });
 }
 
-/** 近 30 天每日新增笔记数（等价 stats.trend 的未登录分支，只统计公开文章） */
+/** 近 30 天每日新增笔记数（未登录缓存版本，只统计公开文章） */
 export async function getTrend(days = 30) {
   "use cache";
   cacheLife("kb");
