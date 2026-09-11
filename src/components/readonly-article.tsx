@@ -46,17 +46,22 @@ export function ReadonlyArticleProvider({
   children: ReactNode;
 }) {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
+  const mounted = useIsMounted();
   // 入口统一去除尾部空段落，兼容历史被 TrailingNode 污染的数据
   const trimmedContent = trimTrailingEmptyParagraphs(content);
+
+  // 【关键修复】延迟到客户端挂载后才创建 TipTap editor 实例。
+  // 服务端渲染与水合阶段都只输出原始 HTML（通过 ReadonlyArticleContent 里的 dangerouslySetInnerHTML），
+  // 避免 TipTap 在水合过程中立即改写 DOM 结构导致 React #418 不匹配错误。
   const editor = useArticleEditor({
-    value: trimmedContent,
+    value: mounted ? trimmedContent : "",
     editable: false,
     onOutline: setOutline,
   });
 
   const value = useMemo(
-    () => ({ editor, outline, content: trimmedContent }),
-    [editor, outline, trimmedContent],
+    () => ({ editor: mounted ? editor : null, outline, content: trimmedContent }),
+    [mounted, editor, outline, trimmedContent],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
