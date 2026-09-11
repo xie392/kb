@@ -14,6 +14,14 @@ import type { OutlineItem } from "@/components/rich-text/types";
 import ArticleToc from "@/components/article-toc";
 import type { TocItem } from "@/lib/toc";
 
+// 用于标记客户端挂载完成，避免 hydration mismatch（服务端无 editor，
+// 客户端挂载后 TipTap 会修改 DOM 结构，#418 就是这个原因）
+function useIsMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return mounted;
+}
+
 interface ReadonlyArticleCtx {
   editor: Editor | null;
   outline: OutlineItem[];
@@ -56,6 +64,7 @@ export function ReadonlyArticleProvider({
 /** 正文渲染区：放在 article 卡片内 */
 export function ReadonlyArticleContent() {
   const { editor, outline, content } = useContext(Ctx);
+  const mounted = useIsMounted();
 
   // 编辑器渲染后给标题注入 id，供 TOC 锚点与 IntersectionObserver 使用
   useEffect(() => {
@@ -74,16 +83,16 @@ export function ReadonlyArticleContent() {
     };
   }, [editor, outline]);
 
-  // 编辑器未初始化时，直接用服务端 HTML 渲染占位，高度完全匹配避免跳动。
-  // 必须给占位套上 tk-prosemirror prose-kb（与编辑器挂载后的 class 一致），
-  // 否则 SSR/首屏这段原始 HTML 没有正文排版样式，会出现"先无样式、等一下才有"的闪烁。
-  if (!editor) {
+  // hydration 期间保持和服务端一致的原始 HTML 输出，等客户端挂载完成后
+  // 再替换为 TipTap 编辑器渲染，避免 DOM 结构不一致导致 React #418 错误
+  if (!mounted || !editor) {
     return (
       <div className="tk-theme-sketch tk-readonly">
         <div className="tk-editor">
           <div
             className="tk-prosemirror prose-kb"
             dangerouslySetInnerHTML={{ __html: content }}
+            suppressHydrationWarning
           />
         </div>
       </div>
@@ -134,11 +143,13 @@ function TocSkeleton() {
 /** 目录：放在 article 卡片外，保持 sticky 定位 */
 export function ReadonlyArticleToc() {
   const { outline } = useContext(Ctx);
+  const mounted = useIsMounted();
   const items = useMemo<TocItem[]>(
     () => outline.map((it) => ({ id: it.id, text: it.text, level: it.level })),
     [outline],
   );
 
-  if (outline.length === 0) return <TocSkeleton />;
+  // hydration 未完成时显示骨架，避免初始 outline 为空导致闪烁或不匹配
+  if (!mounted || outline.length === 0) return <TocSkeleton />;
   return <ArticleToc items={items} />;
 }
