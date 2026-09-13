@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
-import { SITE_URL } from "@/lib/config";
-import { getArticle, getAdjacent } from "@/server/queries/public";
+import { ADMIN_HOME, SITE_URL } from "@/lib/config";
+import { getArticle, getAdjacent, isAuthed } from "@/server/queries/public";
 import ArticleViewTracker from "@/components/article-view-tracker";
 import {
   ReadonlyArticleProvider,
@@ -78,6 +78,9 @@ export default async function ArticlePage({
 
   const article = await getArticle(id);
   if (!article) notFound();
+
+  // 仅登录用户可见：文章头部右侧的编辑入口（新标签打开后台编辑页）
+  const authed = await isAuthed();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -167,6 +170,30 @@ export default async function ArticlePage({
                   <span className="font-hand-body text-[14px] text-primary rotate-[0.5deg]">
                     〇 公开
                   </span>
+                )}
+                {authed && (
+                  <Link
+                    href={`${ADMIN_HOME}/articles/${article.id}/edit`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="在新标签页编辑这篇笔记"
+                    className="ml-auto shrink-0 inline-flex items-center gap-1 font-hand-body text-[14px] px-2.5 py-1 bg-white sketch-border sketch-shadow text-primary hover:-translate-y-0.5 transition-transform"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                    编辑
+                  </Link>
                 )}
               </div>
 

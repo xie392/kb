@@ -5,7 +5,7 @@
 // 缓存失效：
 // - 时间维度由 cacheLife('kb') 后台静默刷新；
 // - 后台写操作后调用 revalidateTag('kb', 'max') 即时失效（见 server/queries/revalidate.ts）。
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife, cacheTag, io } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
@@ -52,8 +52,11 @@ function mapArticleDetail(a: ArticleDetail) {
   };
 }
 
-/** 检查是否已登录（供查询函数判断是否放开权限） */
-async function isAuthed() {
+/** 检查是否已登录（供查询函数判断是否放开权限，前台页面判断是否显示管理入口） */
+export async function isAuthed() {
+  // 显式请求期挂起点：Cache Components 预渲染时在此挂起，
+  // 避免认证内部的 new Date()/crypto 触发 "unstable value while prerendering"。
+  await io();
   try {
     const session = await auth();
     return !!session?.user;
