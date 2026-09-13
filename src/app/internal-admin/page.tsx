@@ -2,6 +2,7 @@
 
 import { api } from "@/trpc/client";
 import HandChart from "@/components/hand-chart";
+import WritingHeatmap from "@/components/writing-heatmap";
 
 const NOTE_COLORS = ["#0075de", "#ff64c8", "#2a9d99", "#dd5b00"];
 const VIEW_COLORS = ["#9b59b6", "#e67e22", "#1abc9c", "#e74c3c"];
@@ -82,6 +83,7 @@ function ChartCard({
 
 export default function AdminDashboardPage() {
   const { data, isFetching } = api.stats.overview.useQuery();
+  const { data: heatmap } = api.stats.heatmap.useQuery({ days: 182 });
 
   const noteCards = data
     ? [
@@ -128,6 +130,20 @@ export default function AdminDashboardPage() {
           <StatCard key={s.label} {...s} delay={i * 60} />
         ))}
       </div>
+
+      {heatmap && heatmap.days.length > 0 && (
+        <div className="bg-white sketch-border sketch-shadow p-6 fade-up mb-8" style={{ animationDelay: "260ms" }}>
+          <h3 className="font-hand-display text-[22px] font-bold text-ink-secondary marker-underline inline-block">
+            写作热力图
+          </h3>
+          <p className="font-hand-body text-[13px] text-ink-faint mt-1">
+            近半年的记录节奏 · 每格一天，颜色越深当天新增越多
+          </p>
+          <div className="mt-4">
+            <WritingHeatmap data={heatmap.days} />
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-4">
         <h2 className="font-hand-display text-[18px] font-bold text-ink-muted">阅读统计</h2>

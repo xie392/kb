@@ -73,7 +73,7 @@ export default function SearchDialogInner({
                 输入关键词开始搜索
               </div>
               <div className="mt-2 font-hand-body text-[14px] text-ink-faint">
-                支持标题、正文摘要、分类、标签
+                支持标题、正文、分类、标签
               </div>
             </div>
           ) : isFetching ? (
@@ -111,9 +111,9 @@ export default function SearchDialogInner({
                     <div className="mt-0.5 font-hand-display text-[19px] font-bold text-ink-secondary">
                       {highlight(a.title, keyword)}
                     </div>
-                    {a.summary && (
-                      <div className="mt-0.5 font-hand-body text-[14px] text-ink-muted line-clamp-1">
-                        {highlight(a.summary, keyword)}
+                    {(a.snippet ?? a.summary) && (
+                      <div className="mt-0.5 font-hand-body text-[14px] text-ink-muted line-clamp-2">
+                        {highlight((a.snippet ?? a.summary) as string, keyword)}
                       </div>
                     )}
                   </div>

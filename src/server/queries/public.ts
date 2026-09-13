@@ -9,6 +9,8 @@ import { cacheLife, cacheTag, io } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { localDayKey } from "@/lib/format";
+
 
 const articleSelect = {
   id: true,
@@ -378,14 +380,6 @@ export async function getTagList() {
     },
     orderBy: { name: "asc" },
   });
-}
-
-/** 本地自然日的 YYYY-MM-DD 键 */
-function localDayKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
 }
 
 /** 近 30 天每日新增笔记数（未登录缓存版本，只统计公开文章） */

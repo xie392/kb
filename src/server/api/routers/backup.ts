@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { reindexAllArticleLinks } from "@/server/links";
+import { revalidateKb } from "@/server/queries/revalidate";
 import {
   backupPayloadSchema,
   createBackup,
@@ -67,6 +69,9 @@ export const backupRouter = router({
       } catch {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "恢复失败，数据已回滚" });
       }
+      // 双链关系可由正文重建，恢复后统一重算，避免指向旧 id 的脏数据
+      await reindexAllArticleLinks(ctx.db);
+      revalidateKb();
       return { ok: true };
     }),
 

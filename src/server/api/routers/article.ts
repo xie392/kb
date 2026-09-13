@@ -3,6 +3,11 @@ import { cookies } from "next/headers";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { revalidateKb } from "@/server/queries/revalidate";
+import { syncArticleLinks } from "@/server/links";
+import { aiConfigured, generateSummary, suggestTags } from "@/server/ai";
+
+/** 每篇文章保留的历史版本上限 */
+const REVISION_KEEP = 30;
 
 const articleSelect = {
   id: true,
@@ -209,6 +214,44 @@ export const articleRouter = router({
       return { prev, next };
     }),
 
+  /** 标题联想：供编辑器 [[双向链接]] 补全，仅返回正常状态文章的 id/标题 */
+  titleSearch: protectedProcedure
+    .input(z.object({ q: z.string().max(100).default(""), excludeId: z.string().max(50).optional() }))
+    .query(async ({ ctx, input }) => {
+      const kw = input.q.trim();
+      const where: Record<string, unknown> = { status: "normal" };
+      if (kw) where.title = { contains: kw };
+      if (input.excludeId) where.id = { not: input.excludeId };
+      const items = await ctx.db.article.findMany({
+        where,
+        select: { id: true, title: true },
+        orderBy: { updatedAt: "desc" },
+        take: 8,
+      });
+      return { items };
+    }),
+
+  /** AI 生成摘要（返回文本，由前端填入 summary 字段） */
+  aiSummary: protectedProcedure
+    .input(z.object({ content: z.string().max(200_000) }))
+    .mutation(async ({ input }) => {
+      if (!aiConfigured()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "未配置 DEEPSEEK_API_KEY，无法使用 AI 摘要" });
+      }
+      return { summary: await generateSummary(input.content) };
+    }),
+
+  /** AI 推荐标签（优先复用已有标签词表） */
+  aiTags: protectedProcedure
+    .input(z.object({ content: z.string().max(200_000) }))
+    .mutation(async ({ ctx, input }) => {
+      if (!aiConfigured()) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "未配置 DEEPSEEK_API_KEY，无法使用 AI 标签" });
+      }
+      const existing = await ctx.db.tag.findMany({ select: { name: true } });
+      return { tags: await suggestTags(input.content, existing.map((t) => t.name)) };
+    }),
+
   create: protectedProcedure
     .input(
       z.object({
@@ -236,6 +279,7 @@ export const articleRouter = router({
           },
         },
       });
+      await syncArticleLinks(ctx.db, created.id, created.content);
       revalidateKb();
       return created;
     }),
@@ -255,6 +299,40 @@ export const articleRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, tagIds, ...data } = input;
+
+      // 修改前快照上一版（仅标题/正文/摘要发生实质变化时）
+      const existing = await ctx.db.article.findUnique({
+        where: { id },
+        select: { title: true, content: true, summary: true },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+      const changed =
+        (data.title !== undefined && data.title !== existing.title) ||
+        (data.content !== undefined && data.content !== existing.content) ||
+        (data.summary !== undefined && (data.summary ?? null) !== existing.summary);
+      if (changed) {
+        await ctx.db.articleRevision.create({
+          data: {
+            articleId: id,
+            title: existing.title,
+            content: existing.content,
+            summary: existing.summary,
+          },
+        });
+        // 只保留最近 REVISION_KEEP 版
+        const stale = await ctx.db.articleRevision.findMany({
+          where: { articleId: id },
+          orderBy: { createdAt: "desc" },
+          select: { id: true },
+          skip: REVISION_KEEP,
+        });
+        if (stale.length) {
+          await ctx.db.articleRevision.deleteMany({
+            where: { id: { in: stale.map((r) => r.id) } },
+          });
+        }
+      }
+
       if (tagIds) {
         await ctx.db.articleTag.deleteMany({ where: { articleId: id } });
         await ctx.db.articleTag.createMany({
@@ -262,6 +340,63 @@ export const articleRouter = router({
         });
       }
       const updated = await ctx.db.article.update({ where: { id }, data });
+      // 正文变化后重建出链关系（仅当本次提交带上了 content）
+      if (input.content !== undefined) {
+        await syncArticleLinks(ctx.db, id, updated.content);
+      }
+      revalidateKb();
+      return updated;
+    }),
+
+  /** 历史版本列表（不含正文全文，只给摘要片段与元信息） */
+  revisions: protectedProcedure
+    .input(z.object({ id: z.string().min(1).max(50) }))
+    .query(async ({ ctx, input }) => {
+      const rows = await ctx.db.articleRevision.findMany({
+        where: { articleId: input.id },
+        select: { id: true, title: true, content: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: REVISION_KEEP,
+      });
+      return {
+        items: rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          createdAt: r.createdAt,
+          // 纯文本预览前 100 字
+          preview: r.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 100),
+        })),
+      };
+    }),
+
+  /** 回滚到指定历史版本（当前版本会自动存为新的一版，可再次回滚回来） */
+  restoreRevision: protectedProcedure
+    .input(z.object({ revisionId: z.string().min(1).max(50) }))
+    .mutation(async ({ ctx, input }) => {
+      const rev = await ctx.db.articleRevision.findUnique({
+        where: { id: input.revisionId },
+      });
+      if (!rev) throw new TRPCError({ code: "NOT_FOUND", message: "历史版本不存在" });
+
+      const current = await ctx.db.article.findUnique({
+        where: { id: rev.articleId },
+        select: { id: true, title: true, content: true, summary: true },
+      });
+      if (!current) throw new TRPCError({ code: "NOT_FOUND", message: "文章不存在" });
+
+      await ctx.db.articleRevision.create({
+        data: {
+          articleId: rev.articleId,
+          title: current.title,
+          content: current.content,
+          summary: current.summary,
+        },
+      });
+      const updated = await ctx.db.article.update({
+        where: { id: rev.articleId },
+        data: { title: rev.title, content: rev.content, summary: rev.summary },
+      });
+      await syncArticleLinks(ctx.db, rev.articleId, rev.content);
       revalidateKb();
       return updated;
     }),

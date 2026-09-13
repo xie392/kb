@@ -4,9 +4,12 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { ADMIN_HOME, SITE_URL, SITE_NAME, pageAlternates } from "@/lib/config";
 import { getArticle, getAdjacent, getRelatedArticles, isAuthed } from "@/server/queries/public";
+import { getArticleLinks } from "@/server/queries/graph";
 import ArticleViewTracker from "@/components/article-view-tracker";
 import RelatedArticles from "@/components/related-articles";
+import BacklinksPanel from "@/components/backlinks-panel";
 import ShareButton from "@/components/share-button";
+import { renderWikiLinks, createTitleResolver } from "@/lib/wikilink";
 import {
   ReadonlyArticleProvider,
   ReadonlyArticleContent,
@@ -131,14 +134,21 @@ export default async function ArticlePage({
     ],
   };
 
-  // 定向查询上一篇/下一篇与相关文章，避免每篇都全量拉取列表
-  const [{ prev, next }, related] = await Promise.all([
+  // 定向查询上一篇/下一篇、相关文章与双向链接，避免每篇都全量拉取列表
+  const [{ prev, next }, related, links] = await Promise.all([
     getAdjacent(id),
     getRelatedArticles(id, 3),
+    getArticleLinks(id, article.content),
   ]);
 
+  // 把正文里的 [[标题]] 渲染为指向对应笔记的链接（未命中则显示为缺失态）
+  const renderedContent = renderWikiLinks(
+    article.content,
+    createTitleResolver(new Map(Object.entries(links.resolveMap))),
+  );
+
   return (
-    <ReadonlyArticleProvider content={article.content}>
+    <ReadonlyArticleProvider content={renderedContent}>
       <ArticleViewTracker articleId={id} />
       <script
         type="application/ld+json"
@@ -281,6 +291,8 @@ export default async function ArticlePage({
               </div>
             )}
           </div>
+
+          {links.incoming.length > 0 && <BacklinksPanel items={links.incoming} />}
 
           {related.length > 0 && <RelatedArticles items={related} />}
         </div>

@@ -4,6 +4,14 @@ import { useState } from "react";
 import { api } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const TAG_COLORS = ["#0075de", "#ff64c8", "#62aef0", "#2a9d99", "#dd5b00", "#d6b6f6"];
 
@@ -31,6 +39,19 @@ export default function AdminTagsPage() {
   });
   const cleanEmpty = api.tag.cleanEmpty.useMutation({
     onSuccess: (res) => { invalidate(); show(`已清理 ${res.removed} 个空标签`); },
+  });
+
+  // 合并标签
+  const [mergeSource, setMergeSource] = useState<{ id: string; name: string } | null>(null);
+  const [mergeTargetId, setMergeTargetId] = useState("");
+  const merge = api.tag.merge.useMutation({
+    onSuccess: (res) => {
+      invalidate();
+      show(`已把 #${res.sourceName} 合并到 #${res.targetName}（转移 ${res.moved} 篇）`);
+      setMergeSource(null);
+      setMergeTargetId("");
+    },
+    onError: (e) => show(e.message),
   });
 
   const show = (text: string) => {
@@ -153,6 +174,16 @@ export default function AdminTagsPage() {
                       编辑
                     </Button>
                     <Button
+                      onClick={() => {
+                        setMergeSource({ id: tag.id, name: tag.name });
+                        setMergeTargetId("");
+                      }}
+                      variant="ghost"
+                      className="px-1.5 h-auto text-[13px] text-ink-faint opacity-0 group-hover:opacity-100"
+                    >
+                      合并
+                    </Button>
+                    <Button
                       onClick={() => remove.mutate({ id: tag.id })}
                       variant="ghost"
                       className="px-1.5 h-auto text-[13px] text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100"
@@ -170,6 +201,45 @@ export default function AdminTagsPage() {
           </div>
         )}
       </div>
+
+      {/* 合并标签对话框 */}
+      <Dialog open={!!mergeSource} onOpenChange={(v) => !v && setMergeSource(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>合并标签</DialogTitle>
+            <DialogDescription>
+              把 #{mergeSource?.name} 下的笔记全部转移到目标标签，然后删除该标签；已同时带目标标签的笔记不会重复绑定。
+            </DialogDescription>
+          </DialogHeader>
+          <select
+            value={mergeTargetId}
+            onChange={(e) => setMergeTargetId(e.target.value)}
+            className="h-10 w-full px-3 sketch-border bg-white font-hand-body text-[15px] text-ink-secondary outline-none"
+          >
+            <option value="">选择目标标签…</option>
+            {(tags ?? [])
+              .filter((t) => t.id !== mergeSource?.id)
+              .map((t) => (
+                <option key={t.id} value={t.id}>
+                  #{t.name}（{t._count.articles} 篇）
+                </option>
+              ))}
+          </select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMergeSource(null)}>
+              取消
+            </Button>
+            <Button
+              disabled={!mergeTargetId || merge.isPending}
+              onClick={() =>
+                mergeSource && merge.mutate({ sourceId: mergeSource.id, targetId: mergeTargetId })
+              }
+            >
+              {merge.isPending ? "合并中…" : "确认合并"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

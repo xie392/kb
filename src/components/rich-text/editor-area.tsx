@@ -14,6 +14,7 @@ import {
   TableControls,
 } from "@tipkit/ui";
 import { TooltipProvider } from "@tipkit/components";
+import { WikiSuggestion, type WikiTarget } from "./ext/wiki-suggestion";
 import {
   Bold,
   ChevronDownSquare,
@@ -85,10 +86,12 @@ interface EditorAreaProps {
   editor: Editor | null;
   /** 传入后 "/" 菜单的"图片"动作支持本地上传 */
   onUploadImage?: (file: File) => Promise<string>;
+  /** 传入后支持 `[[` 双向链接补全（按关键词查询候选笔记） */
+  onWikiSearch?: (query: string) => Promise<WikiTarget[]>;
 }
 
 /* 纯编辑区组件（不含工具栏）—— 浮层菜单全部使用 @tipkit/ui */
-export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
+export function EditorArea({ editor, onUploadImage, onWikiSearch }: EditorAreaProps) {
   if (!editor) {
     return (
       <div className="animate-pulse space-y-3 p-8">
@@ -106,6 +109,7 @@ export function EditorArea({ editor, onUploadImage }: EditorAreaProps) {
         <SlashMenu editor={editor} onUploadImage={onUploadImage} iconRenderer={renderSlashIcon} aiEnabled />
         <AiMenu editor={editor} />
         <EmojiSuggestion editor={editor} />
+        {onWikiSearch && <WikiSuggestion editor={editor} search={onWikiSearch} />}
         <TextMenu editor={editor} />
         <LinkBubble editor={editor} />
         <LinkDialogHost editor={editor} />

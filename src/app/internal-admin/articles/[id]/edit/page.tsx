@@ -26,6 +26,7 @@ export default async function EditArticlePage({
         id: article.id,
         title: article.title,
         content: article.content,
+        summary: article.summary,
         categoryId: article.categoryId,
         visibility: article.visibility,
         tagIds: article.tags.map((t) => t.tag.id),

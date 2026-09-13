@@ -88,7 +88,6 @@ async function main() {
       tags: ["Next.js", "React", "TypeScript"],
       visibility: "public",
       isPinned: true,
-      isFavorite: true,
     },
     {
       id: "a2",
@@ -99,7 +98,6 @@ async function main() {
       tags: ["职场", "效率工具"],
       visibility: "private",
       isPinned: true,
-      isFavorite: false,
     },
     {
       id: "a3",
@@ -110,7 +108,6 @@ async function main() {
       tags: ["读书"],
       visibility: "private",
       isPinned: false,
-      isFavorite: true,
     },
     {
       id: "a4",
@@ -121,7 +118,6 @@ async function main() {
       tags: ["TypeScript"],
       visibility: "private",
       isPinned: false,
-      isFavorite: false,
     },
     {
       id: "a5",
@@ -132,7 +128,6 @@ async function main() {
       tags: ["效率工具"],
       visibility: "private",
       isPinned: false,
-      isFavorite: false,
     },
     {
       id: "a6",
@@ -143,7 +138,6 @@ async function main() {
       tags: ["TypeScript", "效率工具"],
       visibility: "public",
       isPinned: false,
-      isFavorite: false,
     },
   ];
 
@@ -166,7 +160,6 @@ async function main() {
         categoryId: a.categoryId,
         visibility: a.visibility,
         isPinned: a.isPinned,
-        isFavorite: a.isFavorite,
       },
       create: {
         id: a.id,
@@ -176,7 +169,6 @@ async function main() {
         categoryId: a.categoryId,
         visibility: a.visibility,
         isPinned: a.isPinned,
-        isFavorite: a.isFavorite,
         tags: {
           create: a.tags.map((t) => ({ tagId: tags[t] })),
         },

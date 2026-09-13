@@ -1406,6 +1406,24 @@
   /* 占位 */
 }
 
+/* ─── 双向链接（[[笔记标题]]） ─── */
+.prose-kb a.wiki-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 1.5px dashed color-mix(in srgb, var(--color-primary) 55%, transparent);
+  padding: 0 1px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.prose-kb a.wiki-link:hover {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-bottom-color: var(--color-primary);
+}
+.prose-kb .wiki-link-missing {
+  color: var(--color-ink-muted);
+  border-bottom: 1.5px dashed var(--color-hairline);
+  cursor: help;
+}
+
 /* ─── BlockHandles：Notion 风格块级双柄（+ 插入 / ⋮⋮ 拖拽） ─── */
 /* @tipkit/extensions 将手柄以 position:fixed 直接挂到 body 上，inline z-index:50，
    会穿透后台 sticky 顶栏(z-20/z-30)、工具栏、底部状态栏(z-30)和右侧大纲(z-20)。

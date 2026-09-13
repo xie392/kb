@@ -1,5 +1,7 @@
+import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import type { PrismaClient } from "@prisma/client";
+import { localDayKey } from "@/lib/format";
 
 /** 近 N 天每日新增笔记数（status: normal；未登录只统计公开文章） */
 async function getDailyTrend(db: PrismaClient, includePrivate: boolean, days = 30) {
@@ -45,6 +47,30 @@ export const statsRouter = router({
   trend: publicProcedure.query(async ({ ctx }) =>
     getDailyTrend(ctx.db, !!ctx.user)
   ),
+
+  /** 写作热力图：近 N 天每日新增笔记数（本地自然日，含私有） */
+  heatmap: protectedProcedure
+    .input(z.object({ days: z.number().int().min(30).max(365).default(182) }))
+    .query(async ({ ctx, input }) => {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (input.days - 1));
+      const rows = await ctx.db.article.findMany({
+        where: { status: "normal", createdAt: { gte: start } },
+        select: { createdAt: true },
+      });
+      const counts = new Map<string, number>();
+      for (const r of rows) {
+        const key = localDayKey(r.createdAt);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      const days: { date: string; count: number }[] = [];
+      for (let i = input.days - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const key = localDayKey(d);
+        days.push({ date: key, count: counts.get(key) ?? 0 });
+      }
+      return { days };
+    }),
 
   overview: protectedProcedure.query(async ({ ctx }) => {
     const now = new Date();
