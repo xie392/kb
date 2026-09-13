@@ -45,8 +45,6 @@ model Article {
   visibility String             @default("private") // private | public
   isPinned   Boolean            @default(false)
   viewCount  Int                @default(0)
-  // 每日笔记归属的日期（YYYY-MM-DD，本地时区）；普通笔记为 null
-  dailyDate  String?            @unique
   tags       ArticleTag[]
   dailyViews ArticleDailyView[]
   // 双向链接：outgoing = 本文引用了别人；incoming = 别人引用了本文（反向链接）

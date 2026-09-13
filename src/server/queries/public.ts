@@ -417,14 +417,10 @@ export async function getTrend(days = 30) {
   return out;
 }
 
-/** 归档：全部公开文章（按创建时间倒序，用于时间线归档页） */
-export async function getArchive() {
-  "use cache";
-  cacheLife("kb");
-  cacheTag("kb");
-
+/** 归档取数：按创建时间倒序（未登录只看公开，登录后含私有） */
+async function getArchiveLogic(where: { status: "normal"; visibility?: "public" }) {
   const rows = await db.article.findMany({
-    where: { status: "normal", visibility: "public" },
+    where,
     select: {
       id: true,
       title: true,
@@ -444,4 +440,23 @@ export async function getArchive() {
         : r.category.name
       : null,
   }));
+}
+
+/** 归档（未登录缓存版本，只含公开文章） */
+async function getArchivePublic() {
+  "use cache";
+  cacheLife("kb");
+  cacheTag("kb");
+  return getArchiveLogic({ status: "normal", visibility: "public" });
+}
+
+/** 归档（登录动态版本，含私有文章） */
+async function getArchiveAuthed() {
+  return getArchiveLogic({ status: "normal" });
+}
+
+/** 归档（根据登录态自动选择版本，同 listArticles） */
+export async function getArchive() {
+  const authed = await isAuthed();
+  return authed ? getArchiveAuthed() : getArchivePublic();
 }

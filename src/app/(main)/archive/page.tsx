@@ -7,7 +7,7 @@ import { pageAlternates } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "归档",
-  description: "按时间线浏览全部公开笔记，纵览历年的记录脉络。",
+  description: "按时间线浏览全部笔记，纵览历年的记录脉络。",
   alternates: pageAlternates("/archive"),
 };
 
@@ -65,13 +65,13 @@ async function ArchiveContent() {
           归档
         </h1>
         <p className="mt-2 font-hand-body text-[16px] text-ink-muted">
-          按时间线回顾，共 {items.length} 篇公开笔记
+          按时间线回顾，共 {items.length} 篇笔记
         </p>
       </header>
 
       {grouped.length === 0 ? (
         <div className="py-20 text-center font-hand-body text-[16px] text-ink-faint">
-          还没有公开的笔记
+          还没有笔记
         </div>
       ) : (
         <div className="space-y-12">
