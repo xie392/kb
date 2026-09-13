@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { keepPreviousData } from "@tanstack/react-query";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/client";
@@ -168,12 +169,22 @@ function ArticleRow({ article }: { article: FeedArticle }) {
   );
 }
 
+interface InitialPage {
+  items: FeedArticle[];
+  total: number;
+  page: number;
+  pageSize: number;
+  nextCursor: number | null;
+}
+
 export default function KnowledgeBase({
   tree,
   initialCategoryId,
+  initialPage,
 }: {
   tree: CatNode[];
   initialCategoryId: string | null;
+  initialPage?: InitialPage;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(
     initialCategoryId && findName(tree, initialCategoryId) ? initialCategoryId : null
@@ -189,6 +200,12 @@ export default function KnowledgeBase({
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
       initialCursor: 1,
+      // 切换分类时保留上一页数据，避免列表闪成「加载中…」
+      placeholderData: keepPreviousData,
+      // 首屏数据由服务端直出，客户端不再发首次请求
+      initialData: initialPage
+        ? ({ pages: [initialPage], pageParams: [1] } as never)
+        : undefined,
     }
   );
 

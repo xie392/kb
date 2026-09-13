@@ -4,6 +4,7 @@ import { io } from "next/cache";
 import { listArticles, getCategoryTree, getTagList } from "@/server/queries/public";
 import AboutHero from "@/components/about/about-hero";
 import AboutContent from "@/components/about/about-content";
+import { AboutSkeleton } from "@/components/skeletons";
 
 export const metadata: Metadata = {
   title: "关于我",
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 
 export default async function AboutPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AboutSkeleton />}>
       <AboutPageContent />
     </Suspense>
   );

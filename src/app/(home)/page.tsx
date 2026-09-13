@@ -5,7 +5,14 @@ import HandChart from "@/components/hand-chart";
 import HomeArticleFeed from "@/components/home-article-feed";
 import HomeHero from "@/components/home-hero";
 import HomeFeatured from "@/components/home-featured";
-import { listArticles, getCategoryTree, getTagList, getTrend } from "@/server/queries/public";
+import { HomeSkeleton } from "@/components/skeletons";
+import {
+  listArticles,
+  getCategoryTree,
+  getTagList,
+  getTrend,
+  getFeaturedArticles,
+} from "@/server/queries/public";
 import { SITE_NAME } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -20,43 +27,16 @@ export default async function HomePage() {
   );
 }
 
-function HomeSkeleton() {
-  return (
-    <div className="graph-paper min-h-screen font-hand-body text-ink-secondary">
-      <div className="max-w-250 mx-auto px-4 sm:px-6 py-10 text-center">
-        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-4" style={{ width: 120, height: 18 }} />
-        <div className="bg-hairline/40 rounded-sm animate-pulse mx-auto mb-6" style={{ width: 320, height: 52 }} />
-        <div className="flex justify-center gap-3 mb-10">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-hairline/40 rounded-sm animate-pulse" style={{ width: 90, height: 20 }} />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 text-left">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white sketch-border sketch-shadow p-5">
-              <div className="bg-hairline/40 rounded-sm animate-pulse mb-3" style={{ width: "50%", height: 14 }} />
-              <div className="bg-hairline/40 rounded-sm animate-pulse mb-3" style={{ width: "85%", height: 20 }} />
-              <div className="bg-hairline/40 rounded-sm animate-pulse mb-2" style={{ height: 13 }} />
-              <div className="bg-hairline/40 rounded-sm animate-pulse" style={{ width: "70%", height: 13 }} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 async function HomePageContent() {
   await io(); // 动态渲染：规避相对时间等 request-time 值，放 Suspense 内不阻止 instant 导航
-  const [list, cats, tags, trend] = await Promise.all([
-    listArticles({ page: 1, pageSize: 50 }),
+  const [list, cats, tags, trend, featured] = await Promise.all([
+    listArticles({ page: 1, pageSize: 20 }),
     getCategoryTree(),
     getTagList(),
     getTrend(),
+    getFeaturedArticles(3),
   ]);
 
-  const articles = list.items;
-  const featured = articles.filter((a) => a.isPinned).slice(0, 3);
   const featuredIds = featured.map((a) => a.id);
   const stats = [
     { v: String(list.total), l: "笔记总数" },
@@ -105,8 +85,13 @@ async function HomePageContent() {
 
       <HomeFeatured articles={featured} />
 
-      {/* 全部文章（触底加载） */}
-      <HomeArticleFeed featuredIds={featuredIds} />
+      {/* 全部文章（首屏由服务端直出，触底再走客户端加载） */}
+      <HomeArticleFeed
+        featuredIds={featuredIds}
+        initialItems={list.items}
+        initialTotal={list.total}
+        initialNextCursor={list.nextCursor}
+      />
     </div>
   );
 }

@@ -286,6 +286,38 @@ export async function getCategoryTree() {
   return build(null);
 }
 
+/** 置顶精选（未登录缓存版本，只取公开文章） */
+async function getFeaturedPublic(take: number) {
+  "use cache";
+  cacheLife("kb");
+  cacheTag("kb");
+
+  const items = await db.article.findMany({
+    where: { status: "normal", visibility: "public", isPinned: true },
+    select: articleSelect,
+    orderBy: { updatedAt: "desc" },
+    take,
+  });
+  return items.map(mapArticle);
+}
+
+/** 置顶精选（登录动态版本，含私有置顶） */
+async function getFeaturedAuthed(take: number) {
+  const items = await db.article.findMany({
+    where: { status: "normal", isPinned: true },
+    select: articleSelect,
+    orderBy: { updatedAt: "desc" },
+    take,
+  });
+  return items.map(mapArticle);
+}
+
+/** 置顶精选（根据登录态自动选择版本，同 listArticles） */
+export async function getFeaturedArticles(take = 3) {
+  const authed = await isAuthed();
+  return authed ? getFeaturedAuthed(take) : getFeaturedPublic(take);
+}
+
 /** 标签列表（未登录缓存版本，文章数只统计公开文章） */
 export async function getTagList() {
   "use cache";
@@ -300,6 +332,14 @@ export async function getTagList() {
   });
 }
 
+/** 本地自然日的 YYYY-MM-DD 键 */
+function localDayKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 /** 近 30 天每日新增笔记数（未登录缓存版本，只统计公开文章） */
 export async function getTrend(days = 30) {
   "use cache";
@@ -307,20 +347,30 @@ export async function getTrend(days = 30) {
   cacheTag("kb");
 
   const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1));
+
+  // 一次查询取出窗口内的 createdAt，在内存里按本地自然日分组，
+  // 替代原先 30 次串行 count（缓存过期后的首次访问会明显变快）。
+  const rows = await db.article.findMany({
+    where: {
+      status: "normal",
+      visibility: "public",
+      createdAt: { gte: start },
+    },
+    select: { createdAt: true },
+  });
+
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    const key = localDayKey(r.createdAt);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
   const out: { date: string; count: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const next = new Date(d);
-    next.setDate(d.getDate() + 1);
-    const count = await db.article.count({
-      where: {
-        status: "normal",
-        visibility: "public",
-        createdAt: { gte: d, lt: next },
-      },
-    });
-    out.push({ date: d.toISOString().slice(0, 10), count });
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const key = localDayKey(d);
+    out.push({ date: key, count: counts.get(key) ?? 0 });
   }
   return out;
 }

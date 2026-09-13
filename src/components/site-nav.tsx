@@ -60,6 +60,9 @@ export default function SiteNav() {
             <Link
               key={link.href}
               href={link.href}
+              // 主导航开 prefetch={true}：进入客户端 cache 的 static TTL（默认 5 分钟），
+              // 访问过的页面在窗口内再次点击零请求、瞬时渲染（仅 4 个链接，开销可忽略）。
+              prefetch={true}
               className={`font-hand-display text-[17px] px-4 py-1.5 transition-colors ${
                 active
                   ? "bg-white sketch-border sketch-shadow text-primary font-bold"
@@ -106,7 +109,7 @@ export default function SiteNav() {
               return (
                 <DropdownMenuItem
                   key={link.href}
-                  render={<Link href={link.href} />}
+                  render={<Link href={link.href} prefetch={true} />}
                   className={cn(
                     "font-hand-display text-[17px] transition-colors",
                     active

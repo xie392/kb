@@ -34,6 +34,12 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
       ).matches;
       if (reduced) return;
 
+      // 入场动画每个会话只播一次：路由切回首页时直接呈现最终态，
+      // 避免"又看了一遍加载动画"的迟滞感。
+      const KEY = "kb-hero-played";
+      if (sessionStorage.getItem(KEY)) return;
+      sessionStorage.setItem(KEY, "1");
+
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       tl.from(".hero-char", {

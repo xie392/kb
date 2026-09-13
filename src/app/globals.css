@@ -225,15 +225,17 @@
   flex-shrink: 0;
 }
 
-/* 页面入场动画 */
+/* 页面入场动画。
+   内容流式到达时才会播放（fill-mode: both 会让元素在动画前保持 opacity:0），
+   因此时长压缩到 0.26s：保留手感，同时避免"内容到了却还是看不见"的迟滞感。 */
 @utility fade-up {
-  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fade-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

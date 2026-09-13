@@ -63,12 +63,35 @@ function HandPost({ article, index }: { article: FeedArticle; index: number }) {
   );
 }
 
-export default function HomeArticleFeed({ featuredIds }: { featuredIds: string[] }) {
+export default function HomeArticleFeed({
+  featuredIds,
+  initialItems,
+  initialTotal,
+  initialNextCursor,
+}: {
+  featuredIds: string[];
+  initialItems: FeedArticle[];
+  initialTotal: number;
+  initialNextCursor: number | null;
+}) {
   const query = api.article.list.useInfiniteQuery(
     { status: "normal", pageSize: 20 },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
       initialCursor: 1,
+      // 首屏数据由服务端直出（与 RSC 同一份缓存），避免 hydration 后再发一次 tRPC 请求
+      initialData: {
+        pages: [
+          {
+            items: initialItems,
+            total: initialTotal,
+            page: 1,
+            pageSize: 20,
+            nextCursor: initialNextCursor,
+          },
+        ],
+        pageParams: [1],
+      } as never,
     }
   );
 

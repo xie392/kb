@@ -27,6 +27,11 @@ export default function HomeFeatured({ articles }: { articles: FeaturedArticle[]
       ).matches;
       if (reduced) return;
 
+      // 每个会话只播一次，避免路由往返时精选区反复从 opacity:0 浮出
+      const KEY = "kb-featured-played";
+      if (sessionStorage.getItem(KEY)) return;
+      sessionStorage.setItem(KEY, "1");
+
       gsap.fromTo(
         ".featured-title",
         { x: -30, opacity: 0 },
