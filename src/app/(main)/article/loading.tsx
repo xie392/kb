@@ -1,3 +1,5 @@
+import { ScrollResetOnMount } from "@/components/scroll-reset-on-mount";
+
 function SkeletonLine({
   width = "100%",
   height = "16px",
@@ -139,6 +141,8 @@ function ArticleSkeleton() {
 export default function Loading() {
   return (
     <>
+      {/* 骨架渲染时视口仍停在上一页的滚动位置，这里先归零（见组件内注释） */}
+      <ScrollResetOnMount />
       <ArticleSkeleton />
       <TocSkeleton />
     </>
