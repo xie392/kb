@@ -1,8 +1,8 @@
 # 个人知识库系统 · 技术架构设计
 
-> 版本：v1.0
+> 版本：v1.1（部分章节为早期设计稿，实现细节以代码与 README 为准）
 > 关联文档：[PRD](./PRD.md)
-> 技术栈：Next.js 15 (App Router) + TypeScript + Prisma + tRPC v11 + Auth.js v5 + Tailwind v4 + shadcn/ui
+> 技术栈：Next.js 16 (App Router) + TypeScript + Prisma 7 + tRPC v11 + Auth.js v5 + Tailwind v4 + shadcn/ui
 
 ---
 
@@ -10,7 +10,7 @@
 
 | 层次 | 选型 | 说明 |
 |------|------|------|
-| 框架 | Next.js 15 (App Router, TS) | 全栈单应用，Server Components + Route Handlers |
+| 框架 | Next.js 16 (App Router, TS) | 全栈单应用，Server Components + Route Handlers |
 | ORM | Prisma | 类型安全，schema 即文档 |
 | 数据库 | **SQLite**（默认） | 个人知识库零运维、单文件部署；可切换 PostgreSQL（见 §8） |
 | 前端样式 | Tailwind CSS v4 + shadcn/ui | v4 采用 CSS-first 配置（`@theme`） |
@@ -71,7 +71,7 @@ blog/
 │   │   │   ├── article/[id]/page.tsx     # 笔记详情页
 │   │   │   ├── category/[id]/page.tsx    # 分类浏览页
 │   │   │   ├── tag/[id]/page.tsx         # 标签浏览页
-│   │   │   ├── favorites/page.tsx        # 收藏列表
+│   │   │   ├── archive/page.tsx          # 归档（按年月时间线）
 │   │   │   └── trash/page.tsx            # 回收站
 │   │   ├── internal-admin/               # 管理后台（物理路径；对外经 rewrites 映射到 ADMIN_BASE_PATH，见 §5.5）
 │   │   │   ├── page.tsx                  # 数据看板
@@ -110,7 +110,7 @@ blog/
 │   │   ├── sanitize.ts                   # 富文本 XSS 消毒
 │   │   ├── utils.ts                      # cn() 等工具
 │   │   └── search.ts                     # FTS5 raw SQL 封装
-│   └── middleware.ts                     # 路由保护（Auth.js）
+│   └── proxy.ts                          # 路由保护（Auth.js，Next 16 以 proxy 取代 middleware）
 ├── next.config.ts
 ├── components.json                        # shadcn/ui 配置
 ├── package.json
@@ -169,7 +169,6 @@ model Article {
   status     String       @default("normal") // normal | trash
   visibility String       @default("private") // private | public
   isPinned   Boolean      @default(false)
-  isFavorite Boolean      @default(false)
   tags       ArticleTag[]
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -189,7 +188,9 @@ model ArticleTag {
 **说明**：
 - `status` / `visibility` 用字符串枚举，避免 Prisma enum 迁移时的类型摩擦；业务层用 TS 联合类型约束；
 - 删除分类不删笔记：删除时前端先强制迁移或提示，后端 `categoryId` 置空；
-- 软删除（status=trash + deletedAt），永久删除为硬删除并级联清 `ArticleTag`。
+- 软删除（status=trash + deletedAt），永久删除为硬删除并级联清 `ArticleTag`；
+- `isFavorite`（收藏）已移除（迁移 `20260820090000_remove_favorite`），当前版本不提供收藏功能；
+- `ArticleDailyView` 记录文章按日浏览明细，用于看板趋势与浏览统计。
 
 ---
 
@@ -220,7 +221,7 @@ tRPC 鉴权中间件 → 校验 session.user，写操作强制登录
 ### 5.4 路由保护
 
 ```ts
-// src/middleware.ts —— 动态读取后台路径
+// src/proxy.ts —— 动态读取后台路径（Next.js 16 以 proxy 取代 middleware 约定）
 import { auth } from "@/server/auth"
 import { ADMIN_BASE_PATH } from "@/lib/config"
 

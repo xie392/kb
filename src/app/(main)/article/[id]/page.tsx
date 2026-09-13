@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { ADMIN_HOME, SITE_URL, SITE_NAME, pageAlternates } from "@/lib/config";
-import { getArticle, getAdjacent, isAuthed } from "@/server/queries/public";
+import { getArticle, getAdjacent, getRelatedArticles, isAuthed } from "@/server/queries/public";
 import ArticleViewTracker from "@/components/article-view-tracker";
+import RelatedArticles from "@/components/related-articles";
+import ShareButton from "@/components/share-button";
 import {
   ReadonlyArticleProvider,
   ReadonlyArticleContent,
@@ -129,8 +131,11 @@ export default async function ArticlePage({
     ],
   };
 
-  // 定向查询上一篇/下一篇，避免每篇都全量拉取列表
-  const { prev, next } = await getAdjacent(id);
+  // 定向查询上一篇/下一篇与相关文章，避免每篇都全量拉取列表
+  const [{ prev, next }, related] = await Promise.all([
+    getAdjacent(id),
+    getRelatedArticles(id, 3),
+  ]);
 
   return (
     <ReadonlyArticleProvider content={article.content}>
@@ -171,30 +176,33 @@ export default async function ArticlePage({
                     〇 公开
                   </span>
                 )}
-                {authed && (
-                  <Link
-                    href={`${ADMIN_HOME}/articles/${article.id}/edit`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="在新标签页编辑这篇笔记"
-                    className="ml-auto shrink-0 inline-flex items-center gap-1 font-hand-body text-[14px] px-2.5 py-1 bg-white sketch-border sketch-shadow text-primary hover:-translate-y-0.5 transition-transform"
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                <div className="ml-auto flex items-center gap-2">
+                  <ShareButton />
+                  {authed && (
+                    <Link
+                      href={`${ADMIN_HOME}/articles/${article.id}/edit`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="在新标签页编辑这篇笔记"
+                      className="shrink-0 inline-flex items-center gap-1 font-hand-body text-[14px] px-2.5 py-1 bg-white sketch-border sketch-shadow text-primary hover:-translate-y-0.5 transition-transform"
                     >
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                    </svg>
-                    编辑
-                  </Link>
-                )}
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                      编辑
+                    </Link>
+                  )}
+                </div>
               </div>
 
               <h1 className="font-hand-display text-[30px] sm:text-[40px] lg:text-[46px] font-bold leading-[1.15] text-secondary marker-underline inline-block">
@@ -273,6 +281,8 @@ export default async function ArticlePage({
               </div>
             )}
           </div>
+
+          {related.length > 0 && <RelatedArticles items={related} />}
         </div>
       </div>
 

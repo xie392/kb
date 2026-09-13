@@ -41,7 +41,14 @@ export const metadata: Metadata = {
   creator: "xie392",
   robots: { index: true, follow: true },
   // 图标由 app/icon.tsx 与 app/apple-icon.tsx 文件约定自动注入，无需手写 icons
-  alternates: { languages: { "zh-CN": "/", "x-default": "/" } },
+  alternates: {
+    languages: { "zh-CN": "/", "x-default": "/" },
+    // RSS / JSON Feed 自动发现（浏览器与阅读器据 rel="alternate" 提示订阅）
+    types: {
+      "application/rss+xml": "/feed.xml",
+      "application/feed+json": "/feed.json",
+    },
+  },
   openGraph: {
     type: "website",
     locale: "zh_CN",

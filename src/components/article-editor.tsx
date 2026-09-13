@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/client";
+import {
+  draftKey,
+  loadDraft,
+  saveDraft,
+  clearDraft,
+  serializeDraftState,
+} from "@/lib/draft";
 import {
   useArticleEditor,
   EditorToolbar,
@@ -53,6 +60,12 @@ export default function ArticleEditor({ article }: Props) {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [showToc, setShowToc] = useState(true);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+
+  // 草稿键：新建与编辑各自独立；初始内容快照用于判断"是否有未保存改动"
+  const draftStorageKey = draftKey(article?.id);
+  const initialSnapshotRef = useRef<string>("");
+  const draftCheckedRef = useRef(false);
 
   const { data: cats } = api.category.tree.useQuery();
   const { data: tags } = api.tag.list.useQuery();
@@ -96,11 +109,11 @@ export default function ArticleEditor({ article }: Props) {
   });
 
   const create = api.article.create.useMutation({
-    onSuccess: () => { toast.success("已保存"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
+    onSuccess: () => { toast.success("已保存"); clearDraft(draftStorageKey); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
     onError: (e) => toast.error(`保存失败：${e.message}`),
   });
   const update = api.article.update.useMutation({
-    onSuccess: () => { toast.success("已保存"); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
+    onSuccess: () => { toast.success("已保存"); clearDraft(draftStorageKey); utils.article.list.invalidate(); router.push(`${ADMIN_HOME}/articles`); },
     onError: (e) => toast.error(`保存失败：${e.message}`),
   });
   const createTag = api.tag.create.useMutation({
@@ -118,6 +131,62 @@ export default function ArticleEditor({ article }: Props) {
     if (isEdit) update.mutate({ id: article.id, ...payload }, cb);
     else create.mutate(payload, cb);
   };
+
+  // 草稿：挂载时记录初始快照，并检测 7 天内的未保存内容提示恢复
+  useEffect(() => {
+    initialSnapshotRef.current = serializeDraftState({
+      title,
+      content,
+      categoryId,
+      visibility,
+      tagIds,
+    });
+    if (draftCheckedRef.current) return;
+    draftCheckedRef.current = true;
+
+    const draft = loadDraft(draftStorageKey);
+    if (!draft) return;
+    // 与服务端内容一致：视为无改动，直接清理
+    if (serializeDraftState(draft) === initialSnapshotRef.current) {
+      clearDraft(draftStorageKey);
+      return;
+    }
+    toast("检测到未保存的草稿", {
+      description: `上次保存于 ${new Date(draft.savedAt).toLocaleString("zh-CN")}`,
+      duration: 12000,
+      action: {
+        label: "恢复",
+        onClick: () => {
+          setTitle(draft.title);
+          setContent(draft.content);
+          setCategoryId(draft.categoryId ?? "");
+          setVisibility(draft.visibility === "public" ? "public" : "private");
+          setTagIds(draft.tagIds ?? []);
+          toast.success("已恢复草稿");
+        },
+      },
+      cancel: {
+        label: "丢弃",
+        onClick: () => {
+          clearDraft(draftStorageKey);
+          setDraftSavedAt(null);
+          toast("已丢弃草稿");
+        },
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftStorageKey]);
+
+  // 草稿：停止输入 2s 后自动暂存到本地（内容与服务端一致时不写）
+  useEffect(() => {
+    const current = serializeDraftState({ title, content, categoryId, visibility, tagIds });
+    if (current === initialSnapshotRef.current) return;
+    const timer = setTimeout(() => {
+      saveDraft(draftStorageKey, { title, content, categoryId, visibility, tagIds });
+      setDraftSavedAt(Date.now());
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [draftStorageKey, title, content, categoryId, visibility, tagIds]);
 
   // 字数统计
   const plainText = content.replace(/<[^>]+>/g, "").replace(/\s+/g, "");
@@ -334,6 +403,12 @@ export default function ArticleEditor({ article }: Props) {
         <span>{wordCount > 0 ? `${wordCount} 字` : "空文档"}</span>
         <span className="w-px h-3 bg-hairline" />
         <span>{isEdit ? "编辑模式" : "新建模式"}</span>
+        {draftSavedAt && (
+          <>
+            <span className="w-px h-3 bg-hairline" />
+            <span className="text-primary/70">草稿已暂存</span>
+          </>
+        )}
         <span className="w-px h-3 bg-hairline" />
         <span className="hidden sm:inline">⌘S 保存</span>
       </div>

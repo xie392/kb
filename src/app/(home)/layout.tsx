@@ -28,6 +28,17 @@ export default function HomeLayout({
       <footer className="border-t-2 border-dashed border-hairline py-8">
         <div className="max-w-250 mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-center gap-3 font-hand-body text-[15px] text-ink-faint">
           <a
+            href="/feed.xml"
+            title="订阅 RSS"
+            className="flex items-center gap-1 hover:text-primary transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="6.18" cy="17.82" r="2.18" />
+              <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83C19.56 11.45 12.55 4.44 4 4.44zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z" />
+            </svg>
+            RSS
+          </a>
+          <a
             href="https://beian.miit.gov.cn/"
             target="_blank"
             rel="noopener noreferrer"

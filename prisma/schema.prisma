@@ -23,6 +23,8 @@ model Category {
   sort      Int        @default(0)
   createdAt DateTime   @default(now())
   articles  Article[]
+
+  @@index([parentId])
 }
 
 model Tag {
@@ -48,6 +50,13 @@ model Article {
   createdAt  DateTime           @default(now())
   updatedAt  DateTime           @updatedAt
   deletedAt  DateTime?
+
+  // 列表/筛选/Feed/趋势的高频查询路径
+  @@index([status, visibility, updatedAt])
+  @@index([status, updatedAt])
+  @@index([categoryId])
+  @@index([isPinned])
+  @@index([createdAt])
 }
 
 model ArticleDailyView {
@@ -68,6 +77,8 @@ model ArticleTag {
   tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([articleId, tagId])
+  // 复合主键仅对 articleId 前缀高效，按标签反查需要单独索引
+  @@index([tagId])
 }
 
 model Attachment {

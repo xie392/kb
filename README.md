@@ -59,7 +59,24 @@
     <td width="33%" align="center">
       <h3>◳</h3>
       <h4>备份与导出</h4>
-      <sub>JSON + Markdown 双格式导出，SQLite 单文件备份，回收站软删除</sub>
+      <sub>JSON 全量导出与恢复，定时自动备份，回收站软删除</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="33%" align="center">
+      <h3>◉</h3>
+      <h4>RSS / JSON Feed</h4>
+      <sub>公开文章同步输出 RSS 2.0 与 JSON Feed，支持阅读器订阅</sub>
+    </td>
+    <td width="33%" align="center">
+      <h3>❖</h3>
+      <h4>归档与相关阅读</h4>
+      <sub>按年月时间线归档浏览，文章底部按标签/分类推荐相关内容</sub>
+    </td>
+    <td width="33%" align="center">
+      <h3>✑</h3>
+      <h4>草稿保护</h4>
+      <sub>编辑停顿 2 秒自动暂存本地，误关页面后 7 天内可一键恢复</sub>
     </td>
   </tr>
 </table>
@@ -160,7 +177,9 @@ pnpm dev
 | `pnpm dev` | 启动开发服务器（端口 3001） |
 | `pnpm build` | 生产构建 |
 | `pnpm start` | 启动生产服务器 |
-| `pnpm lint` | 代码检查 |
+| `pnpm lint` | 代码检查（`tsc --noEmit`） |
+| `pnpm typecheck` | 类型检查 |
+| `pnpm test` | 运行单元测试（Node 内置 test runner + tsx） |
 | `pnpm db:migrate` | 创建 / 应用数据库迁移 |
 | `pnpm db:seed` | 写入种子数据 |
 | `pnpm db:studio` | 打开 Prisma Studio |
@@ -179,7 +198,7 @@ kb/
 ├── src/
 │   ├── app/
 │   │   ├── (home)/            # 首页（公开文章列表）
-│   │   ├── (main)/            # 前台内容页（分类/标签/收藏/回收站）
+│   │   ├── (main)/            # 前台内容页（分类/标签/归档/回收站）
 │   │   ├── internal-admin/    # 管理后台（经 rewrites 映射）
 │   │   ├── login/             # 登录页
 │   │   ├── api/               # tRPC / Auth.js / 附件路由

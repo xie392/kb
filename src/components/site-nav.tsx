@@ -33,6 +33,7 @@ const navLinks = [
   { label: "首页", href: "/" },
   { label: "知识库", href: "/categories" },
   { label: "标签", href: "/tags" },
+  { label: "归档", href: "/archive" },
   { label: "关于我", href: "/about" },
 ];
 

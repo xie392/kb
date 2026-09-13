@@ -239,6 +239,63 @@ export async function getAdjacent(id: string) {
   return authed ? getAdjacentAuthed(id) : getAdjacentPublic(id);
 }
 
+/** 相关文章（未登录缓存版本） */
+async function getRelatedPublic(id: string, take: number) {
+  "use cache";
+  cacheLife("kb");
+  cacheTag("kb");
+  return getRelatedLogic(id, { status: "normal", visibility: "public" }, take);
+}
+
+/** 相关文章（登录动态版本，不走缓存） */
+async function getRelatedAuthed(id: string, take: number) {
+  return getRelatedLogic(id, { status: "normal" }, take);
+}
+
+/** 相关度 = 共享标签数 ×2 + 同分类 ×1，取分数最高的若干篇 */
+async function getRelatedLogic(
+  id: string,
+  base: { status: "normal"; visibility?: "public" },
+  take: number
+) {
+  const self = await db.article.findUnique({
+    where: { id },
+    select: { categoryId: true, tags: { select: { tagId: true } } },
+  });
+  if (!self) return [];
+
+  const tagIds = self.tags.map((t) => t.tagId);
+  const or: Prisma.ArticleWhereInput[] = [];
+  if (self.categoryId) or.push({ categoryId: self.categoryId });
+  if (tagIds.length) or.push({ tags: { some: { tagId: { in: tagIds } } } });
+  if (or.length === 0) return [];
+
+  const candidates = await db.article.findMany({
+    where: { ...base, id: { not: id }, OR: or },
+    select: articleSelect,
+    orderBy: { updatedAt: "desc" },
+    take: 30,
+  });
+
+  const tagSet = new Set(tagIds);
+  const scored = candidates.map((a) => {
+    const shared = a.tags.filter((t) => tagSet.has(t.tag.id)).length;
+    const sameCat = self.categoryId && a.categoryId === self.categoryId ? 1 : 0;
+    return { article: a, score: shared * 2 + sameCat };
+  });
+  scored.sort(
+    (x, y) =>
+      y.score - x.score || y.article.updatedAt.getTime() - x.article.updatedAt.getTime()
+  );
+  return scored.slice(0, take).map((s) => mapArticle(s.article));
+}
+
+/** 相关文章（根据登录态自动选择版本） */
+export async function getRelatedArticles(id: string, take = 3) {
+  const authed = await isAuthed();
+  return authed ? getRelatedAuthed(id, take) : getRelatedPublic(id, take);
+}
+
 /** 分类树（未登录缓存版本，笔记数只统计公开文章） */
 export async function getCategoryTree() {
   "use cache";
@@ -364,4 +421,33 @@ export async function getTrend(days = 30) {
     out.push({ date: key, count: counts.get(key) ?? 0 });
   }
   return out;
+}
+
+/** 归档：全部公开文章（按创建时间倒序，用于时间线归档页） */
+export async function getArchive() {
+  "use cache";
+  cacheLife("kb");
+  cacheTag("kb");
+
+  const rows = await db.article.findMany({
+    where: { status: "normal", visibility: "public" },
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      category: { select: { name: true, parent: { select: { name: true } } } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    createdAt: r.createdAt,
+    categoryName: r.category
+      ? r.category.parent
+        ? `${r.category.parent.name}/${r.category.name}`
+        : r.category.name
+      : null,
+  }));
 }
