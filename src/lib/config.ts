@@ -28,6 +28,11 @@ export const SITE_URL = (
 // 构建期注入，修改后需重新构建。
 export const SITE_NAME = `${process.env.NEXT_PUBLIC_SITE_NAME ?? "XIE392"}的知识库`;
 
+// 站点图标 / 导航 Logo 的首字母（取自站点名，避免 favicon 与 Logo 各自硬编码导致不一致）
+export const SITE_INITIAL =
+  (process.env.NEXT_PUBLIC_SITE_NAME ?? "XIE392").trim().charAt(0).toUpperCase() ||
+  "X";
+
 // 站点默认描述（SEO / OG / 结构化数据统一来源）
 export const SITE_DESCRIPTION =
   "记录碎片化的想法，沉淀系统化的知识。一个关于全栈开发、技术思考与项目实践的个人知识库。";

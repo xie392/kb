@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { SITE_INITIAL } from "@/lib/config";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -20,7 +21,7 @@ export function Logo({ size = "sm", className }: LogoProps) {
         className
       )}
     >
-      X
+      {SITE_INITIAL}
     </span>
   );
 }
