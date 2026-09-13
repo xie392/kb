@@ -26,11 +26,19 @@ export async function GET(
 
   try {
     const buf = await fs.readFile(path.join(getAttachmentStorageDir(), name));
+    const mime = rec.mimeType || "application/octet-stream";
+    // 仅媒体/PDF 内联展示，其余（.docx/.zip 等）强制下载，避免在浏览器内被直接渲染
+    const inline =
+      mime.startsWith("image/") ||
+      mime.startsWith("audio/") ||
+      mime.startsWith("video/") ||
+      mime === "application/pdf";
     return new Response(new Uint8Array(buf), {
       status: 200,
       headers: {
-        "Content-Type": rec.mimeType || "application/octet-stream",
+        "Content-Type": mime,
         "Content-Length": String(buf.length),
+        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(name)}`,
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });

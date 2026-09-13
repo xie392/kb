@@ -13,10 +13,14 @@ import {
   getTrend,
   getFeaturedArticles,
 } from "@/server/queries/public";
-import { SITE_NAME } from "@/lib/config";
+import { SITE_NAME, SITE_DESCRIPTION, pageAlternates } from "@/lib/config";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/" },
+  // 首页给出比站名更有信息量的标题（模板为 "%s | 站名" 会重复，故用 absolute）
+  title: { absolute: `${SITE_NAME} — 记录碎片化的想法，沉淀系统化的知识` },
+  description: SITE_DESCRIPTION,
+  keywords: ["个人知识库", "技术笔记", "知识管理", "分类标签", "全栈开发", "Next.js"],
+  alternates: pageAlternates("/"),
 };
 
 export default async function HomePage() {

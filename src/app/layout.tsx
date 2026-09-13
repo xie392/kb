@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 // sketch 主题走 JS import（resolveAlias 指向本地 tipkit），替代 globals.css 里无法解析的 CSS @import
 import "@tipkit/themes/sketch.css";
 import { Geist, Caveat, Patrick_Hand } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { SITE_URL, SITE_NAME } from "@/lib/config";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/config";
 import TRPCProvider from "@/trpc/react";
 import { Toaster } from "@/components/ui/sonner";
 import BackToTop from "@/components/back-to-top";
@@ -31,28 +31,43 @@ const patrick = Patrick_Hand({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "个人知识库",
-    template: "%s | 个人知识库",
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "轻量化、私有化的个人知识管理工具",
-  keywords: ["知识库", "知识管理", "个人笔记", "博客"],
-  applicationName: "个人知识库",
+  description: SITE_DESCRIPTION,
+  keywords: ["知识库", "知识管理", "个人笔记", "博客", "全栈开发", "Next.js"],
+  applicationName: SITE_NAME,
+  authors: [{ name: "xie392", url: SITE_URL }],
+  creator: "xie392",
   robots: { index: true, follow: true },
-  icons: { icon: "/logo.svg" },
+  // 图标由 app/icon.tsx 与 app/apple-icon.tsx 文件约定自动注入，无需手写 icons
+  alternates: { languages: { "zh-CN": "/", "x-default": "/" } },
   openGraph: {
     type: "website",
     locale: "zh_CN",
-    siteName: "个人知识库",
-    title: "个人知识库",
-    description: "轻量化、私有化的个人知识管理工具",
-    images: [{ url: "/logo.svg", width: 512, height: 512, alt: "个人知识库" }],
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    // og:image 由 app/opengraph-image.tsx 动态生成（1200×630 PNG）；
+    // 注意：不能用 SVG（Facebook/X/微信/Telegram 均不支持 SVG 作为预览图）
   },
   twitter: {
-    card: "summary",
-    title: "个人知识库",
-    description: "轻量化、私有化的个人知识管理工具",
-    images: ["/logo.svg"],
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
   },
+};
+
+// 移动端浏览器 UI 配色与主题一致（浅色=暖纸，深色=暖暗）
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f5f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1b19" },
+  ],
 };
 
 export default function RootLayout({
@@ -69,13 +84,11 @@ export default function RootLayout({
         "@id": `${SITE_URL}/#website`,
         url: SITE_URL,
         name: SITE_NAME,
-        description: "轻量化、私有化的个人知识管理工具",
+        description: SITE_DESCRIPTION,
         inLanguage: "zh-CN",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${SITE_URL}/?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
+        // 注：站点搜索为弹窗交互、无独立 URL，故不再声明 SearchAction
+        //（声明却无对应可抓取搜索页会被 Search Console 判为无效富结果）
+        publisher: { "@id": `${SITE_URL}/#organization` },
       },
       // 作者/Organization 信息（帮助AI识别内容来源）
       {
@@ -92,9 +105,13 @@ export default function RootLayout({
         "@id": `${SITE_URL}/#organization`,
         name: SITE_NAME,
         url: SITE_URL,
+        description: SITE_DESCRIPTION,
+        // GEO：明确地域相关性信号（站点为中文站、主体在中国大陆）
+        areaServed: { "@type": "Country", name: "China" },
+        address: { "@type": "PostalAddress", addressCountry: "CN" },
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}/logo.svg`,
+          url: `${SITE_URL}/icon`,
           width: 512,
           height: 512,
         },

@@ -13,6 +13,7 @@ import { useArticleEditor } from "@/components/rich-text/use-editor";
 import type { OutlineItem } from "@/components/rich-text/types";
 import ArticleToc from "@/components/article-toc";
 import type { TocItem } from "@/lib/toc";
+import { trimTrailingEmptyParagraphs } from "@/lib/html";
 
 // 用于标记客户端挂载完成，避免 hydration mismatch（服务端无 editor，
 // 客户端挂载后 TipTap 会修改 DOM 结构，#418 就是这个原因）
@@ -29,13 +30,6 @@ interface ReadonlyArticleCtx {
 }
 
 const Ctx = createContext<ReadonlyArticleCtx>({ editor: null, outline: [], content: "" });
-
-/** 统一去除尾部空段落，兼容历史被 TrailingNode 污染的数据 */
-function trimTrailingEmptyParagraphs(content: string): string {
-  return content
-    ? content.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "")
-    : content;
-}
 
 /** 包裹正文与 TOC，共享同一个只读编辑器实例（保持原 DOM 结构，TOC 可在 article 卡片外） */
 export function ReadonlyArticleProvider({
@@ -63,25 +57,14 @@ export function ReadonlyArticleProvider({
 
 /** 正文渲染区：放在 article 卡片内 */
 export function ReadonlyArticleContent() {
-  const { editor, outline, content } = useContext(Ctx);
+  const { editor, content } = useContext(Ctx);
   const mounted = useIsMounted();
 
-  // 编辑器渲染后给标题注入 id，供 TOC 锚点与 IntersectionObserver 使用
-  useEffect(() => {
-    if (!editor || outline.length === 0) return;
-
-    const headingEls = Array.from(
-      editor.view.dom.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6"),
-    );
-    headingEls.forEach((el, idx) => {
-      const item = outline[idx];
-      if (item) el.id = item.id;
-    });
-
-    return () => {
-      headingEls.forEach((el) => el.removeAttribute("id"));
-    };
-  }, [editor, outline]);
+  // 注意：这里曾给标题注入 id 供目录锚点使用，现已移除。
+  // 原因：标题 id 写在 ProseMirror 托管的 DOM 上，而 UniqueID 扩展挂载后会用
+  // 重试事务补 `data-id`，ProseMirror 随之重渲染标题节点，手写的 id 会被抹掉，
+  // 导致目录高亮与点击跳转同时失效。
+  // 目录现已改为按「文档顺序 + 索引」定位正文标题（见 article-toc.tsx），不再依赖 id。
 
   // hydration 期间保持和服务端一致的原始 HTML 输出，等客户端挂载完成后
   // 再替换为 TipTap 编辑器渲染，避免 DOM 结构不一致导致 React #418 错误

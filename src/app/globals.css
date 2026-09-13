@@ -146,7 +146,8 @@
   --color-ink: #000000;
   --color-ink-secondary: #31302e;
   --color-ink-muted: #615d59;
-  --color-ink-faint: #7a766f;
+  /* 对比度：在暖纸底 #f6f5f4 上由 #7a766f(4.16:1) 提高到 #6b6760(≈4.9:1)，满足 WCAG AA 正文要求 */
+  --color-ink-faint: #6b6760;
 
   /* Typography */
   --font-sans: "NotionInter", "Inter", -apple-system, system-ui, "Segoe UI",

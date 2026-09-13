@@ -6,9 +6,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 遵循 sitemaps.org 极简规范：只保留 loc + lastmod，
   // changefreq/priority 已不被搜索引擎重视，生产普遍省略。
   const entries: MetadataRoute.Sitemap = [
-    {
-      url: `${SITE_URL}/`,
-    },
+    { url: `${SITE_URL}/` },
+    { url: `${SITE_URL}/categories` },
+    { url: `${SITE_URL}/tags` },
+    { url: `${SITE_URL}/about` },
   ];
 
   try {

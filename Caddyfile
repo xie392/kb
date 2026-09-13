@@ -3,6 +3,8 @@
 # 显式写 tls 指令后不走 Let's Encrypt 自动签发；外层由 Cloudflare 代理
 xie392.cn, www.xie392.cn {
 	tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem
+	# 显式声明压缩（zstd 优先、gzip 兜底），进一步降低 HTML/CSS/JS 传输体积
+	encode zstd gzip
 	reverse_proxy kb:3000
 	# 隐藏反代指纹头（#06），其余安全头由应用层 next.config headers() 注入
 	header {

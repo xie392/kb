@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { io } from "next/cache";
 import { formatDate } from "@/lib/format";
 import { TagsSkeleton } from "@/components/skeletons";
 import { getTagList, listArticles } from "@/server/queries/public";
+import { pageAlternates } from "@/lib/config";
+
+export const metadata: Metadata = {
+  title: "标签",
+  description: "按标签跨维度浏览全部笔记，快速发现相关内容。",
+  alternates: pageAlternates("/tags"),
+};
 
 export default async function TagsPage() {
   return (

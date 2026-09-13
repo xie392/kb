@@ -5,12 +5,13 @@ import { listArticles, getCategoryTree, getTagList } from "@/server/queries/publ
 import AboutHero from "@/components/about/about-hero";
 import AboutContent from "@/components/about/about-content";
 import { AboutSkeleton } from "@/components/skeletons";
+import { pageAlternates } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "关于我",
   description:
     "XIE392 的个人主页：全栈开发者、开源爱好者。这里记录技术思考、项目实践与这个知识库背后的故事。",
-  alternates: { canonical: "/about" },
+  alternates: pageAlternates("/about"),
 };
 
 export default async function AboutPage() {

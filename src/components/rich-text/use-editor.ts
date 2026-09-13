@@ -64,6 +64,7 @@ import {
   Canvas,
 } from "@tipkit/extensions";
 import { createT, useTipKitEditor, useEditorDeps, zh } from "@tipkit/core";
+import { trimTrailingEmptyParagraphs } from "@/lib/html";
 import { LinkCard } from "./link-card";
 
 import type { OutlineItem } from "./types";
@@ -81,11 +82,6 @@ const PLACEHOLDER_TEXTS = [
 
 function pickPlaceholder(): string {
   return PLACEHOLDER_TEXTS[Math.floor(Math.random() * PLACEHOLDER_TEXTS.length)]!;
-}
-
-/** 去除 HTML 末尾的空段落（TrailingNode 注入或历史遗留），避免只读页底部留白 */
-function trimTrailingEmptyParagraphs(html: string): string {
-  return html.replace(/(?:<p(?:\s[^>]*)?>(?:<br\s*\/?>|\s|&nbsp;|&#xA0;)*<\/p>\s*)+$/i, "");
 }
 
 export interface UseArticleEditorOptions {

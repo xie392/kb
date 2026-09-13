@@ -26,21 +26,9 @@ const articleSelect = {
 } as const;
 
 type ArticleListItem = Prisma.ArticleGetPayload<{ select: typeof articleSelect }>;
-type ArticleDetail = ArticleListItem & { content: string };
 
-function mapArticle(a: ArticleListItem) {
-  return {
-    ...a,
-    categoryName: a.category
-      ? a.category.parent
-        ? `${a.category.parent.name}/${a.category.name}`
-        : a.category.name
-      : null,
-    tagNames: a.tags.map((t) => t.tag.name),
-  };
-}
-
-function mapArticleDetail(a: ArticleDetail) {
+/** 列表项 / 详情共用的字段映射（详情多出的 content 由展开运算符自动保留） */
+function mapArticle<T extends ArticleListItem>(a: T) {
   return {
     ...a,
     categoryName: a.category
@@ -141,7 +129,7 @@ async function getArticlePublic(id: string) {
     },
   });
   if (!article || article.visibility !== "public" || article.status !== "normal") return null;
-  return mapArticleDetail(article);
+  return mapArticle(article);
 }
 
 /** 文章详情（登录动态版本，不走缓存） */
@@ -154,7 +142,7 @@ async function getArticleAuthed(id: string) {
     },
   });
   if (!article || article.status !== "normal") return null;
-  return mapArticleDetail(article);
+  return mapArticle(article);
 }
 
 /** 文章详情（根据登录态自动选择版本：未登录只看公开，登录看所有正常文章） */

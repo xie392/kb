@@ -1,5 +1,17 @@
 import type { NextConfig } from "next";
 import { ADMIN_BASE_PATH } from "./src/lib/config";
+import { buildCsp } from "./src/lib/csp";
+
+const isDev = process.env.NODE_ENV === "development";
+
+// CSP 构造见 src/lib/csp.ts（纯函数，含"本地文章访问不了"的完整坑位说明）
+const csp = buildCsp(isDev);
+
+// 先观察后收紧：CSP_REPORT_ONLY=true 时只上报不拦截，用于灰度验证
+const cspHeaderKey =
+  process.env.CSP_REPORT_ONLY === "true"
+    ? "Content-Security-Policy-Report-Only"
+    : "Content-Security-Policy";
 
 const nextConfig: NextConfig = {
   // Cache Components + Partial Prefetching：前台公开查询用 "use cache" 进静态壳/预取，
@@ -90,45 +102,28 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=604800" },
         ],
       },
+      // 注意：不再为 HTML 页面设置 public 缓存头。
+      // 前台查询会按登录态返回私有文章（见 server/queries/public.ts），
+      // 而 Caddy + Cloudflare 会复用公共缓存 —— public/s-maxage 存在把私有笔记
+      // 回给匿名访客的风险。HTML 缓存一律交给 Next（use cache / cacheComponents）自行决定。
       {
-        // 首页：使用 Stale-While-Revalidate 策略
-        // 用户立刻拿到缓存（<100ms），后台静默更新新鲜内容
-        source: "/",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=60, stale-while-revalidate=300" },
-        ],
-      },
-      {
-        // 公开文章页：同样使用 SWR，缓存 5 分钟
-        source: "/article/:id",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=3600" },
-        ],
-      },
-      {
-        // 分类、标签页：缓存 10 分钟
-        source: "/:path(categories|tags|about)",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=600, stale-while-revalidate=3600" },
-        ],
-      },
-      {
-        // API 路由、后台、TRPC 不缓存，保持动态
+        // API 路由、TRPC 不缓存，保持动态
         source: "/(api|trpc|_trpc)/:path*",
         headers: [
           { key: "Cache-Control", value: "private, no-cache, no-store, must-revalidate" },
         ],
       },
       {
-        // 全站安全响应头（#05）：补齐报告缺失的 6 项安全头
-        // CSP 依赖内联脚本/样式（Next.js RSC 注入 + Tailwind），必须保留 unsafe-inline
+        // 全站安全响应头 + CSP
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: cspHeaderKey, value: csp },
+          // 生产环境补 X-Frame-Options（legacy 兜底；现代浏览器由 frame-ancestors 覆盖）
+          ...(isDev ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
         ],
       },
     ];

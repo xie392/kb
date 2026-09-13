@@ -61,4 +61,41 @@ export function cleanup(): void {
   for (const [k, e] of store) {
     if (now - e.firstAt > WINDOW_MS && e.lockedUntil <= now) store.delete(k);
   }
+  for (const [k, b] of buckets) {
+    if (now >= b.resetAt) buckets.delete(k);
+  }
+}
+
+// ── 通用固定窗口限流 ─────────────────────────────────────────────────
+// 用于对资源开销大的接口（如 /api/ai 转发大模型、link-preview 外网抓取）按 key 限速。
+// 与上面的登录防爆破独立：那个是"失败计数+锁定"，这个是"窗口内请求配额"。
+interface Bucket {
+  count: number;
+  resetAt: number;
+}
+
+const buckets = new Map<string, Bucket>();
+
+/**
+ * 记一次请求并判断是否超配额。
+ * @param key 限流维度键（如 `ai:${ip}`）
+ * @param max 窗口内允许的最大请求数
+ * @param windowMs 窗口时长（毫秒）
+ */
+export function hit(
+  key: string,
+  max: number,
+  windowMs: number,
+): RateLimitResult {
+  const now = Date.now();
+  const b = buckets.get(key);
+  if (!b || now >= b.resetAt) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+  b.count += 1;
+  if (b.count > max) {
+    return { allowed: false, retryAfterSeconds: Math.ceil((b.resetAt - now) / 1000) };
+  }
+  return { allowed: true, retryAfterSeconds: 0 };
 }

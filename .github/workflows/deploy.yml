@@ -71,9 +71,15 @@ jobs:
             ${{ steps.meta-ghcr.outputs.tags }}
             ${{ steps.meta-aliyun.outputs.tags }}
           labels: ${{ steps.meta-ghcr.outputs.labels }}
+          # 注意：build-args 是 YAML 字面量块，块内不能写 # 注释（会被当成 build-arg 内容）
+          # 可选：把仓库变量 CSP_REPORT_ONLY 设为 true，则 CSP 只上报不拦截（先观察后收紧）
           build-args: |
             NEXT_PUBLIC_ADMIN_BASE_PATH=${{ secrets.NEXT_PUBLIC_ADMIN_BASE_PATH }}
             NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_UMAMI_URL=${{ secrets.NEXT_PUBLIC_UMAMI_URL }}
+            NEXT_PUBLIC_UMAMI_SITE_ID=${{ secrets.NEXT_PUBLIC_UMAMI_SITE_ID }}
+            NEXT_PUBLIC_UMAMI_DOMAINS=${{ secrets.NEXT_PUBLIC_UMAMI_DOMAINS }}
+            CSP_REPORT_ONLY=${{ vars.CSP_REPORT_ONLY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

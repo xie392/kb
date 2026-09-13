@@ -83,6 +83,58 @@ function getFavicon(html: string, base: URL): string | null {
   return `${base.origin}/favicon.ico`;
 }
 
+const MAX_REDIRECTS = 5;
+
+/**
+ * 手动跟随重定向并逐跳校验目标 host 仍为公网地址。
+ * 若直接 `redirect: "follow"`，外部站点可用 302 跳转到 169.254.169.254 / 内网地址，
+ * 绕过入口处的 isPrivateHost 校验形成 SSRF。
+ */
+async function fetchFollowingRedirects(
+  start: URL,
+): Promise<{ res: Response; finalUrl: URL } | { error: string; status: number }> {
+  let current = start;
+  for (let i = 0; i <= MAX_REDIRECTS; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    let res: Response;
+    try {
+      res = await fetch(current.toString(), {
+        signal: controller.signal,
+        headers: {
+          "user-agent": "Mozilla/5.0 (compatible; KbLinkPreview/1.0)",
+          accept: "text/html,application/xhtml+xml",
+        },
+        redirect: "manual",
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get("location");
+      if (!location) return { res, finalUrl: current };
+      let next: URL;
+      try {
+        next = new URL(location, current);
+      } catch {
+        return { error: "重定向地址无效", status: 502 };
+      }
+      if (next.protocol !== "http:" && next.protocol !== "https:") {
+        return { error: "不允许的重定向协议", status: 403 };
+      }
+      if (isPrivateHost(next.hostname)) {
+        return { error: "不允许访问内网地址", status: 403 };
+      }
+      current = next;
+      continue;
+    }
+
+    return { res, finalUrl: current };
+  }
+  return { error: "重定向次数过多", status: 502 };
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const raw = searchParams.get("url")?.trim();
@@ -104,17 +156,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-    const res = await fetch(target.toString(), {
-      signal: controller.signal,
-      headers: {
-        "user-agent": "Mozilla/5.0 (compatible; KbLinkPreview/1.0)",
-        accept: "text/html,application/xhtml+xml",
-      },
-      redirect: "follow",
-    });
-    clearTimeout(timer);
+    const fetched = await fetchFollowingRedirects(target);
+    if ("error" in fetched) {
+      return NextResponse.json({ error: fetched.error }, { status: fetched.status });
+    }
+    const { res, finalUrl } = fetched;
 
     if (!res.ok) {
       return NextResponse.json({ error: `抓取失败（HTTP ${res.status}）` }, { status: 502 });
@@ -124,13 +170,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "目标页面不是 HTML" }, { status: 415 });
     }
     const html = (await res.text()).slice(0, MAX_BYTES);
-    const base = new URL(res.url || target.toString());
 
     return NextResponse.json({
       title: getTitle(html).slice(0, 200),
       description: getDescription(html).slice(0, 300),
-      image: getImage(html, base),
-      favicon: getFavicon(html, base),
+      image: getImage(html, finalUrl),
+      favicon: getFavicon(html, finalUrl),
     });
   } catch (error) {
     const aborted = error instanceof Error && error.name === "AbortError";

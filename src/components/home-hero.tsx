@@ -91,6 +91,13 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
 
   const chars = siteName.split("");
 
+  // 分类圆点色：走设计 token，暗色模式下自动跟随主题
+  const CAT_DOT_COLORS = [
+    "var(--color-primary)",
+    "var(--color-sticker-pink)",
+    "var(--color-sticker-teal)",
+  ];
+
   return (
     <section
       ref={rootRef}
@@ -102,13 +109,14 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
         height="48"
         viewBox="0 0 48 48"
         fill="none"
+        aria-hidden
       >
         <path
           d="M24 6 L27 21 L42 24 L27 27 L24 42 L21 27 L6 24 L21 21 Z"
-          stroke="#0075de"
+          stroke="var(--color-primary)"
           strokeWidth="2"
           strokeLinejoin="round"
-          fill="rgba(0,117,222,0.1)"
+          fill="color-mix(in srgb, var(--color-primary) 10%, transparent)"
         />
       </svg>
 
@@ -118,17 +126,18 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
         height="40"
         viewBox="0 0 40 40"
         fill="none"
+        aria-hidden
       >
         <circle
           cx="20"
           cy="20"
           r="14"
-          stroke="#ff64c8"
+          stroke="var(--color-sticker-pink)"
           strokeWidth="2"
           strokeDasharray="4 3"
           fill="none"
         />
-        <circle cx="20" cy="20" r="4" fill="#ff64c8" opacity="0.5" />
+        <circle cx="20" cy="20" r="4" fill="var(--color-sticker-pink)" opacity="0.5" />
       </svg>
 
       <svg
@@ -137,18 +146,23 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
         height="44"
         viewBox="0 0 44 44"
         fill="none"
+        aria-hidden
       >
         <path
           d="M8 36 L20 10 L32 36 Z"
-          stroke="#2a9d99"
+          stroke="var(--color-sticker-teal)"
           strokeWidth="2"
           strokeLinejoin="round"
           fill="none"
         />
       </svg>
 
-      <h1 className="font-hand-display text-[44px] sm:text-[64px] md:text-[80px] font-bold leading-none text-secondary rotate-[-2deg] inline-block">
-        <span className="inline-block overflow-hidden align-bottom">
+      <h1
+        aria-label={siteName}
+        className="font-hand-display text-[44px] sm:text-[64px] md:text-[80px] font-bold leading-none text-secondary rotate-[-2deg] inline-block"
+      >
+        {/* 逐字拆分为动画服务，对屏幕阅读器无意义：字符与装饰线对 AT 隐藏，改由 h1 aria-label 提供可读文本 */}
+        <span aria-hidden className="inline-block overflow-hidden align-bottom">
           {chars.map((ch, i) => (
             <span key={i} className="hero-char inline-block">
               {ch}
@@ -156,10 +170,11 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
           ))}
         </span>
         <span
+          aria-hidden
           className="hero-underline block w-full h-[6px] mt-2 rotate-[-1deg]"
           style={{
             background:
-              "repeating-linear-gradient(90deg, rgba(0,117,222,0.55) 0 8px, transparent 8px 14px)",
+              "repeating-linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 55%, transparent) 0 8px, transparent 8px 14px)",
             borderRadius: "3px",
           }}
         />
@@ -196,9 +211,7 @@ export default function HomeHero({ siteName, stats, cats }: HomeHeroProps) {
               i % 2 ? "rotate-[1deg]" : "rotate-[-1deg]"
             }`}
           >
-            <span style={{ color: ["#0075de", "#ff64c8", "#2a9d99"][i % 3] }}>
-              ●
-            </span>{" "}
+            <span style={{ color: CAT_DOT_COLORS[i % 3] }}>●</span>{" "}
             {c.name}
             <span className="text-ink-faint text-[14px]"> ({c.count})</span>
           </Link>

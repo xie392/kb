@@ -4,9 +4,12 @@ import { getCategoryTree } from "@/server/queries/public";
 import { createServerCaller } from "@/trpc/server";
 import KnowledgeBase from "@/components/knowledge-base";
 import { KnowledgeBaseSkeleton } from "@/components/skeletons";
+import { pageAlternates } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "知识库",
+  description: "按两级分类树浏览全部笔记，按主题系统地沉淀知识。",
+  alternates: pageAlternates("/categories"),
 };
 
 export default async function CategoriesPage({

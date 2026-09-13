@@ -17,7 +17,7 @@
 
 </div>
 
-![首页预览](./public/homepage-screenshot.png?v=2)
+![首页预览](./docs/homepage-screenshot.png?v=2)
 
 <p align="center">
   <sub>手绘线框图风格 · 方格纸背景 · 马克笔高亮 · 便签装饰</sub>
@@ -120,6 +120,15 @@ cp .env.example .env
 | `NEXT_PUBLIC_ADMIN_BASE_PATH` | 后台入口前缀（默认 `kb-9f3x`，建议自定义） |
 | `NEXT_PUBLIC_SITE_URL` | 站点公网 URL（SEO / sitemap 使用） |
 | `NEXT_PUBLIC_SITE_NAME` | 站点名称（如 `XIE392`，展示为「XIE392的知识库」） |
+| `NEXT_PUBLIC_UMAMI_URL` | 可选。自托管 Umami 实例地址，如 `https://stats.example.com` |
+| `NEXT_PUBLIC_UMAMI_SITE_ID` | 可选。Umami 网站 ID，与上面的 URL 成对配置才生效 |
+| `NEXT_PUBLIC_UMAMI_DOMAINS` | 可选。限定统计域名（逗号分隔），防止本地误上报 |
+| `CSP_REPORT_ONLY` | 可选。设为 `true` 时 CSP 只上报不拦截，用于首次上线观察 |
+
+> **构建期 vs 运行期**：所有 `NEXT_PUBLIC_*` 与 `CSP_REPORT_ONLY` 都是**构建期变量**——
+> Next 会在 `next build` 时把它们内联进产物（静态壳与响应头一并固化在镜像里），
+> 因此**写进服务器 `.env` 不生效，必须通过构建参数注入**（本项目的 CI 已配置好对应 build-args）。
+> 其余变量（`AUTH_SECRET`、`DATABASE_URL`、`DEEPSEEK_API_KEY` 等）是运行期变量，改服务器 `.env` 后重启容器即可。
 
 ### 4. 初始化数据库
 

@@ -27,3 +27,16 @@ export const SITE_URL = (
 // NEXT_PUBLIC_SITE_NAME 只配置名字部分（如 XIE392），"的知识库"为固定后缀。
 // 构建期注入，修改后需重新构建。
 export const SITE_NAME = `${process.env.NEXT_PUBLIC_SITE_NAME ?? "XIE392"}的知识库`;
+
+// 站点默认描述（SEO / OG / 结构化数据统一来源）
+export const SITE_DESCRIPTION =
+  "记录碎片化的想法，沉淀系统化的知识。一个关于全栈开发、技术思考与项目实践的个人知识库。";
+
+// 页面 canonical + hreflang。
+// 单语言站点：zh-CN 与 x-default 指向同一路径，为抓取/生成式引擎提供明确语言信号。
+export function pageAlternates(path: string) {
+  return {
+    canonical: path,
+    languages: { "zh-CN": path, "x-default": path },
+  };
+}

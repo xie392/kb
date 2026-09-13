@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
-import { ADMIN_HOME, SITE_URL } from "@/lib/config";
+import { ADMIN_HOME, SITE_URL, SITE_NAME, pageAlternates } from "@/lib/config";
 import { getArticle, getAdjacent, isAuthed } from "@/server/queries/public";
 import ArticleViewTracker from "@/components/article-view-tracker";
 import {
@@ -47,14 +47,14 @@ export async function generateMetadata({
     title: article.title,
     description,
     keywords,
-    alternates: { canonical: `/article/${article.id}` },
+    alternates: pageAlternates(`/article/${article.id}`),
     // og:image 由同目录 opengraph-image.tsx 动态生成（1200×630），此处不再覆盖
     openGraph: {
       type: "article",
       title: article.title,
       description,
       url: `${SITE_URL}/article/${article.id}`,
-      siteName: "个人知识库",
+      siteName: SITE_NAME,
       locale: "zh_CN",
       publishedTime: article.createdAt.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),

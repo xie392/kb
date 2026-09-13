@@ -46,6 +46,8 @@ export default function MainLayout({
               alt="公安备案图标"
               width={16}
               height={16}
+              loading="lazy"
+              decoding="async"
               className="w-4 h-4 inline-block"
             />
             桂公网安备45098102000582号

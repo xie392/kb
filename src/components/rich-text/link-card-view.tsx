@@ -67,9 +67,9 @@ export function LinkCardView(props: NodeViewProps) {
     >
       <div className="kb-link-card-inner" onClick={selectNode}>
         {image ? (
-          <img className="kb-link-card-thumb" src={image} alt={title} />
+          <img className="kb-link-card-thumb" src={image} alt={title} loading="lazy" decoding="async" />
         ) : favicon ? (
-          <img className="kb-link-card-logo" src={favicon} alt="" />
+          <img className="kb-link-card-logo" src={favicon} alt="" loading="lazy" decoding="async" />
         ) : (
           <span className="kb-link-card-thumb kb-link-card-thumb--empty">
             <HandExternalLink className="h-5 w-5" />
